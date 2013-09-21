@@ -1,0 +1,265 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-1 (1.68)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Starting Scripting</TITLE>
+<META NAME="description" CONTENT="Starting Scripting">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="previous" HREF="node49.html">
+<LINK REL="up" HREF="node49.html">
+<LINK REL="next" HREF="node51.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html600"
+  HREF="node51.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html598"
+  HREF="node49.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html594"
+  HREF="node49.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html601"
+  HREF="node51.html">Getting Help</A>
+<B> Up:</B> <A NAME="tex2html599"
+  HREF="node49.html">Scripting SalStat and Making</A>
+<B> Previous:</B> <A NAME="tex2html595"
+  HREF="node49.html">Scripting SalStat and Making</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION001310000000000000000">
+Starting Scripting</A>
+</H1>
+
+<P>
+To get started on scripting, you will need to open the scripting window.
+This is done by clicking on the ``Analyse'' menu, and selecting
+``Open Script Window...''. A new window frame will appear, with
+a toolbar at the top, and most of the window will be taken up by an
+edit box. This edit box will accept typing (try it...), cut, copy,
+paste (the toolbar allows access to these functions, but you can use
+&lt;ctrl-x&gt; to cut, &lt;ctrol-c&gt; to copy and &lt;ctrl-v&gt; to paste text. There
+are also buttons for saving and loading scripts to file. 
+
+<P>
+The one new button is the first on the toolbar. This is the ``run
+script'' button, and pressing it will execute the script using the
+built-in Python interpreter.
+
+<P>
+To start with, type in &lt;display (``This is SalStat Scripting'')&gt;
+- only type in what's between the diagonal brackets, not the brackets
+themselves (and don't forget the quotation marks!). Once that is done,
+click on the ``Go'' button, and look at the output window. You
+should see ``This is SalStat Scripting'' written somwhere.
+
+<P>
+What is happening is this. Writing &lt;display&gt; tells the computer that
+you want to display something on the html window. What you want on
+there is in the open brackets, but because you want to print a string,
+the words will need to be in quotation marks.
+
+<P>
+Delete everything you've typed and type in &lt;a = 'This is a Python
+script'&gt;, press the &lt;enter&gt; key, and type in &lt;display(a)&gt;. Then press
+the Go button. Hopefully, the words ``This is a Python script''
+will be printed on the html window. What you have done is made a variable
+(called 'a'), and assigned to it the words ``This is a Python script''.
+The next line says that you want to display what is in the variable
+'a'.
+
+<P>
+Of course, all of this doesn't mean very much. Other functions can
+be called too. If you have some data on the grid and you want to put
+it into a variable, the <I>GetData</I> function is used (PLEASE
+NOTE: Python is case-sensitive. GetData is different from getdata
+or Getdata - make sure you use the capitals in the right place). Just
+use <I>variable =</I> GetData(<I>column</I>)<I>,</I> and the
+variable will be given a list of the data from the column specified.
+Example:
+
+<P>
+a = GetData(0)
+
+<P>
+This generates the variable called <I>a</I>, and asks that the contents
+of column 0 be copied into this variable from the grid (ANOTHER NOTE:
+in SalStat, the grid columns start at 0, not 1). Type some data into
+the grid and try it out. Of course, to see what <I>a</I> contains,
+write:
+
+<P>
+display(a)
+
+<P>
+afterwards, and you will see the contents of the first column there.
+Data can also be put back into the grid with the PutData command,
+but you have to specify the column where the data are going to inserted,
+and the data itself. Try:
+
+<P>
+PutData(1, a)
+
+<P>
+and the data from the first column that you just got will be copied
+to the second column (column number 1).
+
+<P>
+Of course, these commands can be mixed if you want, so typing:
+
+<P>
+PutData(4, GetData(0))
+
+<P>
+is valid - it makes a copy of column 0's data, and puts it into column
+4.
+
+<P>
+Now how's about doing something statistical with all of this? Simple.
+To start with, let's get the descriptive statistics for column 0.
+This is slightly more complex than the previous commands, but is still
+quite straightforward. Type in:
+
+<P>
+x = Describe(a)
+
+<P>
+What this does is retrieve a complete set of descriptive statistics
+for you, and puts them into the variable <I>x</I>. However, if you
+typed in <I>display(x)</I> underneath, you probably didn't get what
+you expected! This is because you need to specify which descriptives
+you want before you can access them. This is just as easy: to access
+them, type the variable you had (the <I>x</I> in the current example,
+then type a full stop (period) after it, then the descriptive name.
+So to show the sum, the mean and the variance, you would type:
+
+<P>
+display(x.sum)
+
+<P>
+display(x.mean)
+
+<P>
+display(x.variance)
+
+<P>
+A full list of the descriptive statistics available is in the appendices.
+
+<P>
+Obviously, there are mathematical operators available, so you can
+type in:
+
+<P>
+y = x.mean + x.variance
+
+<P>
+To get the results of a test using scripts is a little bit more complicated.
+Let's look at how to do a paired t-test:
+
+<P>
+t, df, p = DoPairedTTest(col1, col2, 2)
+
+<P>
+First of all, the <I>DoPairedTTest</I> bit just tells SalStat what
+test you want. The first 2 items in the brackets are the data. These
+can be lists of data, or, if they are single whole numbers, the data
+from the relevant column will be retrieved. Of course, you can pass
+one list and one column number if you want to! The third number is
+the tail. 2 refers to a 2 tailed test, whereas 1 refers to... well,
+a 1 tailed test. No other numbers are valid for that bit.
+
+<P>
+However, what does the <I>t, df, p</I> bit mean? Well, doing a t-test
+will result in 3 bits of data: the t statistic, the df or degrees
+of freedom, and the probability. When you call a <I>DoPairedTTest</I>
+function, three data items are returned in the order of: t, df, probability.
+To make it simple, the above example puts the results into very similarly
+known variables, but you can use what you want. For example, if you
+really wanted to, you could type:
+
+<P>
+df, prob, t = PairedTTest(x,y)
+
+<P>
+This could be confusing, because the test will always return t first,
+then the df, then the probability, so your t statistic will be in
+a variable named <I>df</I>, the df will be in a variable named <I>prob</I>,
+and the probability will be in a variable called <I>t</I>. All very
+confusing, so remember to use variable names that aren't coonfusing
+to you.
+
+<P>
+(Notice that no tail was indicated just above, only variable names:
+This is because if you don't specify a tail, the test defaults to
+a 2 tailed test). 
+
+<P>
+Scripting is a very powerful addition to SalStat. If you have the
+algorithms for a test that isn't in SalStat, you can write your own
+version of it quite easily. Of course, you could do this with Python
+on its own anyway, but with SalStat, you get the benefit of access
+to a good structure of descriptive statistics that are easily accessible,
+and a GUI to look at your data. Alternatively, you can get tests off
+other people and use them if you want, or extend existing tests. Scripting
+is also useful for batch processing: If you have a lot of data sets
+that have to be analysed in exactly the same way, you can use scripting
+to automate the entire process.
+
+<P>
+If you wish, you can have access to the ``raw'' functions and
+classes in the statistics module using Python. To do this, you will
+need to put a copy of the <I>salstat_stats.py</I> module in the
+site-packages directory, and call import salstat_stats in your program,
+and all the classes and functions contained therein will be available.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html600"
+  HREF="node51.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html598"
+  HREF="node49.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html594"
+  HREF="node49.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html601"
+  HREF="node51.html">Getting Help</A>
+<B> Up:</B> <A NAME="tex2html599"
+  HREF="node49.html">Scripting SalStat and Making</A>
+<B> Previous:</B> <A NAME="tex2html595"
+  HREF="node49.html">Scripting SalStat and Making</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Alan James Salmoni
+2002-10-17
+</ADDRESS>
+</BODY>
+</HTML>

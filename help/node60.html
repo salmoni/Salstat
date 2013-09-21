@@ -1,0 +1,241 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-1 (1.68)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Inferential Statistics</TITLE>
+<META NAME="description" CONTENT="Inferential Statistics">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="node61.html">
+<LINK REL="previous" HREF="node59.html">
+<LINK REL="up" HREF="node57.html">
+<LINK REL="next" HREF="node61.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html704"
+  HREF="node61.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html702"
+  HREF="node57.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html696"
+  HREF="node59.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html705"
+  HREF="node61.html">Probability Functions</A>
+<B> Up:</B> <A NAME="tex2html703"
+  HREF="node57.html">Appendix C - API</A>
+<B> Previous:</B> <A NAME="tex2html697"
+  HREF="node59.html">Descriptive Statistics</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION001830000000000000000">
+Inferential Statistics</A>
+</H1>
+
+<P>
+These perform the actual tests. Each test returns more than one value
+(for example, the t-test returns the value of t, the degrees of freedom,
+and the associated probability). The way to script these are as follows:
+
+<P>
+t, df, p = DoUnpairedTTest(0,1)
+
+<P>
+This will perform an unpaired t test. Obviously, the variable t will
+hold the value of t, the df will hold the degrees of freedom and so
+on. Like the descriptive statistics, you will need to specify the
+data source, and this is done in the brackets. You can form a list
+of data and send those, or you can specify a column from the grid.
+In the above example, the data from columns 0 and 1 will be retrieved
+and used.
+
+<P>
+All these tests assume a 2-tailed hypothesis. If that is what you
+want, then you don't need to specify anything else, but if you want
+a one tailed test, just add a '1' after the data sources like so:
+
+<P>
+t, df, p = DoUnpairedTTest(0, 1, 1)
+
+<P>
+Remember that you can call these variables anything you want, but
+the order in which they are returned is fixed. The following is acceptable:
+
+<P>
+p, t, df = DoUnpairedTTest(0, 1)
+
+<P>
+This will perform an unpaired t-test using the data from columns 0
+and 1 tested against a 2-tailed hypothesis, but the value of t will
+be stored in the variable p, the degrees of freedom will be in t,
+and the p-value will be stored in df!
+
+<P>
+<B>DoOneSampleTTest(</B><B><I>source, usermean, tail =
+2</I></B><B>) </B>
+
+<P>
+This is the one sample t-test and returns <I>t, df, probability</I>.
+The user hypothesised mean needs to be specified.
+
+<P>
+<B>DoOneSampleSignTest(</B><B><I>source, usermean, tail
+= 2</I></B><B>) </B>
+
+<P>
+This performs the one sample sign test, a nonparametric equivilent
+of the one sample t-test. Again, the user hypothesised mean needs
+to be specified. Returns <I>nplus, nminus, z, probability</I>.
+
+<P>
+<B>DoChiSquareVariance(</B><B><I>source, usermean, tail
+= 2</I></B><B>) </B>
+
+<P>
+This performs the chi square for variance ratio's. Like the other
+one sample tests, the user hypothesised mean should be specified.
+This test returns <I>chi, df, probability</I>.
+
+<P>
+<B>DoPairedTTest(</B><B><I>source1, source2, tail = 2</I></B><B>)</B>
+
+<P>
+This is for a paired t-test and returns <I>t, df, probability</I>.
+
+<P>
+<B>DoUnpairedTTest(</B><B><I>source1, source2, tail =
+2</I></B><B>) </B>
+
+<P>
+This is the unpaired t-test and returns <I>t, df, probability</I>.
+
+<P>
+<B>DoPearsonsCorrelation(</B><B><I>source1, source2, tail=2</I></B><B>) </B>
+
+<P>
+This performs the Pearsons correlation, a correlation for parametric
+data and returns <I>t, r, df, probability</I>.
+
+<P>
+<B>DoFTest(</B><B><I>source1, source2, uservariance, tail=2</I></B><B>) </B>
+
+<P>
+This does an F-test, and uniquely among the 2-sample tests, an extra
+value needs to be specfied, the user hypothesised variance. Returned
+values are <I>t, r, df, probability</I>.
+
+<P>
+<B>DoSignTest(</B><B><I>source1, source2, tail=2</I></B><B>) </B>
+
+<P>
+This is the sign test, a nonparametric equivilent of the paired t-test,
+and it returns <I>z, probability</I>.
+
+<P>
+<B>DoKendallsCorrelation(</B><B><I>source1, source2, tail=2</I></B><B>) </B>
+
+<P>
+This performs a Kendalls tau correlation and returns <I>tau,
+z, probability</I>.
+
+<P>
+<B>DoKSTest(</B><B><I>source1, source2, tail=2</I></B><B>) </B>
+
+<P>
+This performs a Kolmogorov-Smirnov test and returns <I>d, probability</I>.
+
+<P>
+<B>DoSpearmansCorrelation(</B><B><I>source1, source2,
+tail=2</I></B><B>) </B>
+
+<P>
+This does a Spearmans nonparametric correlation and it returns <I>rho,
+t, df, probability</I>.
+
+<P>
+<B>DoRankSums(</B><B><I>source1, source2, tail=2</I></B><B>) </B>
+
+<P>
+This performs a Wilcoxon rank sums test, a nonparametric version of
+the unpaired t-test and it returns <I>z, probability</I>.
+
+<P>
+<B>DoSignedRanks(</B><B><I>source1, source2, tail=2</I></B><B>) </B>
+
+<P>
+This is for the Wilcoxon sgned ranks test, and returns <I>z,
+wt, probability</I>.
+
+<P>
+<B>DoMannWhitneyTest(</B><B><I>source1, source2, tail=2</I></B><B>) </B>
+
+<P>
+This does a Mann-Whitney U test and returns <I>bigu, smallu,
+z, probability.</I>
+
+<P>
+<B>DoLinearRegression(</B><B><I>source1, source2, tail=2</I></B><B>) </B>
+
+<P>
+This should perform a linear regression and it returns <I>df,
+r, slope, intercept, estimated standard error, probability.</I>
+
+<P>
+<B>DoPairedPermutation(</B><B><I>source1, source2, tail
+= 2</I></B><B>)</B>
+
+<P>
+This gets you a paired permutation test and returns <I>nperm,
+probability</I>.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html704"
+  HREF="node61.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html702"
+  HREF="node57.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html696"
+  HREF="node59.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html705"
+  HREF="node61.html">Probability Functions</A>
+<B> Up:</B> <A NAME="tex2html703"
+  HREF="node57.html">Appendix C - API</A>
+<B> Previous:</B> <A NAME="tex2html697"
+  HREF="node59.html">Descriptive Statistics</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Alan James Salmoni
+2002-10-17
+</ADDRESS>
+</BODY>
+</HTML>

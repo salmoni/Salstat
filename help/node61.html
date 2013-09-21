@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-1 (1.68)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Probability Functions</TITLE>
+<META NAME="description" CONTENT="Probability Functions">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="previous" HREF="node60.html">
+<LINK REL="up" HREF="node57.html">
+<LINK REL="next" HREF="node62.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html712"
+  HREF="node62.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html710"
+  HREF="node57.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html706"
+  HREF="node60.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html713"
+  HREF="node62.html">Appendix D - Thanks!</A>
+<B> Up:</B> <A NAME="tex2html711"
+  HREF="node57.html">Appendix C - API</A>
+<B> Previous:</B> <A NAME="tex2html707"
+  HREF="node60.html">Inferential Statistics</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION001840000000000000000">
+Probability Functions</A>
+</H1>
+
+<P>
+These functions will return a p-value given the right data except
+for two of them which return the critical value for a given p-value.
+All of the information requested in these functions is essential -
+without it, SalStat will not be able to generate an answer.
+
+<P>
+<B>GetChiProb(</B><B><I>chi, df</I></B><B>)</B>
+
+<P>
+Given chi and the degrees of freedom, this returns the associated
+p-value.
+
+<P>
+<B>GetInverseChiProb(</B><B><I>prob, df</I></B><B>)</B>
+
+<P>
+Returns the value of chi for the given probability and df.
+
+<P>
+<B>GetZProb(</B><B><I>z</I></B><B>)</B>
+
+<P>
+Returns the p-value of the z-score.
+
+<P>
+<B>GetKSProb(</B><B><I>ks</I></B><B>)</B>
+
+<P>
+Given the critical value from a Kolmogorov-Smirnov test, this return
+its probability.
+
+<P>
+<B>GetTProb(</B><B><I>t, df</I></B><B>)</B>
+
+<P>
+Returns the probability for a t-test (or Pearsons and Spearmans correlation)
+
+<P>
+<B>GetFProb(</B><B><I>F, df1, df2</I></B><B>)</B>
+
+<P>
+Returns the p-value for an anova given F and the two df's.
+
+<P>
+<B>GetInverseFProb(</B><B><I>prob, df1, df2</I></B><B>)</B>
+
+<P>
+The inverse of the above, this returns the critical value of F given
+the probability and degrees of freedom specified.
+
+<P>
+<BR><HR>
+<ADDRESS>
+Alan James Salmoni
+2002-10-17
+</ADDRESS>
+</BODY>
+</HTML>

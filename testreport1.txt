@@ -1,0 +1,98 @@
+SalStat Statistics - Test Report 1
+
+The primary objective of SalStat is accuracy. If the output of the analysis is
+not accurate, then SalStat is worse whan useless.
+
+In order to test this, sets of data were analysed, and the results compared
+against those obtained from other statistics packages. Packages used were SPSS,
+StatView, Minitab and Statistica.
+
+Test data set 1 - Small integer data set.
+a) 10 11 12 11 10 9 10
+b) 11 12 13 14 13 14 12
+c) 9 10 8 9 8 7 8
+
+SalStat version 20020505 was used.
+
+Notes: Subset a) was used for 1 sample tests, a) and b) for 2 sample tests, and
+all for 3+ sample tests.
+
+Parametric Tests:
+
+t-test (unpaired)
+SalStat: t = -4.086, p = 0.002
+SPSS:    t = -4.086, p = 0.002
+StatView:
+
+t-test (paired)
+SalStat: t = -4.042, p = 0.007
+SPSS:        -4.042, p = 0.007 
+StatView:
+
+single factor anova (between subjects)
+SalStat: F = 16.696, p = 0.002
+SPSS:    F = 16.696, p = 0.002
+StatView:
+
+single factor anova (within subjects)
+SalStat: F = 16.340, p = 0.007
+SPSS:    F = 16.340, p = 0.007
+StatView:
+
+Pearsons correlation
+SalStat: r = -0.022, p = 0.963
+SPSS:    r = -0.022, p = 0.963
+StatView:
+
+Non-Parametric Tests:
+
+Mann-Whitney U
+SalStat: U = 3.00, U' = 46.000, z = 2.769, p = 0.002814
+SPSS:    U = 3.00,              z =-2.790, p = 0.004/0.005
+StatView:U = 3.00, U' = 46.000, z =-2.747, p = 0.0060
+
+Kolmogorov-Smirnov
+SalStat: D = -0.714, p = 0.027500
+SPSS:    z =  1.336, p = 0.056
+StatView:maxdiff=0.714, chi= 7.143, p = 0.0562
+
+Wilcoxon Signed-Ranks
+SalStat: z = 2.366, p = 0.018
+SPSS:    z =-2.388, p = 0.017
+StatView:z =-2.366, p = 0.018
+
+Spearmans rho correlation
+SalStat: r = 0.054, p = 0.909
+SPSS:    r =-0.019, p = 0.967
+StatView:r = 0.054, p = 0.8956
+
+Kendalls tau correlation
+SalStat: tau = 0.000, p = 1.000
+SPSS:    tau = 0.000, p = 1.000
+StatView:tau = 0.000, p = 1.000
+
+Kruskal-Wallis h
+SalStat: H = 15.822, p = 0.000367
+SPSS:    (SPSS crashed several times)
+StatView:H = 15.534, p = 0.0004
+Minitab: H = 15.53, p = 0.000, and
+         H = 15.82, p = 0.000 (adjusted for ties)
+
+Friedman chi square
+SalStat: chi = 14.0, p = 0.003569571
+SPSS:    chi = 14.0, p = 0.001
+StatView:chi = 14.0, p = 0.0009
+
+So what conclusions can be drawn? The Freidman is obviously way out of what it
+should be, but all the parametric tests agree absolutely with the others, except
+that SalStat has a greater degree of specificity of the p-value.
+
+For non-parametric tests, the probability of the Mann-Whitney U and
+Kolmogorov-Smirnov need looking at (are they one-tailed?). Interestingly, the
+Spearmans results differ between SPSS and StatView with SalStat agreeing with
+StatView. The results are not too different though.
+
+The Kruskal-Wallis test is fine, though the SalStat results adjust for ties.
+
+Alan James Salmoni
+07 May 2002

@@ -1,0 +1,34 @@
+The Undo in SalStat.
+
+The undo/redo function will have to be a big thing indeed. It will hold a record of the entire analysis session for a file, and SalStat will use it when saving in the native format.
+
+The best way to approach this:
+
+Set up a history object. This class will have the following attributes:
+
+history.DataEntry - when a user has entered some data;
+history.DeleteCell - when a user deletes a cells contents. Includes the data deleted.
+history.OpenFile - when the user opens a file of data. The data are also stored in a table format;
+history.Save - when a user saves a data set with a "proper" (i.e., non-default) filename;
+history.SaveAs - when the user saves under a new/different filename. The filename itself is recorded;
+history.Print - when the output is printed out;
+history.DeleteColumn
+history.DeleteRow
+history.AddColumn
+history.AddRow
+history.Describe - when the user retrieves a set of descriptive statistics. This is also used when descriptives are retrieved using the analysis menu item;
+history.Transform - STILL not implemented, but will be in place;
+history.Analysis1 - one condition tests;
+history.Analysis2 - two condition tests;
+history.Analysis3 - three or more condition tests;
+history.Correlation - correlations;
+
+Most of the above is simple and easy to implement - each attribute is simply stored in the order of occurance. However, the tests are more complex as they can hold many values. For example, the history.Analysis1 will have to specify the test, the dataset tested, the hypothesised mean and the tail. It should also hold the results too for auditing purposes.
+
+This cannot be a dictionary as more than one value and key may need to be stored. The test attributes will contain more than one datum, making a dictionary inadequate for the purpose.
+
+For each session, only one history object will be created. It will be created at program execution, and the user may load an old file an append new actions to it if they choose.
+
+The format will be XML. I will have to write up a suitable schema for this.
+
+Overall, it is obviously possible, but I am not entirely sure how to do it. I need to consider this more before I can begin to implement anything.

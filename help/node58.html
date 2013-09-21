@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-1 (1.68)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Data Access Functions</TITLE>
+<META NAME="description" CONTENT="Data Access Functions">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="node59.html">
+<LINK REL="previous" HREF="node57.html">
+<LINK REL="up" HREF="node57.html">
+<LINK REL="next" HREF="node59.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html684"
+  HREF="node59.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html682"
+  HREF="node57.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html676"
+  HREF="node57.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html685"
+  HREF="node59.html">Descriptive Statistics</A>
+<B> Up:</B> <A NAME="tex2html683"
+  HREF="node57.html">Appendix C - API</A>
+<B> Previous:</B> <A NAME="tex2html677"
+  HREF="node57.html">Appendix C - API</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION001810000000000000000">
+Data Access Functions</A>
+</H1>
+
+<P>
+function GetData(<I>datasource</I>) - the datasource can be a list
+or an integer. If it is a list, then the list will be used as the
+data. Passing an integer will retrieve the specified column of data
+from the datagrid. <I>NOTE</I>: When calling this, remember that
+in SalStat, the first column of data is column 0, not 1. Example:
+GetData(1) will get data from column 1 on the grid.
+
+<P>
+function PutData(<I>datasource</I>, <I>data</I>) - this puts the
+data contained the in variable <I>data</I> into the grid at column
+<I>datasource</I>. Example: PutData(0, [''3'',''5.67'',''7.89''])
+will put the numbers 3, 5.67 and 7.89 into the first column of the
+grid.
+
+<P>
+function display(<I>data</I>) - this takes whatever is contained
+in <I>data</I> and shows it in the output window. Example: display(``Hi'')
+will write ``Hi'' to the output window. Each new entry is automatically
+started on a new line (i.e., it has a base level of html formatting),
+but other html can be included if needed.
+
+<P>
+<BR><HR>
+<ADDRESS>
+Alan James Salmoni
+2002-10-17
+</ADDRESS>
+</BODY>
+</HTML>

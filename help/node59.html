@@ -1,0 +1,188 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-1 (1.68)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Descriptive Statistics</TITLE>
+<META NAME="description" CONTENT="Descriptive Statistics">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="node60.html">
+<LINK REL="previous" HREF="node58.html">
+<LINK REL="up" HREF="node57.html">
+<LINK REL="next" HREF="node60.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html694"
+  HREF="node60.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html692"
+  HREF="node57.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html686"
+  HREF="node58.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html695"
+  HREF="node60.html">Inferential Statistics</A>
+<B> Up:</B> <A NAME="tex2html693"
+  HREF="node57.html">Appendix C - API</A>
+<B> Previous:</B> <A NAME="tex2html687"
+  HREF="node58.html">Data Access Functions</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION001820000000000000000">
+Descriptive Statistics</A>
+</H1>
+
+<P>
+class Describe(<I>datasource</I>) - This class will get all the
+descriptive statistics for <I>datasource</I>. Each individual statistic
+is accessed as an attribute of this class. <I>datasource</I> may
+be a list of data, or an integer to represent the column on the data
+grid. Example: a = Describe(1) will get descriptive statistics for
+column 1 on the grid and store them in the variable <I>a</I>.
+
+<P>
+Available statistics (all for non-missing data except for, well, the
+missing data statistic:
+
+<P>
+Name - the variable name (the column heading)
+
+<P>
+N - number of the data;
+
+<P>
+sum - the sum of the data;
+
+<P>
+mean - the mean of the data;
+
+<P>
+samplevar - the variance of the data;
+
+<P>
+stddev - the standard deviation of the data;
+
+<P>
+stderr - the standard error of the data;
+
+<P>
+sumsquares - the sum of squares of the data;
+
+<P>
+ssdevs - the sum of squared deviations of the data;
+
+<P>
+coeffvar - the coefficient of variation of the data;
+
+<P>
+minimum - the minimum value of the data;
+
+<P>
+maximum - the maximum value of the data;
+
+<P>
+range - the range of the data (maximum - minimum);
+
+<P>
+numbermissing - the number of missing data;
+
+<P>
+geomean - the geometric mean of the data;
+
+<P>
+harmmean - the harmonic mean of the data;
+
+<P>
+skewness - the skewness of the data;
+
+<P>
+kurtosis - the kurtosis of the data;
+
+<P>
+median - the median of the data;
+
+<P>
+mad - the median absolute deviation of the data;
+
+<P>
+mode - the mode of the data;
+
+<P>
+interquartilerrange - the interquartile range of the data;
+
+<P>
+uniques - the number of unique levels (i.e., non-occuring values)
+of the data;
+
+<P>
+To those unfamiliar with object-oriented approaches, access to these
+might be a little but unusual at first, but it is quite easy. Simply
+add the descriptive after the variable name (with a dot in between!)
+and they can be used. Example:
+
+<P>
+a = Describe(0) - gets the descriptives for the data in the first
+grid column;
+
+<P>
+display(a.N) - shows on the output sheet how many non-missing data
+there are;
+
+<P>
+a.samplevar * a.samplevar - the sample variance is squared here.
+
+<P>
+MyOwnRange = a.maximum - a.minimum - this works out the range (which
+is already calculated and access as a.range).
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html694"
+  HREF="node60.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html692"
+  HREF="node57.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html686"
+  HREF="node58.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html695"
+  HREF="node60.html">Inferential Statistics</A>
+<B> Up:</B> <A NAME="tex2html693"
+  HREF="node57.html">Appendix C - API</A>
+<B> Previous:</B> <A NAME="tex2html687"
+  HREF="node58.html">Data Access Functions</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Alan James Salmoni
+2002-10-17
+</ADDRESS>
+</BODY>
+</HTML>

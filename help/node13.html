@@ -1,0 +1,207 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-1 (1.68)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>Using SalStat - entering data</TITLE>
+<META NAME="description" CONTENT="Using SalStat - entering data">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="node14.html">
+<LINK REL="previous" HREF="node7.html">
+<LINK REL="up" HREF="manual.html">
+<LINK REL="next" HREF="node14.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html200"
+  HREF="node14.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html198"
+  HREF="manual.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html192"
+  HREF="node12.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html201"
+  HREF="node14.html">Using SalStat - dealing</A>
+<B> Up:</B> <A NAME="tex2html199"
+  HREF="manual.html">SalStat Statistics Package -</A>
+<B> Previous:</B> <A NAME="tex2html193"
+  HREF="node12.html">Unix</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00600000000000000000">
+Using SalStat - entering data</A>
+</H1>
+
+<P>
+When SalStat is running, you will see 2 different windows on your
+screen. One has a grid like pattern on it, and the other is mostly
+blank. Both have menus.
+
+<P>
+<IMG
+ WIDTH="675" HEIGHT="363" ALIGN="BOTTOM" BORDER="0"
+ SRC="img1.png"
+ ALT="\includegraphics[ width=4in
+keepaspectratio]{/home/alan/graphics/grid.eps}"><I>The data grid, where you can enter data</I>
+
+<P>
+The window with the grid on is where you can enter your data. It works
+like a spreadsheet (although there are no functions available currently).
+Each cell contains a single datum, and you can actually input anything
+you want - either a number or a string of letters. The grid will be
+called the data grid from now on. The window with the blank sheet
+is called the output sheet - once you have done some data analysis,
+this is where your results will appear.
+
+<P>
+Most popular statistics packages demand that (for between subjects
+designs at least) the data are entered in a particular way. SalStat
+has been designed to be intuitive, and differs in that each condition
+is entered into its own column. In other words, if you have an experiment
+with one variable that has 3 levels (say, amount of alcohol - 2 units,
+4 units or 6 units), then you will need to enter your data into three
+columns: one column for each condition.
+
+<P>
+The data grid can be customised to your liking. If you find the cells
+too large or small they can easily be changed: if you go to the menu,
+click on ``Preferences'' -&gt; `Change Cell Size...''.
+
+<P>
+<IMG
+  WIDTH="212" HEIGHT="184" ALIGN="BOTTOM" BORDER="0"
+ SRC="./cellsize.png"
+ ALT="Image cellsize">
+
+<P>
+<I>Changing the cell size on the grid</I>
+
+<P>
+A small dialog box will come up that has 2 buttons on the bottom (marked
+``okay'' and ``cancel''), and a couple of what are called ``spin controls''.
+Next to the box with a number in it are 2 small arrows pointing up
+and down. Click on these to change the values. The top box number
+refers to how wide the columns are, and the lower box is how high
+the rows are. Try changing the values of both, then click on ``okay'',
+and you will see that the data grid has changed all of the cells sizes.
+If you only want to change the size of one column or row, put the
+mouse point over the line next to the column or row you want to change.
+You will see that the mouse cursor changes from the normal arrow into
+a line with an arrow at each end. This means you can press the left
+button and drag the line (with the button held down) to where you
+want.
+
+<P>
+As each column in SalStat refers to a different condition, each column
+heading can also be changed: These may be referred to as variable
+names. Of course, you can keep the default headings of A, B, C and
+so on, but it may be easier when you read your results to have headings
+more meaningful to yourself. Using the above example of 3 levels of
+alcohol, you could use headings of ``2 units'', ``4 units'', and ``6
+units''. To change the headings, just go to the menu, click on ``Preferences''
+-&gt; ``Variables...''.
+
+<P>
+<IMG
+ WIDTH="675" HEIGHT="201" ALIGN="BOTTOM" BORDER="0"
+ SRC="img2.png"
+ ALT="\includegraphics[ width=4in
+keepaspectratio]{/home/alan/graphics/variables.eps}">
+
+<P>
+<I>Making variable names</I>
+
+<P>
+A new window will appear, and in this there is another grid, but this
+time smaller. Here, you can put in whatever variable names you want
+into the top row. If you have missing data (data where you were not
+able to collect a value), you can also enter what you want your missing
+data to be. By default, the value is -99.999, but if you have some
+real data of this value, you would want to change the missing value
+to something more suitable.
+
+<P>
+If you have some data saved on disk, it can be loaded. Currently,
+SalStat only loads ASCII data - this means simply plain text, and
+with no variable names. This is done by going to the menu and clicking
+on ``menu -&gt; open...'', and a standard dialog will appear allowing
+you to select the file you want to load. If your data are too big
+for the grid, don't worry because SalStat will automatically adjust
+its size to fit the data.
+
+<P>
+Saving data is done the same way. From the menu, click on ``File -&gt;
+Save As...'', and you will get a dialog where you can enter the file
+name.
+
+<P>
+If you need to add an extra column or row to the grid, go to the menu,
+click on ``edit'' -&gt; ``Add Columns and Rows...'', and a dialog will
+appear where you can enter the number of rows or columns you want
+to add.
+
+<P>
+<IMG
+ WIDTH="339" HEIGHT="246" ALIGN="BOTTOM" BORDER="0"
+ SRC="img3.png"
+ ALT="\includegraphics{/home/alan/graphics/gridsize.eps}">
+
+<P>
+<I>Changing the size of the grid</I>
+
+<P>
+From the same place, you can also delete rows or columns. The column
+or row deleted will be the one with the ``focus'' (this is the cell
+where you are currently entering data).
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html200"
+  HREF="node14.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html198"
+  HREF="manual.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html192"
+  HREF="node12.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html201"
+  HREF="node14.html">Using SalStat - dealing</A>
+<B> Up:</B> <A NAME="tex2html199"
+  HREF="manual.html">SalStat Statistics Package -</A>
+<B> Previous:</B> <A NAME="tex2html193"
+  HREF="node12.html">Unix</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Alan James Salmoni
+2002-10-17
+</ADDRESS>
+</BODY>
+</HTML>

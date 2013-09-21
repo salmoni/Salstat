@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<!--Converted with LaTeX2HTML 2002-1 (1.68)
+original version by:  Nikos Drakos, CBLU, University of Leeds
+* revised and updated by:  Marcus Hennecke, Ross Moore, Herb Swan
+* with significant contributions from:
+  Jens Lippmann, Marek Rouchal, Martin Wilck and others -->
+<HTML>
+<HEAD>
+<TITLE>History of SalStat</TITLE>
+<META NAME="description" CONTENT="History of SalStat">
+<META NAME="keywords" CONTENT="manual">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+<META NAME="Generator" CONTENT="LaTeX2HTML v2002-1">
+<META HTTP-EQUIV="Content-Style-Type" CONTENT="text/css">
+
+<LINK REL="STYLESHEET" HREF="manual.css">
+
+<LINK REL="next" HREF="node3.html">
+<LINK REL="previous" HREF="node1.html">
+<LINK REL="up" HREF="manual.html">
+<LINK REL="next" HREF="node3.html">
+</HEAD>
+
+<BODY >
+<!--Navigation Panel-->
+<A NAME="tex2html87"
+  HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html85"
+  HREF="manual.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html79"
+  HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html88"
+  HREF="node3.html">What Does SalStat Do?</A>
+<B> Up:</B> <A NAME="tex2html86"
+  HREF="manual.html">SalStat Statistics Package -</A>
+<B> Previous:</B> <A NAME="tex2html80"
+  HREF="node1.html">Introduction</A>
+<BR>
+<BR>
+<!--End of Navigation Panel-->
+
+<H1><A NAME="SECTION00200000000000000000">
+History of SalStat</A>
+</H1>
+
+<P>
+The idea for SalStat began forming in my mind a number of years ago
+when I realised that SPSS would not run on my computer (it was a small
+one with a small memory by todays standards). Over time, I got a more
+powerful computer that could run SPSS, but I couldn't afford it, and
+later on, I actually taught psychology undergraduates how to use SPSS
+for basic statistical analysis (up to multi-factorial analysis of
+variance). Every time I taught, the same problems came up again and
+again: For example. the data entry was confusing and varied according
+to whether you were performing a within or between subjects test.
+This was confusing to people who weren't familiar with SPSS or even
+statistics, and I felt that it got in the way of how productive the
+students were. In addition, my colleagues and myself relied greatly
+upon the top commercial packages and found them all lacking in some
+way or other, which gave me an ``itch'' that I had to scratch.
+
+<P>
+Therefore, I saw that there was a need for a simple and easy to use
+statistics package available on as many different operating systems
+as possible which could be used by virtually anyone with a little
+bit of statistical knowledge. This created a few problems in itself.
+Obviously, in order to be easy to use, it had to have a graphic user
+interface (GUI) as many people find the command line interface intimidating.
+Besides, there are already good packages available with the command
+line interface (such as R or lisp-stat - see appendix C for more details).
+GUI programming is difficult to do across different platforms, as
+they all do things in different ways. This meant either that I had
+to write a new version of SalStat for each platform (which was difficult
+as I didn't have a MacIntosh to work on), or I had to use a language
+that offered cross-platform capabilities with a powerful yet simple
+way to do a GUI interface. For example, Visual Basic would allow me
+to do the program on Windows easily, but it would not be available
+for Unix, Linux or the MacIntosh.
+
+<P>
+I considered many languages. My first choice was Ada, a language commissioned
+by the US Department of Defense. It was cross-platform, was compiled
+(which makes the program faster), and was a rock-solid language in
+terms of reliability (it is used in things like avionics and missile
+guidance systems). However, GUI programming was difficult as the only
+truly cross-platform interface was the Tk toolkit which didn't offer
+all that I wanted from a GUI. My next consideration was Object Pascal,
+a version of Pascal by Borland, but that ran only on Windows (Delphi)
+and Linux (Kylix) which meant no program for the other Unices and
+MacIntosh. I also briefly considered C or C++, but programmers on
+these languages seemed to spend most of their time debugging memory
+problems than anything, and I wanted a working package more than a
+programming challenge.
+
+<P>
+Finally I settled on the Python language. Python is a modern object
+oriented language that had a reputation for being easy to use. Its
+syntax was clear and interpreters were available for most platforms
+around. Not only did it offer the possibility of running programs
+on Unix, Linux, MacIntosh and Windows, but it also had good cross-platform
+GUI toolkits. The standard was called Tkinter, based upon Tk, but
+I decided not to use that due to the non-standard widgets (widgets
+are things like buttons and edit boxes). The best option left to me
+was a toolkit called wxPython. At the time, it wasn't available for
+the MacIntosh, but work was progressing on it, and I hoped that it
+would be ready by the time SalStat was finished. wxPython offered
+me all the GUI widgets that I needed (and then some!), along with
+native look and feel, and a simple object oriented way of programming
+them.
+
+<P>
+My decision to use the GNU General Public License (the ``GPL'') for
+this work was for pragmatic reasons. If had had released it under
+a commercial/proprietary license, I would have to offer support and
+do some marketing which is not something I am interested in. My objective
+was not to make money, but rather to make the best statistics package
+that I could, and the GPL offered me protection of my intellectual
+property in a way that no other license did. In addition, being open
+source, I was more likely to get people involved in contributing towards
+the project which would enable the code to be made more solid over
+time.
+
+<P>
+Since then, SalStat has come along in leaps and bounds. I have had
+some feedback of a number of kind people all around the world, and
+I find it heartening that folk from so many different countries find
+my work useful.
+
+<P>
+To date, I have heard from people in: UK, Ireland, US, Canada, Slovakia,
+France, Germany, Switzerland, the Phillipines, Australia, Brazil,
+and I think in Mexico too. I am interested in hearing how many people
+use it, so drop me an email if you can.
+
+<P>
+<HR>
+<!--Navigation Panel-->
+<A NAME="tex2html87"
+  HREF="node3.html">
+<IMG WIDTH="37" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="next"
+ SRC="file:/usr/lib/latex2html/icons/next.png"></A> 
+<A NAME="tex2html85"
+  HREF="manual.html">
+<IMG WIDTH="26" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="up"
+ SRC="file:/usr/lib/latex2html/icons/up.png"></A> 
+<A NAME="tex2html79"
+  HREF="node1.html">
+<IMG WIDTH="63" HEIGHT="24" ALIGN="BOTTOM" BORDER="0" ALT="previous"
+ SRC="file:/usr/lib/latex2html/icons/prev.png"></A>   
+<BR>
+<B> Next:</B> <A NAME="tex2html88"
+  HREF="node3.html">What Does SalStat Do?</A>
+<B> Up:</B> <A NAME="tex2html86"
+  HREF="manual.html">SalStat Statistics Package -</A>
+<B> Previous:</B> <A NAME="tex2html80"
+  HREF="node1.html">Introduction</A>
+<!--End of Navigation Panel-->
+<ADDRESS>
+Alan James Salmoni
+2002-10-17
+</ADDRESS>
+</BODY>
+</HTML>
