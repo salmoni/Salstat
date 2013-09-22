@@ -1,53 +1,8 @@
-So you have decided to look at SalStat then? To be fair, I am not a
-programmer, I am a psychologist and my skills should show in the quality of
-code (get this, I am being sarcastic about myself!), but one thing I do have
-is an "itch" to develop a better statistics package.
+Salstat revitalised
 
-I teach psychology undergrads "computing and statistics" with SPSS and
-StatView. Both are okay programs, but whenever I teach people this stuff, it
-always strikes me that things are harder than they should be, especially for
-people who only need to get a simple result.
+This is not Salstat 2 (see https://code.google.com/p/salstat-statistics-package-2/ and try it!).
 
-I am also aware that there are no really good stats packages with good
-intuitive GUIs available that the user can mess around with.
-
-These are my reasons for SalStat. I know my code is not the best or tightest
-around, but it does work (after a fashion!), and I intend this program to be
-the best of its kind. At the very least, I hope free/libre competition will
-encourage the commercial people to pull their socks up in the interface
-department, which can only benefit consumers.
-
-Currently, SalStat is in Beta - to me this means that it can do a few things,
-but is not what anyone would call a finished package. Through using
-Python (and wxPython), it is unlikely to crash (although it is possible)
-because of memory errors, but nothing is perfect.
-
-And the architecture: Forgive me for my ignorance, but the way I have
-structured it is as follows:
-
-**salstat.py - this is the main file which contains all the GUI elements and
-controls just about everything. It's a bit monolithic, but it works well.
-**salstat_stats.py - this module has taken most of its code from Gary Strangmans
-own stats.py module. This version is object orientated and custom made for
-SalStat and is faster for its purpose than the original.
-**images.py - this simply contains 'pythonic' representations of the icons
-**wxChart.py - a beginning module for drawing charts in wxPython. It is in its
-very early days, so don't expect too much, but code changes are more than 
-welcome!
-
-Hopefully, some bright person will be able to program multi-factorial anova
-with easy access to simple effects for me (I really do not have the skills!)
-
-If you want to help with this project, then contact me at
-salstat@sunsite.dk. There are lots of things that need doing, though
-curiously, documentation seems to be okay for an open source project (I like
-writing!). Skills needed are Python, and statistics, preferably both.
-Statisticians who are willing to write tests are more than welcome, and even
-if you don't know Python (it is quite easy to learn), let me know and I'll try
-and sort out a way to marry your knowledge with someone elses programming
-skills.
-
-Please don't flame me - I have filters for stuff like "suxxx" and "dude".
+I've done no work on this for about 10 years only to find that people are *still* using it. I'm surprised at its longevity and wonder if, just maybe, I should continue developing it.
 
 INSTALLATION (Windows):
 
@@ -101,7 +56,4 @@ house down, run off with your life partner, and end the world as we know it.
 Well, you never know ;), so MAKE BACKUPS BEFORE USING IT!
 
 Alan James Salmoni
-HCI Group
-Cardiff University
-Wales, UK.
-salmonia@cardiff.ac.uk
+salmoni@gmail.com
