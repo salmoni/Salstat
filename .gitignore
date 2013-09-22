@@ -2,3 +2,5 @@
 .DS_Store?
 *.pyc
 
+
+tmp/html2text.py
