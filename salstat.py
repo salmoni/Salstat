@@ -10,6 +10,7 @@ from wx.stc import *
 import wx.grid as gridlib
 import wx.html as htmllib
 import wx.html2 as html2lib
+import xlrd, xlwt # import xls format
 import string, os, os.path, pickle
 
 # import SalStat specific modules
@@ -165,6 +166,7 @@ class SaveDialog(wx.Dialog):
         self.SetAutoLayout(True)
         self.SetSizer(vbox)
         self.Layout()
+        self.res = ""
         wx.EVT_BUTTON(self, 331, self.SaveData)
         wx.EVT_BUTTON(self, 332, self.DiscardData)
         wx.EVT_BUTTON(self, 333, self.CancelDialog)
@@ -174,14 +176,17 @@ class SaveDialog(wx.Dialog):
         frame.grid.SaveAsDataASCII(self) # will it be ASCII or XML?
         output.Close(True)
         frame.Close(True)
+        self.res = "Saved"
         self.Close(True)
 
     def DiscardData(self, event):
         output.Close(True)
         frame.Close(True)
+        self.res = "Discard"
         self.Close(True)
 
     def CancelDialog(self, event):
+        self.res = "Cancel"
         self.Close(True)
 
 #---------------------------------------------------------------------------
@@ -1036,7 +1041,7 @@ class AboutFrame(wx.Frame):
         self.topics.LoadPage('help/index.html')
         self.tabs.AddPage(licence, "Licence")
         licence.LoadPage('help/COPYING')
-        self.tabs.AddPage(peeps, "Peeps")
+        self.tabs.AddPage(peeps, "People")
         peeps.LoadPage('help/about.html')
         self.tabs.SetSelection(tabnumber)
         wx.EVT_TOOL(self, 210, self.GoBackPressed)
@@ -1120,39 +1125,12 @@ class VariablesFrame(wx.Dialog):
 
 #---------------------------------------------------------------------------
 # base html window class
-class HtmlWindow2(html2lib.WebView):
-    def __init__(self):
-        self.WholeOutString = ''
-    
-    def Addhtml(self, htmlline):
-        print dir(self)
-        self.WholeOutString = self.WholeOutString + htmlline
-        self.SetPage(self.WholeOutString,"")
-
-#---------------------------------------------------------------------------
-# base html window class
 class MyHtmlWindow(htmllib.HtmlWindow):
     def __init__(self, parent, id):
         htmllib.HtmlWindow.__init__(self, parent, id)
         wx.Image_AddHandler(wx.JPEGHandler()) # just in case!
         self.WholeOutString = ''
         self.Saved = True
-
-    """def OnLinkClicked(self, linkinfo):
-        ref = string.split(linkinfo.GetHref(),',')
-        means = []
-        for i in range(1, len(ref), 2):
-            if ref[i] == 'M':
-                means.append(float(ref[i+1]))
-            elif ref[i] == 'k':
-                k = int(ref[i+1])
-            elif ref[i] == 'n':
-                n = int(ref[i+1])
-            elif ref[i] == 'p':
-                p = float(ref[i+1])
-        self.Addhtml(str(means)+' '+str(k)+' '+str(n)+' '+str(p))
-        if ref[0] == 'friedman':
-            waste = salstat_stats.FriedmanComp(means, k, n, p)"""
 
     def Addhtml(self, htmlline):
         self.Saved = False
@@ -1258,22 +1236,42 @@ class OutputSheet(wx.Frame):
         self.htmlpage = html2lib.WebView.New(self)
         self.Addhtml('<P><B>SalStat Statistics</B></P>')
         self.printer = wx.Printout()
-        """
-        wx.EVT_MENU(self, ID_OFILE_SAVEAS, self.htmlpage.SaveHtmlPage)
+        wx.EVT_MENU(self, ID_OFILE_SAVEAS, self.SaveHtmlPage)
         wx.EVT_CLOSE(self, self.DoNothing)
         wx.EVT_MENU(self, ID_OFILE_NEW, self.ClearAll)
         wx.EVT_MENU(self, ID_OFILE_PRINT, self.PrintOutput)
-        wx.EVT_MENU(self, ID_OFILE_OPEN, self.htmlpage.LoadHtmlPage)
+        wx.EVT_MENU(self, ID_OFILE_OPEN, self.LoadHtmlPage)
         wx.EVT_MENU(self, ID_HELP_ABOUT, frame.GoHelpAboutFrame)
         wx.EVT_MENU(self, ID_HELP_WIZARD, frame.GoHelpWizardFrame)
         wx.EVT_MENU(self, ID_HELP_TOPICS, frame.GoHelpTopicsFrame)
         wx.EVT_MENU(self, ID_HELP_LICENCE, frame.GoHelpLicenceFrame)
         wx.EVT_TOOL(self, 401, self.ClearAll)
-        wx.EVT_TOOL(self, 402, self.htmlpage.LoadHtmlPage)
-        wx.EVT_TOOL(self, 403, self.htmlpage.SaveHtmlPage)
+        wx.EVT_TOOL(self, 402, self.LoadHtmlPage)
+        wx.EVT_TOOL(self, 403, self.SaveHtmlPage)
         wx.EVT_TOOL(self, 404, self.htmlpage.Print)
         wx.EVT_TOOL(self, 405, frame.GoHelpTopicsFrame)
-        """
+
+    def LoadHtmlPage(self, event):
+        dlg = wx.FileDialog(self, "Load Output File", "","","*.html|*.*", \
+                            wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
+            inputfilename = dlg.GetPath()
+            fin = open(inputfilename, 'r')
+            data = fin.read()
+            fin.close()
+            self.htmlpage.SetPage(data,"")
+            inits.update({'opendir': dlg.GetDirectory()})
+    
+    def SaveHtmlPage(self):
+        dlg = wx.FileDialog(self, "Save Output","","","*.html|*>*", \
+                            wx.SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            outputfilename = dlg.GetPath()
+            fout = open(outputfilename, "w")
+            fout.write(self.WholeOutString)
+            fout.close()
+            inits.update({'savedir': dlg.GetDirectory()})
+            self.Saved = True
 
     def Addhtml(self, htmlline):
         self.WholeOutString = self.WholeOutString + htmlline
@@ -2250,7 +2248,7 @@ class PlotFrame(wx.Frame):
         file_menu.Append(ID_FILE_GSAVEAS, 'Save &As...')
         file_menu.Append(ID_FILE_GPRINTSETUP, 'Page Setup...')
         file_menu.Append(ID_FILE_GPRINTPREVIEW, 'Print Preview...')
-        file_menu.Append(ID_FILE_GPRINT, '&Print...')
+        file_menu.Append(ID_FILE_GPRINT, '&Pryint...')
         file_menu.Append(ID_FILE_GCLOSE, '&Close')
         title_menu.Append(ID_TITLE_GTITLE, '&Graph Title...')
         title_menu.Append(ID_TITLE_GXAXIS, '&X Axis Label...')
@@ -2316,8 +2314,8 @@ class DataFrame(wx.Frame):
         # size the frame to 600x400 - will fit in any VGA screen
         dimx = int(inits.get('gridsizex'))
         dimy = int(inits.get('gridsizey'))
-        posx = 0#int(inits.get('gridposx'))
-        posy = 0#int(inits.get('gridposy'))
+        posx = int(inits.get('gridposx'))
+        posy = int(inits.get('gridposy'))
         wx.Frame.__init__(self,parent,-1,"SalStat Statistics", size=(dimx,\
                                     dimy), pos=(posx,posy))
         #set icon for frame (needs x-platform separator!
@@ -2342,7 +2340,7 @@ class DataFrame(wx.Frame):
         file_menu.AppendSeparator()
         file_menu.Append(ID_FILE_PRINT, '&Print...')
         file_menu.AppendSeparator()
-        file_menu.Append(ID_FILE_EXIT, 'E&xit')
+        file_menu.Append(ID_FILE_EXIT, 'Q&uit')
         edit_menu.Append(ID_EDIT_CUT, 'Cu&t')
         edit_menu.Append(ID_EDIT_COPY, '&Copy')
         edit_menu.Append(ID_EDIT_PASTE, '&Paste')
