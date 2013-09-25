@@ -14,7 +14,7 @@ import xlrd, xlwt # import xls format
 import string, os, os.path, pickle
 
 # import SalStat specific modules
-import salstat_stats, images
+import salstat_stats, images, xlrd
 import numpy, math
 
 # and for plots!
@@ -509,6 +509,13 @@ class SimpleGrid(gridlib.Grid):
     def SelectAllCells(self, event):
         self.SelectAll()
 
+    def ResizeGrid(self, ncols, nrows):
+        spare = 10 # extra spaces
+        # check that data is saved before clearing!
+        self.ClearGrid()
+        self.AppendCols(ncols + spare)
+        self.AppendRows(nrows + spare)
+    
     # adds columns and rows to the grid
     def AddNCells(self, numcols, numrows):
         insert = self.AppendCols(numcols)
@@ -628,15 +635,17 @@ class SimpleGrid(gridlib.Grid):
     # also does csv values as well
     def LoadDataASCII(self, event):
         default = inits.get('opendir')
-        dlg = wx.FileDialog(self, "Load Data File", default,"",\
-                                    self.wildcard, wx.OPEN)
-                #SalStat Native (*.xml)|*.xml|", wx.OPEN)
+        dlg = wx.FileDialog(self, "Open Data File", "","",\
+                                #self.wildcard, wx.OPEN)
+                                "All files (*.*)|*.*|", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
         icon = images.getIconIcon()
         dlg.SetIcon(icon)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()
             if filename[-3:] == 'xml':
                 self.LoadNativeXML(filename)
+            if filename[-3:] == "xls" or filename[-4:] == "xlsx":
+                self.LoadExcel(filename)
             else:
                 inits.update({'opendir': dlg.GetDirectory()})
                 self.ClearGrid()
@@ -660,6 +669,26 @@ class SimpleGrid(gridlib.Grid):
                 fin.close()
                 self.Thaw()
             self.ForceRefresh()
+
+    def LoadExcel(self, filename):
+        try:
+            workbook = xlrd.open_workbook(filename)
+        except: # get proper exception
+            pass # could not open file
+        try:
+            # numsheets = workbook.nsheets
+            # user should decide here which sheet.
+            # temp code: Default to first
+            worksheet = workbook.sheet_by_index(0)
+            nrows = worksheet.nrows
+            ncols = worksheet.ncols
+            self.ResizeGrid(ncols, nrows)
+            for idx_row in range(nrows):
+                for idx_col in range(ncols):
+                    val = unicode(worksheet.cell(idx_row, idx_col).value)
+                    self.SetCellValue(idx_row, idx_col, val)
+        except:
+            pass
 
     def getData(self, x):
         for i in range(len(x)):
@@ -725,61 +754,6 @@ class SimpleGrid(gridlib.Grid):
             #describeTags = xmldoc.getElementsByTagName('describe')
             #for i in range(len(describeTags)):
             self.Thaw()
-
-    def LoadDataASCII2(self, event):
-        # redundant routine
-        default = inits.get('opendir')
-        dlg = wx.FileDialog(self, "Load Data File", default,"",\
-                                    "ASCII Text (*.dat)|*.dat",wx.OPEN)
-                #Numeric Array (*.npy)|*.npy|", wx.OPEN)
-        icon = images.getIconIcon()
-        dlg.SetIcon(icon)
-        if dlg.ShowModal() == wx.ID_OK:
-            inits.update({'opendir': dlg.GetDirectory()})
-            filename = dlg.GetPath()
-            self.ClearGrid()
-            # exception handler here!
-            fin = open(filename, "r")
-            #if filename[-3:] == 'dat':
-            if 1:
-                # text data file
-                # size the datafile first
-                dataheight = 0
-                line = fin.readline()
-                words = string.split(line)
-                datawidth = len(words)
-                while 1:
-                    try:
-                        line = fin.readline()
-                    except:
-                        pass
-                    if (line == ''):
-                        break
-                    dataheight = dataheight + 1
-                gridwidth = self.GetNumberCols()
-                gridheight = self.GetNumberRows()
-                if (datawidth > gridwidth):
-                    self.AddNCols(-1, (datawidth - gridwidth + 5))
-                if (dataheight > gridheight):
-                    self.AddNRows(-1, (dataheight -  gridheight + 5))
-                fin.close
-                fin = open(filename, "r")
-                currentrow = 0
-                for i in range(dataheight):
-                    line = fin.readline()
-                    if (line == ''):
-                        break
-                    line = string.replace(line, ',', ' ')
-                    words = string.split(line)
-                    for i in range(len(words)):
-                        self.SetCellValue(currentrow, i, words[i])
-                    currentrow = currentrow + 1
-            elif filename[-3:] == 'npy':
-                p = pickle.Unpickler(fin)
-                dataset = p.load()
-                # put dataset into grid
-            fin.close()
-            self.ForceRefresh()
 
     def LoadNumericData(self, event):
         default = inits.get('opendir')
