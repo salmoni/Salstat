@@ -1160,7 +1160,7 @@ class OutputSheet(wx.Frame):
         #set icon for frame (needs x-platform separator!
         icon = images.getIconIcon()
         self.SetIcon(icon)
-        self.WholeOutString = ''
+        self.WholeOutString = CreateHTMLDoc()
         file_menu = wx.Menu()
         edit_menu = wx.Menu()
         pref_menu = wx.Menu()
@@ -1208,7 +1208,9 @@ class OutputSheet(wx.Frame):
         self.CreateStatusBar()
         self.SetStatusText('SalStat Statistics')
         self.htmlpage = html2lib.WebView.New(self)
-        self.Addhtml('<P><B>SalStat Statistics</B></P>')
+        self.Addhtml('<div id="chart0001" style="width:100%; height: auto;">')
+        self.Addhtml('<script type="text/javascript">%s</script></div>'%act)
+        #self.htmlpage.LoadURL("http://www.google.com")
         self.printer = wx.Printout()
         wx.EVT_MENU(self, ID_OFILE_SAVEAS, self.SaveHtmlPage)
         wx.EVT_CLOSE(self, self.DoNothing)
@@ -1249,8 +1251,9 @@ class OutputSheet(wx.Frame):
 
     def Addhtml(self, htmlline):
         self.WholeOutString = self.WholeOutString + htmlline
-        self.htmlpage.SetPage(self.WholeOutString,"")
-    
+        htmlend = "\n\t</body>\n<html>"
+        self.htmlpage.SetPage(self.WholeOutString+htmlend,"")
+
     def PrintOutput(self, event):
         data = wx.PrintDialogData()
         data.EnablePrintToFile(True)
@@ -1267,8 +1270,9 @@ class OutputSheet(wx.Frame):
 
     def ClearAll(self, event):
         # check output has been saved
-        self.addhtml('<P><B>SalStat Statistics</B></P>')
-        self.htmlpage.WholeOutString = ''
+        self.htmlpage.WholeOutString = CreateHTMLDoc()
+        htmlend = "\n\t</body>\n<html>"
+        self.htmlpage.SetPage(self.WholeOutString+htmlend,"")
 
 #---------------------------------------------------------------------------
 # user selects which cols to analyse, and what stats to have
@@ -3059,10 +3063,43 @@ def GetInverseFProb(prob, df1, df2):
     """Returns the f-ratio of the given p-value and df's"""
     return salstat_stats.inversef(prob, df1, df2)
 
+#---------------------------------------------------------------------------
+# Creating HTML document
+def CreateHTMLDoc():
+    fin = open("htmlbase.html",'r')
+    page = fin.read()
+    fin.close()
+    return page
 
 #---------------------------------------------------------------------------
 # main loop
 if __name__ == '__main__':
+    act = """        
+$(function () { 
+    $('#chart0001').highcharts({
+        chart: {
+            type: 'area'
+        },
+        title: {
+            text: 'Fruit Consumption'
+        },
+        xAxis: {
+            categories: ['Apples', 'Bananas', 'Oranges']
+        },
+        yAxis: {
+            title: {
+                text: 'Fruit eaten'
+            }
+        },
+        series: [{
+            name: 'John',
+            data: [5, 7, 3]
+        }, {
+            name: 'Jane',
+            data: [1, 0, 6]
+        }]
+    });
+});"""
     import sys
     # find init file and read otherwise create it
     ini = GetInits()
