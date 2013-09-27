@@ -419,7 +419,7 @@ class SimpleGrid(gridlib.Grid):
         gridlib.Grid.__init__(self, parent)
         self.Saved = True
         self.moveTo = None
-        self.SetGridLineColour(wx.BLACK)
+        self.SetGridLineColour(wx.LIGHT_GREY)
         self.CreateGrid(int(inits.get("gridcellsy")), \
                                     int(inits.get("gridcellsx")))
         self.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_BOTTOM)
@@ -452,7 +452,20 @@ class SimpleGrid(gridlib.Grid):
         currentcol = self.GetGridCursorCol()
         currentrow = self.GetGridCursorRow()
         if self.IsSelection():
-            data = 'range' # change this to coords self.tl self.br
+            self.tl = self.GetSelectionBlockTopLeft()[0]
+            self.br = self.GetSelectionBlockBottomRight()[0]
+            top = self.tl[0]
+            left = self.tl[1]
+            bot = self.br[0] + 1
+            right = self.br[1] + 1
+            data = ''
+            for row in range(top, bot):
+                line = []
+                for col in range(left, right):
+                    val = str(self.GetCellValue(row, col))
+                    self.SetCellValue(row, col, '')
+                    line.append(val)
+                data = data + '\t'.join(line) + '\r'
         else:
             data = self.GetCellValue(currentrow, currentcol)
         if (wx.TheClipboard.Open()):
@@ -465,10 +478,22 @@ class SimpleGrid(gridlib.Grid):
         buffer = wx.TextDataObject()
         currentcol = self.GetGridCursorCol()
         currentrow = self.GetGridCursorRow()
-        #if self.IsSelection(): # extend this only if SalStat can paste lists
-        #    data = [2,3,4,5]
-        #else:
-        data = self.GetCellValue(currentrow, currentcol)
+        if self.IsSelection(): # extend this only if SalStat can paste lists
+            self.tl = self.GetSelectionBlockTopLeft()[0]
+            self.br = self.GetSelectionBlockBottomRight()[0]
+            top = self.tl[0]
+            left = self.tl[1]
+            bot = self.br[0] + 1
+            right = self.br[1] + 1
+            data = ''
+            for row in range(top, bot):
+                line = []
+                for col in range(left, right):
+                    val = str(self.GetCellValue(row, col))
+                    line.append(val)
+                data = data + '\t'.join(line) + '\r'
+        else:
+            data = self.GetCellValue(currentrow, currentcol)
         if (wx.TheClipboard.Open()):
             buffer.SetText(data)
             wx.TheClipboard.SetData(buffer)
@@ -480,14 +505,17 @@ class SimpleGrid(gridlib.Grid):
         currentrow = self.GetGridCursorRow()
         res = wx.TheClipboard.Open()
         if res:
-            res = wx.TheClipboard.GetData(buffer)
+            data = wx.TheClipboard.GetData(buffer)
+            pastetext = buffer.GetText()
             wx.TheClipboard.Close()
-            if res:
+            if pastetext:
                 self.Saved = False
-                if type(buffer.GetText()) != list:
-                    self.SetCellValue(currentrow, currentcol, buffer.GetText())
-                else:
-                    self.SetCellValue(currentrow, currentcol, 'list!')
+                rows = pastetext.split('\r')
+                for row in range(len(rows)):
+                    cells = rows[row].split('\t')
+                    for col in range(len(cells)):
+                        val = cells[col]
+                        self.SetCellValue(currentrow+row, currentcol+col, val)
 
     def EditGrid(self, event, numrows):
         insert = self.AppendRows(numrows)
