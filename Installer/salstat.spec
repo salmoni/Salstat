@@ -1,5 +1,5 @@
 # -*- mode: python -*-
-a = Analysis(['/Users/alansalmoni/Projects/Salstat/salstat.py'],
+a = Analysis(['../../Salstat/salstat.py'],
              pathex=['/Users/alansalmoni/Projects/Salstat/Installer'],
              hiddenimports=[],
              hookspath=None,
