@@ -5,6 +5,7 @@ under the GNU General Public License (GPL). See the file COPYING for full
 details of this license. """
 
 # import wx stuff
+from __future__ import unicode_literals
 import wx
 from wx.stc import *
 import wx.grid as gridlib
@@ -3093,9 +3094,12 @@ def GetInverseFProb(prob, df1, df2):
 #---------------------------------------------------------------------------
 # Creating HTML document
 def CreateHTMLDoc():
-    fin = open("htmlbase.html",'r')
-    page = fin.read()
-    fin.close()
+    try:
+        fin = open("htmlbase.html",'r')
+        page = fin.read()
+        fin.close()
+    except IOError:
+        page = """<!DOCTYPE html>\n<html>\n    <head>\n        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>\n        <script src="http://code.highcharts.com/highcharts.js"></script>\n        <script src="http://code.highcharts.com/modules/exporting.js"></script>\n        <script src="/js/themes/gray.js"></script>\n        <style>\n            body { font-family: helvectica, arial, \'lucida sans\'; }\n        </style>\n    </head>\n    <body>\n        <a href="http://www.salstat.com" alt="Go to the Salstat home page"><img src="http://bit.ly/1fqFdQm" alt="Salstat Statistics" style="float: right;"></a>\n        <h2>Salstat Statistics</h2>\n\n\n"""   
     return page
 
 #---------------------------------------------------------------------------
