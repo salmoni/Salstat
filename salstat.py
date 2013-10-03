@@ -261,7 +261,7 @@ class ManyDescriptives:
     def __init__(self, source, ds):
         __x__ = len(ds)
         outstring = ""
-        outstring = outstring +'<table border = "1"><tr><td>Statistic</td>'
+        outstring = outstring +'<table class="table table-striped" border = "1"><tr><td>Statistic</td>'
         for i in range(__x__):
             outstring = outstring +'<td>'+ds[i].Name+'</td>'
         if source.DescChoice.IsChecked(0):
@@ -1837,7 +1837,7 @@ class ThreeConditionTestFrame(wx.Dialog):
             TBase.anovaBetween(d)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.addhtml('<table border="1"><tr><td></td><td>SS \
+            output.addhtml('<table class="table table-striped" border="1"><tr><td></td><td>SS \
                                     </td><td>df</td><td>MS</td><td>F</td>  \
                                     <td>p-value</TD></tr>')
             output.addhtml('<tr><td>FACTOR</td><td>%5.3f</td><td> \
@@ -1871,7 +1871,7 @@ class ThreeConditionTestFrame(wx.Dialog):
             TBase.anovaWithin(biglist, ns, sums, means)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.addhtml('<table border="1"><tr><td></td><td>SS \
+            output.addhtml('<table class="table table-striped" border="1"><tr><td></td><td>SS \
                                     </td><td>df</td><td>MS</td><td>F</td>  \
                                     <td>p-value</TD></tr>')
             output.addhtml('<tr><td>FACTOR</td><td>%5.3f</td><td> \
