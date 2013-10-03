@@ -1237,6 +1237,7 @@ class OutputSheet(wx.Frame):
         self.CreateStatusBar()
         self.SetStatusText('SalStat Statistics')
         self.htmlpage = html2lib.WebView.New(self)
+        print dir(self.htmlpage) #.EnableContextMenu(False)
         self.Addhtml('<div id="chart0001" style="width:100%; height: auto;">')
         self.Addhtml('<script type="text/javascript">%s</script></div>'%act)
         #self.htmlpage.LoadURL("http://www.google.com")
@@ -1947,7 +1948,7 @@ class ThreeConditionTestFrame(wx.Dialog):
                                     (TBase.SStot, TBase.dftot))
             output.Addhtml('</table>')
 
-        # kruskal wallis H
+        # Kruskal wallis H
         if self.TestChoice.IsChecked(2):
             output.Addhtml('<p><b>Kruskal Wallis H Test</b>')
             TBase.KruskalWallisH(biglist)
