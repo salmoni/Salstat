@@ -744,12 +744,32 @@ class TwoSampleTests:
             r_left = self.d1.N*self.d1.sumsquares-(self.d1.sum**2)
             r_right= self.d2.N*self.d2.sumsquares-(self.d2.sum**2)
             r_den = math.sqrt(r_left*r_right)
-            self.r = r_num / r_den
             self.df = self.d1.N - 2
-            self.t = self.r*math.sqrt(self.df/((1.0-self.r+TINY)* \
-                                    (1.0+self.r+TINY)))
-            self.prob = betai(0.5*self.df,0.5,self.df/float \
-                                    (self.df+self.t*self.t))
+            try:
+                self.r = r_num / r_den
+                self.t = self.r*math.sqrt(self.df/((1.0-self.r+TINY)* \
+                                        (1.0+self.r+TINY)))
+                self.prob = betai(0.5*self.df,0.5,self.df/float \
+                                        (self.df+self.t*self.t))
+            except ZeroDivisionError:
+                self.r = 1.0
+                self.t = 0
+                self.prob = 1.0
+
+        TINY = 1e-30
+        if self.d1.N <> self.d2.N:
+            self.prob= -1.0
+        else:
+            rankx = rankdata(data1)
+            ranky = rankdata(data2)
+            dsq = reduce(add, map(diffsquared, rankx, ranky))
+            self.rho = 1 - 6*dsq / float(self.d1.N*(self.d1.N**2-1))
+            self.t = self.rho * math.sqrt((self.d1.N-2) / \
+                                    ((self.rho+1.0+TINY)*(1.0-self.rho+TINY)))
+            self.df = self.d1.N-2
+            self.prob = betai(0.5*self.df,0.5,self.df/(self.df+self.t*self.t))
+
+
 
     def FTest(self, uservar):
         """
@@ -792,28 +812,33 @@ class TwoSampleTests:
         """
         n1 = 0
         n2 = 0
-        iss = 0
-        for j in range(self.d1.N-1):
-            for k in range(j,self.d2.N):
-                a1 = data1[j] - data1[k]
-                a2 = data2[j] - data2[k]
-                aa = a1 * a2
-                if (aa):             # neither list has a tie
-                    n1 = n1 + 1
-                    n2 = n2 + 1
-                    if aa > 0:
-                        iss = iss + 1
-                    else:
-                        iss = iss -1
+        if len(data1) != len(data2):
+            self.tau = "n/a"
+            self.z = "n/a"
+            self.prob = -1.0
+        else:
+            iss = 0
+            for j in range(self.d1.N-1):
+                for k in range(j,self.d2.N):
+                    a1 = data1[j] - data1[k]
+                    a2 = data2[j] - data2[k]
+                    aa = a1 * a2
+                    if (aa):             # neither list has a tie
+                        n1 = n1 + 1
+                        n2 = n2 + 1
+                        if aa > 0:
+                            iss = iss + 1
+                        else:
+                            iss = iss -1
                 else:
                     if (a1):
                         n1 = n1 + 1
                     else:
                         n2 = n2 + 1
-        self.tau = iss / math.sqrt(n1*n2)
-        svar = (4.0*self.d1.N+10.0) / (9.0*self.d1.N*(self.d1.N-1))
-        self.z = self.tau / math.sqrt(svar)
-        self.prob = erfcc(abs(self.z)/1.4142136)
+            self.tau = iss / math.sqrt(n1*n2)
+            svar = (4.0*self.d1.N+10.0) / (9.0*self.d1.N*(self.d1.N-1))
+            self.z = self.tau / math.sqrt(svar)
+            self.prob = erfcc(abs(self.z)/1.4142136)
 
     def KolmogorovSmirnov(self):
         """
@@ -866,7 +891,6 @@ class TwoSampleTests:
                                     ((self.rho+1.0+TINY)*(1.0-self.rho+TINY)))
             self.df = self.d1.N-2
             self.prob = betai(0.5*self.df,0.5,self.df/(self.df+self.t*self.t))
-
 
     def RankSums(self, data1, data2):
         """

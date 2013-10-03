@@ -15,7 +15,7 @@ import xlrd, xlwt # import xls format
 import string, os, os.path, pickle
 
 # import SalStat specific modules
-import salstat_stats, images, xlrd
+import salstat_stats, images, xlrd, tabler
 import numpy, math
 
 # and for plots!
@@ -1420,7 +1420,7 @@ class OneConditionTestFrame(wx.Dialog):
         try:
             umean = float(self.UserMean.GetValue())
         except:
-            output.Addhtml('<p>Cannot do test - no user \
+            output.Addhtml('<p class="text-warning">Cannot do test - no user \
                                     hypothesised mean specified')
             self.Close(True)
             return
@@ -1432,16 +1432,20 @@ class OneConditionTestFrame(wx.Dialog):
         x2=ManyDescriptives(self, d)
         # One sample t-test
         if self.TestChoice.IsChecked(0):
-            output.Addhtml('<p><b>One sample t-test</b>')
+            output.Addhtml('<h3>One sample t-test</h3>')
             TBase.OneSampleTTest(umean)
             if (TBase.prob == -1.0):
-                output.Addhtml('<br>All elements are the same, \
-                                    test not possible')
+                output.Addhtml('<p class="text-warning">All elements are the same, \
+                                    test not possible</p>')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.Addhtml('<br>t(%d) = %5.3f, p (approx) = \
-                                    %1.6f'%(TBase.df, TBase.t, TBase.prob))
+                vars = [['Variable', name1],
+                        ['df', TBase.df],
+                        ['t',TBase.t],
+                        ['p',TBase.prob]]
+                ln = tabler.table(vars)
+                output.Addhtml(ln)
                 #now draw up the xml history stuff
                 xmlevt = '<analyse test="one sample t-test" column = "'+str(x1)
                 xmlevt = xmlevt+' hyp_value = "'+str(umean)+'" tail="'
@@ -1454,26 +1458,35 @@ class OneConditionTestFrame(wx.Dialog):
                 hist.AppendEvent(xmlevt)
         # One sample sign test
         if self.TestChoice.IsChecked(1):
-            output.Addhtml('<p><b>One sample sign test</b>')
+            output.Addhtml('<H3>One sample sign test</H3>')
             TBase.OneSampleSignTest(x, umean)
             if (TBase.prob == -1.0):
-                output.Addhtml('<br>All data are the same - no \
-                                    analysis is possible')
+                output.Addhtml('<p class="text-warning">All data are the same - no \
+                                    analysis is possible</p>')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.Addhtml('<br>N = %5.0f, z = %5.3f, p = %1.6f'%\
-                                    (TBase.ntotal, TBase.z, TBase.prob))
+                vars = [['Variable', name1],
+                        ['Total N', TBase.ntotal],
+                        ['Z',TBase.z],
+                        ['p',TBase.prob]]
+                ln = tabler.table(vars)
+                output.Addhtml(ln)
         # chi square test for variance
         if self.TestChoice.IsChecked(2):
-            output.Addhtml('<p><b>One sample chi square</b>')
+            output.Addhtml('<H3>One sample chi square</H3>')
             TBase.ChiSquareVariance(umean)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
             if (TBase.prob == None):
                 TBase.prob = 1.0
-            output.Addhtml('<br>Chi square (%d) = %5.3f, p = %1.6f'%\
-                                    (TBase.df, TBase.chisquare, TBase.prob))
+                vars = [['Variable', name1],
+                        ['df', TBase.df],
+                        ['Chi',TBase.chisquare],
+                        ['p',TBase.prob]]
+                ln = tabler.table(vars)
+                output.Addhtml(ln)
+
         self.Close(True)
             
     def OnCloseOneCond(self, event):
@@ -1593,74 +1606,94 @@ class TwoConditionTestFrame(wx.Dialog):
         d[0] = TBase.d1
         d[1] = TBase.d2
         x2 = ManyDescriptives(self, d)
+
         # chi square test
         if self.paratests.IsChecked(0):
-            output.Addhtml('<p><b>Chi square</b>')
+            output.Addhtml('<H3>Chi square</H3>')
             TBase.ChiSquare(x, y)
             if (TBase.prob == -1.0):
-                output.Addhtml('<BR>Cannot do chi square - \
-                                    unequal data sizes')
+                output.Addhtml('<p class="text-warning">Cannot do chi square - unequal data sizes</p>')
             else:
-                output.Addhtml('<br>chi (%d) = %5.3f, p = %1.6f'% \
-                                    (TBase.df, TBase.chisq, TBase.prob))
+                vars = [['Variable 1', name1],
+                        ['Variable 2', name2],
+                        ['df', TBase.df],
+                        ['Chi',TBase.chisq],
+                        ['p',TBase.prob]]
+                ln = tabler.table(vars)
+                output.Addhtml(ln)
 
         # F-test for variance ratio's
         if self.paratests.IsChecked(1):
-            output.Addhtml('<P><B>F test for variance ratio (\
-                                    independent samples)</B>')
+            output.Addhtml('<H3>F test for variance ratio (independent samples)</H3>')
             try:
                 umean = float(self.UserMean.GetValue())
             except:
-                output.Addhtml('<p>Cannot do test - no user \
+                output.Addhtml('<p class="text-warning">Cannot do test - no user \
                                     hypothesised mean specified')
             else:
                 TBase.FTest(umean)
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.Addhtml('<BR>f(%d, %d) = %5.3f, p = %1.6f'% \
-                                    (TBase.df1,TBase.df2, TBase.f, TBase.prob))
+                vars = [['Variable 1', name1],
+                        ['Variable 2', name2],
+                        ['df', '%d, %d'%(TBase.df1, TBase.df2)],
+                        ['F',TBase.f],
+                        ['p',TBase.prob]]
+                ln = tabler.table(vars)
+                output.Addhtml(ln)
 
         # Kolmorogov-Smirnov 2 sample test
         if self.paratests.IsChecked(2):
-            output.Addhtml('<P><B>Kolmogorov-Smirnov test \
-                                    (unpaired)</B>')
+            output.Addhtml('<h3>Kolmogorov-Smirnov test (unpaired)</h3>')
             TBase.KolmogorovSmirnov()
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.Addhtml('<BR>D = %5.3f, p = %1.6f'%(TBase.d, \
-                                    TBase.prob))
+            vars = [['Variable 1', name1],
+                    ['Variable 2', name2],
+                    ['d', TBase.d],
+                    ['p',TBase.prob]]
+            ln = tabler.table(vars)
+            output.Addhtml(ln)
 
         # Linear Regression
         if self.paratests.IsChecked(3):
-            output.Addhtml('<p><b>Linear Regression</b>')
+            output.Addhtml('<h3>Linear Regression</h3>')
             TBase.LinearRegression(x,y)
             #s, i, r, prob, st = salstat_stats.llinregress(x, y)
             if (TBase.prob == -1.0):
-                output.Addhtml('<BR>Cannot do linear regression - \
-                                    unequal data sizes')
+                output.Addhtml('<h3>Cannot do linear regression - unequal data sizes</p>')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     self.prob = self.prob / 2
-                output.Addhtml('<BR>Slope = %5.3f, Intercept = %5.3f,\
-                                    r = %5.3f, Estimated Standard Error = \
-                                    %5.3f' %(TBase.slope, TBase.intercept, \
-                                    TBase.r, TBase.sterrest))
-                output.Addhtml('<br>t (%d) = %5.3f, p = %1.6f' \
-                                    %(TBase.df, TBase.t, TBase.prob))
+                vars = [['Variable 1 on', name1],
+                        ['Variable 2', name2],
+                        ['Slope', TBase.slope],
+                        ['Intercept',TBase.intercept],
+                        ['R', TBase.r],
+                        ['Est. Standard Error',TBase.sterrest],
+                        ['df', TBase.df],
+                        ['t',TBase.t],
+                        ['p',TBase.prob]]
+                ln = tabler.table(vars)
+                output.Addhtml(ln)
+
         # Mann-Whitney U
         if self.paratests.IsChecked(4):
-            output.Addhtml('<P><B>Mann-Whitney U test (unpaired \
-                                    samples)</B>')
+            output.Addhtml('<h3>Mann-Whitney U test (unpaired samples)</h3>')
             TBase.MannWhitneyU(x, y)
             if (TBase.prob == -1.0):
-                output.Addhtml('<BR>Cannot do Mann-Whitney U test \
-                                    - all numbers are identical')
+                output.Addhtml('<p class="text-warning">Cannot do Mann-Whitney U test - all numbers are identical<p>')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.Addhtml('<BR>z = %5.3f, small U = %5.3f, \
-                                    big U = %5.3f, p = %1.6f'%(TBase.z, \
-                                    TBase.smallu, TBase.bigu, TBase.prob))
+                vars = [['Variable 1', name1],
+                        ['Variable 2', name2],
+                        ['df', TBase.z],
+                        ['Small U',TBase.smallu],
+                        ['Big U',TBase.bigu],
+                        ['p',TBase.prob]]
+                ln = tabler.table(vars)
+                output.Addhtml(ln)
 
         # Paired permutation test
         """if self.paratests.IsChecked(5):
@@ -1678,38 +1711,51 @@ class TwoConditionTestFrame(wx.Dialog):
 
         # Paired sign test
         if self.paratests.IsChecked(5):
-            output.Addhtml('<P><B>2 sample sign test</B></P>')
+            output.Addhtml('<h3>Paired sign test</h3>')
             TBase.TwoSampleSignTest(x, y)
             if (TBase.prob == -1.0):
-                output.Addhtml('<BR>Cannot do test - not paired \
-                                    samples')
+                output.Addhtml('<p class="text-warning">Cannot do test - not paired samples</p>')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.Addhtml('<BR>N = %5.0f, z = %5.3f, p = %1.6f'\
-                                    %(TBase.ntotal, TBase.z, TBase.prob))
+                vars = [['Variable 1', name1],
+                        ['Variable 2', name2],
+                        ['N (total)', TBase.ntotal],
+                        ['Z',TBase.z],
+                        ['p',TBase.prob]]
+                ln = tabler.table(vars)
+                output.Addhtml(ln)
 
         # Paired t-test
         if self.paratests.IsChecked(6):
-            output.Addhtml('<p><b>t-test paired</b>')
+            output.Addhtml('<h3>t-test paired</h3>')
             TBase.TTestPaired(x, y)
             if (TBase.prob == -1.0):
-                output.Addhtml('<br>Cannot do paired t test - \
-                                    unequal data sizes')
+                output.Addhtml('<p class="text-warning">Cannot do paired t test - unequal data sizes</p>')
             else:
                 if self.hypchoice.GetSelection() == 0:
                     TBase.prob = TBase.prob / 2
-                output.Addhtml('<BR>t(%d) = %5.3f, p = %1.6f'% \
-                                    (TBase.df, TBase.t, TBase.prob))
+                vars = [['Variable 1', name1],
+                        ['Variable 2', name2],
+                        ['df', TBase.df],
+                        ['t',TBase.t],
+                        ['p',TBase.prob]]
+                ln = tabler.table(vars)
+                output.Addhtml(ln)
 
         # unpaired t-test
         if self.paratests.IsChecked(7):
-            output.Addhtml('<p><b>t-test unpaired</b>')
+            output.Addhtml('<h3>t-test unpaired</h3>')
             TBase.TTestUnpaired()
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.Addhtml('<BR>t(%d) = %5.3f, p =  %1.6f'% \
-                                    (TBase.df, TBase.t, TBase.prob))
+            vars = [['Variable 1', name1],
+                    ['Variable 2', name2],
+                    ['df', TBase.df],
+                    ['t',TBase.t],
+                    ['p',TBase.prob]]
+            ln = tabler.table(vars)
+            output.Addhtml(ln)
 
         # Wald-Wolfowitz runs test (no yet coded)
         if self.paratests.IsChecked(8):
@@ -1717,26 +1763,35 @@ class TwoConditionTestFrame(wx.Dialog):
 
         # Wilcoxon Rank Sums
         if self.paratests.IsChecked(9):
-            output.Addhtml('<P><B>Rank Sums test (unpaired \
-                                    samples)</B>')
+            output.Addhtml('<h3>Rank Sums test (unpaired samples)</h3>')
             TBase.RankSums(x, y)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
+            vars = [['Variable 1', name1],
+                    ['Variable 2', name2],
+                    ['z', TBase.z],
+                    ['p',TBase.prob]]
+            ln = tabler.table(vars)
+            output.Addhtml(ln)
             output.Addhtml('<BR>t = %5.3f, p = %1.6f'%(TBase.z, \
                                     TBase.prob))
 
         # Wilcoxon Signed Ranks
         if self.paratests.IsChecked(10):
-            output.Addhtml('<P><B>Wilcoxon t (paired samples)</B>')
+            output.Addhtml('<h3>Wilcoxon t (paired samples)</h3>')
             TBase.SignedRanks(x, y)
             if (TBase.prob == -1.0):
-                output.Addhtml('<BR>Cannot do Wilcoxon t test - \
-                                    unequal data sizes')
+                output.Addhtml('<p class="text-warning">Cannot do Wilcoxon t test - unequal data sizes</p>')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.Addhtml('<BR>z = %5.3f, t = %5.3f, p = %1.6f'%\
-                                    (TBase.z, TBase.wt, TBase.prob))
+                vars = [['Variable 1', name1],
+                        ['Variable 2', name2],
+                        ['z', TBase.z],
+                        ['wt',TBase.wt],
+                        ['p',TBase.prob]]
+                ln = tabler.table(vars)
+                output.Addhtml(ln)
         self.Close(True)
 
     def OnCloseTwoCond(self, event):
@@ -1898,8 +1953,11 @@ class ThreeConditionTestFrame(wx.Dialog):
             TBase.KruskalWallisH(biglist)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.Addhtml('<br>H(%d) = %5.3f, p = %1.6f'% \
-                                    (TBase.df, TBase.h, TBase.prob))
+            vars = [['df', TBase.df],
+                    ['H',TBase.h],
+                    ['p',TBase.prob]]
+            ln = tabler.table(vars)
+            output.Addhtml(ln)
 
         # Friedman test
         if self.TestChoice.IsChecked(3):
@@ -1910,8 +1968,11 @@ class ThreeConditionTestFrame(wx.Dialog):
                 alpha = 0.10
             else:
                 alpha = 0.05
-            output.Addhtml('<br>Chi(%d) = %5.3f, p = %1.6f'% \
-                                    (TBase.df, TBase.chisq, TBase.prob))
+            vars = [['df', TBase.df],
+                    ['Chi',TBase.chisq],
+                    ['p',TBase.prob]]
+            ln = tabler.table(vars)
+            output.Addhtml(ln)
             # the next few lines are commented out & are experimental. They
             # help perform multiple comparisons for the Friedman test.
             #outstring = '<a href="friedman,'
@@ -1928,8 +1989,11 @@ class ThreeConditionTestFrame(wx.Dialog):
             TBase.CochranesQ(biglist)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.Addhtml('<br>Q (%d) = %5.3f, p = %1.6f'% \
-                                    (TBase.df, TBase.q, TBase.prob))
+            vars = [['df', TBase.df],
+                    ['Q',TBase.q],
+                    ['p',TBase.prob]]
+            ln = tabler.table(vars)
+            output.Addhtml(ln)
         self.Close(True)
 
     def OnCloseThreeCond(self, event):
@@ -2032,39 +2096,64 @@ class CorrelationTestFrame(wx.Dialog):
         d[0] = TBase.d1
         d[1] = TBase.d2
         x2 = ManyDescriptives(self, d)
+        
         # Kendalls tau correlation
         if self.paratests.IsChecked(0):
-            output.Addhtml('<P><B>Kendalls Tau correlation</B>')
+            output.Addhtml('<h3>Kendalls Tau correlation</h3>')
             TBase.KendallsTau(x, y)
-            if (self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-            output.Addhtml('<BR>tau = %5.3f, z = %5.3f, p = %1.6f'% \
-                                    (TBase.tau, TBase.z, TBase.prob))
+            if (TBase.prob == -1.0):
+                output.Addhtml('<p class="text-warning">Cannot do Kendall&#39;s tau correlation \
+                                    - the data have unequal sizes')
+            else:
+                if (self.hypchoice.GetSelection() == 0):
+                    TBase.prob = TBase.prob / 2
+                vars = [['Variable 1', name1],
+                        ['Variable 2', name2],
+                        ['Tau', TBase.tau],
+                        ['z',TBase.z],
+                        ['p',TBase.prob]]
+                ln = tabler.table(vars)
+                output.Addhtml(ln)
 
         # Pearsons r correlation
         if self.paratests.IsChecked(1):
-            output.Addhtml('<P><B>Pearsons correlation</B>')
+            output.Addhtml('<H3>Pearsons correlation</H3>')
             TBase.PearsonsCorrelation(x, y)
-            if (self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-            output.Addhtml('<BR>r (%d) = %5.3f, t = %5.3f, p = %1.6f'% \
-                                    (TBase.df, TBase.r, TBase.t, TBase.prob))
+            if (TBase.prob == -1.0):
+                output.Addhtml('<p class="text-warning">Cannot do Pearson&#39;s correlation \
+                                    - the data have unequal sizes')
+            else:
+                if (self.hypchoice.GetSelection() == 0):
+                    TBase.prob = TBase.prob / 2
+                vars = [['Variable 1', name1],
+                        ['Variable 2', name2],
+                        ['df', TBase.df],
+                        ['r',TBase.r],
+                        ['t',TBase.t],
+                        ['p',TBase.prob]]
+                ln = tabler.table(vars)
+                output.Addhtml(ln)
 
         # Point Biserial r
         if self.paratests.IsChecked(2):
             pass
         # Spearmans rho correlation
         if self.paratests.IsChecked(3):
-            output.Addhtml('<P><B>Spearmans rho correlation</B>')
+            output.Addhtml('<H3>Spearmans rho correlation</H3>')
             TBase.SpearmansCorrelation(x, y)
             if (TBase.prob == -1.0):
-                output.Addhtml('<BR>Cannot do Spearmans correlation \
-                                    - unequal data sizes')
+                output.Addhtml('<p class="text-warning">Cannot do Spearmans correlation \
+                                    - the data have unequal sizes')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.Addhtml('<BR>rho(%d) = %5.3f, p = %1.6f'% \
-                                    (TBase.df, TBase.rho, TBase.prob))
+                vars = [['Variable 1', name1],
+                        ['Variable 2', name2],
+                        ['df', TBase.df],
+                        ['Rho',TBase.rho],
+                        ['p',TBase.prob]]
+                ln = tabler.table(vars)
+                output.Addhtml(ln)
 
         self.Close(True)
 
