@@ -773,13 +773,13 @@ class SimpleGrid(gridlib.Grid):
                 self.DeleteCurrentRow(rownum)
             # there is a problem here - the html tags embedded between the <results> tags
             # are parsed as XML, but I want the whole lot available as a string.
-            output.addhtml('<P><B>SalStat Statistics</B></P>')
+            output.Addhtml('<P><B>SalStat Statistics</B></P>')
             output.htmlpage.WholeOutString = ''
             resultsTags = xmldoc.getElementsByTagName('results')
             for i in range(len(resultsTags)):
                 outputText = self.getText(resultsTags[i].childNodes)
                 #print "out" + outputText # debugging!
-                output.addhtml(outputText)
+                output.Addhtml(outputText)
             #describeTags = xmldoc.getElementsByTagName('describe')
             #for i in range(len(describeTags)):
             self.Thaw()
@@ -1420,7 +1420,7 @@ class OneConditionTestFrame(wx.Dialog):
         try:
             umean = float(self.UserMean.GetValue())
         except:
-            output.addhtml('<p>Cannot do test - no user \
+            output.Addhtml('<p>Cannot do test - no user \
                                     hypothesised mean specified')
             self.Close(True)
             return
@@ -1432,15 +1432,15 @@ class OneConditionTestFrame(wx.Dialog):
         x2=ManyDescriptives(self, d)
         # One sample t-test
         if self.TestChoice.IsChecked(0):
-            output.addhtml('<p><b>One sample t-test</b>')
+            output.Addhtml('<p><b>One sample t-test</b>')
             TBase.OneSampleTTest(umean)
             if (TBase.prob == -1.0):
-                output.addhtml('<br>All elements are the same, \
+                output.Addhtml('<br>All elements are the same, \
                                     test not possible')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.addhtml('<br>t(%d) = %5.3f, p (approx) = \
+                output.Addhtml('<br>t(%d) = %5.3f, p (approx) = \
                                     %1.6f'%(TBase.df, TBase.t, TBase.prob))
                 #now draw up the xml history stuff
                 xmlevt = '<analyse test="one sample t-test" column = "'+str(x1)
@@ -1454,25 +1454,25 @@ class OneConditionTestFrame(wx.Dialog):
                 hist.AppendEvent(xmlevt)
         # One sample sign test
         if self.TestChoice.IsChecked(1):
-            output.addhtml('<p><b>One sample sign test</b>')
+            output.Addhtml('<p><b>One sample sign test</b>')
             TBase.OneSampleSignTest(x, umean)
             if (TBase.prob == -1.0):
-                output.addhtml('<br>All data are the same - no \
+                output.Addhtml('<br>All data are the same - no \
                                     analysis is possible')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.addhtml('<br>N = %5.0f, z = %5.3f, p = %1.6f'%\
+                output.Addhtml('<br>N = %5.0f, z = %5.3f, p = %1.6f'%\
                                     (TBase.ntotal, TBase.z, TBase.prob))
         # chi square test for variance
         if self.TestChoice.IsChecked(2):
-            output.addhtml('<p><b>One sample chi square</b>')
+            output.Addhtml('<p><b>One sample chi square</b>')
             TBase.ChiSquareVariance(umean)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
             if (TBase.prob == None):
                 TBase.prob = 1.0
-            output.addhtml('<br>Chi square (%d) = %5.3f, p = %1.6f'%\
+            output.Addhtml('<br>Chi square (%d) = %5.3f, p = %1.6f'%\
                                     (TBase.df, TBase.chisquare, TBase.prob))
         self.Close(True)
             
@@ -1595,120 +1595,120 @@ class TwoConditionTestFrame(wx.Dialog):
         x2 = ManyDescriptives(self, d)
         # chi square test
         if self.paratests.IsChecked(0):
-            output.addhtml('<p><b>Chi square</b>')
+            output.Addhtml('<p><b>Chi square</b>')
             TBase.ChiSquare(x, y)
             if (TBase.prob == -1.0):
-                output.addhtml('<BR>Cannot do chi square - \
+                output.Addhtml('<BR>Cannot do chi square - \
                                     unequal data sizes')
             else:
-                output.addhtml('<br>chi (%d) = %5.3f, p = %1.6f'% \
+                output.Addhtml('<br>chi (%d) = %5.3f, p = %1.6f'% \
                                     (TBase.df, TBase.chisq, TBase.prob))
 
         # F-test for variance ratio's
         if self.paratests.IsChecked(1):
-            output.addhtml('<P><B>F test for variance ratio (\
+            output.Addhtml('<P><B>F test for variance ratio (\
                                     independent samples)</B>')
             try:
                 umean = float(self.UserMean.GetValue())
             except:
-                output.addhtml('<p>Cannot do test - no user \
+                output.Addhtml('<p>Cannot do test - no user \
                                     hypothesised mean specified')
             else:
                 TBase.FTest(umean)
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.addhtml('<BR>f(%d, %d) = %5.3f, p = %1.6f'% \
+                output.Addhtml('<BR>f(%d, %d) = %5.3f, p = %1.6f'% \
                                     (TBase.df1,TBase.df2, TBase.f, TBase.prob))
 
         # Kolmorogov-Smirnov 2 sample test
         if self.paratests.IsChecked(2):
-            output.addhtml('<P><B>Kolmogorov-Smirnov test \
+            output.Addhtml('<P><B>Kolmogorov-Smirnov test \
                                     (unpaired)</B>')
             TBase.KolmogorovSmirnov()
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.addhtml('<BR>D = %5.3f, p = %1.6f'%(TBase.d, \
+            output.Addhtml('<BR>D = %5.3f, p = %1.6f'%(TBase.d, \
                                     TBase.prob))
 
         # Linear Regression
         if self.paratests.IsChecked(3):
-            output.addhtml('<p><b>Linear Regression</b>')
+            output.Addhtml('<p><b>Linear Regression</b>')
             TBase.LinearRegression(x,y)
             #s, i, r, prob, st = salstat_stats.llinregress(x, y)
             if (TBase.prob == -1.0):
-                output.addhtml('<BR>Cannot do linear regression - \
+                output.Addhtml('<BR>Cannot do linear regression - \
                                     unequal data sizes')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     self.prob = self.prob / 2
-                output.addhtml('<BR>Slope = %5.3f, Intercept = %5.3f,\
+                output.Addhtml('<BR>Slope = %5.3f, Intercept = %5.3f,\
                                     r = %5.3f, Estimated Standard Error = \
                                     %5.3f' %(TBase.slope, TBase.intercept, \
                                     TBase.r, TBase.sterrest))
-                output.addhtml('<br>t (%d) = %5.3f, p = %1.6f' \
+                output.Addhtml('<br>t (%d) = %5.3f, p = %1.6f' \
                                     %(TBase.df, TBase.t, TBase.prob))
         # Mann-Whitney U
         if self.paratests.IsChecked(4):
-            output.addhtml('<P><B>Mann-Whitney U test (unpaired \
+            output.Addhtml('<P><B>Mann-Whitney U test (unpaired \
                                     samples)</B>')
             TBase.MannWhitneyU(x, y)
             if (TBase.prob == -1.0):
-                output.addhtml('<BR>Cannot do Mann-Whitney U test \
+                output.Addhtml('<BR>Cannot do Mann-Whitney U test \
                                     - all numbers are identical')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.addhtml('<BR>z = %5.3f, small U = %5.3f, \
+                output.Addhtml('<BR>z = %5.3f, small U = %5.3f, \
                                     big U = %5.3f, p = %1.6f'%(TBase.z, \
                                     TBase.smallu, TBase.bigu, TBase.prob))
 
         # Paired permutation test
         """if self.paratests.IsChecked(5):
-            output.addhtml('<P><B>Paired Permutation test</B></P>')
+            output.Addhtml('<P><B>Paired Permutation test</B></P>')
             TBase.PairedPermutation(x, y)
             if (TBase.prob == -1.0):
-                output.addhtml('<BR>Cannot do test - not paired \
+                output.Addhtml('<BR>Cannot do test - not paired \
                                     samples')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.addhtml('<BR>Utail = %5.0f, nperm = %5.3f, \
+                output.Addhtml('<BR>Utail = %5.0f, nperm = %5.3f, \
                         crit = %5.3f, p = %1.6f'%(TBase.utail, TBase.nperm, \
                         TBase.crit, TBase.prob))"""
 
         # Paired sign test
         if self.paratests.IsChecked(5):
-            output.addhtml('<P><B>2 sample sign test</B></P>')
+            output.Addhtml('<P><B>2 sample sign test</B></P>')
             TBase.TwoSampleSignTest(x, y)
             if (TBase.prob == -1.0):
-                output.addhtml('<BR>Cannot do test - not paired \
+                output.Addhtml('<BR>Cannot do test - not paired \
                                     samples')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.addhtml('<BR>N = %5.0f, z = %5.3f, p = %1.6f'\
+                output.Addhtml('<BR>N = %5.0f, z = %5.3f, p = %1.6f'\
                                     %(TBase.ntotal, TBase.z, TBase.prob))
 
         # Paired t-test
         if self.paratests.IsChecked(6):
-            output.addhtml('<p><b>t-test paired</b>')
+            output.Addhtml('<p><b>t-test paired</b>')
             TBase.TTestPaired(x, y)
             if (TBase.prob == -1.0):
-                output.addhtml('<br>Cannot do paired t test - \
+                output.Addhtml('<br>Cannot do paired t test - \
                                     unequal data sizes')
             else:
                 if self.hypchoice.GetSelection() == 0:
                     TBase.prob = TBase.prob / 2
-                output.addhtml('<BR>t(%d) = %5.3f, p = %1.6f'% \
+                output.Addhtml('<BR>t(%d) = %5.3f, p = %1.6f'% \
                                     (TBase.df, TBase.t, TBase.prob))
 
         # unpaired t-test
         if self.paratests.IsChecked(7):
-            output.addhtml('<p><b>t-test unpaired</b>')
+            output.Addhtml('<p><b>t-test unpaired</b>')
             TBase.TTestUnpaired()
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.addhtml('<BR>t(%d) = %5.3f, p =  %1.6f'% \
+            output.Addhtml('<BR>t(%d) = %5.3f, p =  %1.6f'% \
                                     (TBase.df, TBase.t, TBase.prob))
 
         # Wald-Wolfowitz runs test (no yet coded)
@@ -1717,25 +1717,25 @@ class TwoConditionTestFrame(wx.Dialog):
 
         # Wilcoxon Rank Sums
         if self.paratests.IsChecked(9):
-            output.addhtml('<P><B>Rank Sums test (unpaired \
+            output.Addhtml('<P><B>Rank Sums test (unpaired \
                                     samples)</B>')
             TBase.RankSums(x, y)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.addhtml('<BR>t = %5.3f, p = %1.6f'%(TBase.z, \
+            output.Addhtml('<BR>t = %5.3f, p = %1.6f'%(TBase.z, \
                                     TBase.prob))
 
         # Wilcoxon Signed Ranks
         if self.paratests.IsChecked(10):
-            output.addhtml('<P><B>Wilcoxon t (paired samples)</B>')
+            output.Addhtml('<P><B>Wilcoxon t (paired samples)</B>')
             TBase.SignedRanks(x, y)
             if (TBase.prob == -1.0):
-                output.addhtml('<BR>Cannot do Wilcoxon t test - \
+                output.Addhtml('<BR>Cannot do Wilcoxon t test - \
                                     unequal data sizes')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.addhtml('<BR>z = %5.3f, t = %5.3f, p = %1.6f'%\
+                output.Addhtml('<BR>z = %5.3f, t = %5.3f, p = %1.6f'%\
                                     (TBase.z, TBase.wt, TBase.prob))
         self.Close(True)
 
@@ -1815,7 +1815,7 @@ class ThreeConditionTestFrame(wx.Dialog):
             d.append(x2)
         x2=ManyDescriptives(self, d)
         if (len(biglist) < 2):
-            output.addhtml('<p><b>Not enough columns selected for \
+            output.Addhtml('<p><b>Not enough columns selected for \
                                     test!</b>')
             self.Close(True)
             return
@@ -1823,94 +1823,94 @@ class ThreeConditionTestFrame(wx.Dialog):
         #single factor between subjects anova
         if self.TestChoice.IsChecked(0):
             cols = []
-            output.addhtml('<P><B>Single Factor anova - between \
+            output.Addhtml('<P><B>Single Factor anova - between \
                                     subjects</B></P>')
-            output.addhtml('<P><i>Warning!</i> This test is based \
+            output.Addhtml('<P><i>Warning!</i> This test is based \
                                     on the following assumptions:')
-            output.addhtml('<P>1) Each group has a normal \
+            output.Addhtml('<P>1) Each group has a normal \
                                     distribution of observations')
-            output.addhtml('<P>2) The variances of each observation \
+            output.Addhtml('<P>2) The variances of each observation \
                                     are equal across groups (homogeneity of \
                                     variance)')
-            output.addhtml('<P>3) The observations are statistically \
+            output.Addhtml('<P>3) The observations are statistically \
                                     independent')
             TBase.anovaBetween(d)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.addhtml('<table class="table table-striped" border="1"><tr><td></td><td>SS \
+            output.Addhtml('<table class="table table-striped" border="1"><tr><td></td><td>SS \
                                     </td><td>df</td><td>MS</td><td>F</td>  \
                                     <td>p-value</TD></tr>')
-            output.addhtml('<tr><td>FACTOR</td><td>%5.3f</td><td> \
+            output.Addhtml('<tr><td>FACTOR</td><td>%5.3f</td><td> \
                                     %5d</td><td>%5.3f</td><td>%5.3f</td>   \
                                     <td>%1.6f</td></tr>'%(TBase.SSbet,     \
                                     TBase.dfbet, TBase.MSbet, TBase.F,\
                                     TBase.prob))
-            output.addhtml('<tr><td>Error</td><td>%5.3f</td><td>  \
+            output.Addhtml('<tr><td>Error</td><td>%5.3f</td><td>  \
                                     %5d</td><td>%5.3f</td><td></td><td>    \
                                     </td></tr>'%(TBase.SSwit, TBase.dferr, \
                                     TBase.MSerr))
-            output.addhtml('<tr><td>Total</td><td>%5.3f</td><td>  \
+            output.Addhtml('<tr><td>Total</td><td>%5.3f</td><td>  \
                                     %5d</td><td></td><td></td><td></td></tr>\
                                     </table>'%(TBase.SStot, TBase.dftot))
         # single factor within subjects anova
         if self.TestChoice.IsChecked(1):
-            output.addhtml('<P><B>Single Factor anova - within  \
+            output.Addhtml('<P><B>Single Factor anova - within  \
                                     subjects</b></P>')
-            output.addhtml('<P><i>Warning!</i> This test is based \
+            output.Addhtml('<P><i>Warning!</i> This test is based \
                                     on the following assumptions:')
-            output.addhtml('<P>1) Each group has a normal \
+            output.Addhtml('<P>1) Each group has a normal \
                                     distribution of observations')
-            output.addhtml('<P>2) The variances of each observation \
+            output.Addhtml('<P>2) The variances of each observation \
                                     are equal across groups (homogeneity of \
                                     variance)')
-            output.addhtml('<P>3) The observations are statistically \
+            output.Addhtml('<P>3) The observations are statistically \
                                     indpendent')
-            output.addhtml('<P>4) The variances of each participant \
+            output.Addhtml('<P>4) The variances of each participant \
                                     are equal across groups (homogeneity of \
                                     covariance)')
             TBase.anovaWithin(biglist, ns, sums, means)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.addhtml('<table class="table table-striped" border="1"><tr><td></td><td>SS \
+            output.Addhtml('<table class="table table-striped" border="1"><tr><td></td><td>SS \
                                     </td><td>df</td><td>MS</td><td>F</td>  \
                                     <td>p-value</TD></tr>')
-            output.addhtml('<tr><td>FACTOR</td><td>%5.3f</td><td> \
+            output.Addhtml('<tr><td>FACTOR</td><td>%5.3f</td><td> \
                                     %5d</td><td>%5.3f</td><td>%5.3f</td>   \
                                     <td>%1.6f</td></tr>'%(TBase.SSbet,  \
                                     TBase.dfbet, TBase.MSbet, TBase.F,  \
                                     TBase.prob))
-            output.addhtml('<tr><td>Within</td><td>%5.3f</td><td>%5d\
+            output.Addhtml('<tr><td>Within</td><td>%5.3f</td><td>%5d\
                                     </td><td>%5.3f</td><td></td><td></td> \
                                     </tr>'%(TBase.SSwit, TBase.dfwit,     \
                                     TBase.MSwit))
-            output.addhtml('<tr><td>Error</td><td>%5.3f</td><td> \
+            output.Addhtml('<tr><td>Error</td><td>%5.3f</td><td> \
                                     %5d</td><td>%5.3f</td><td></td><td></td> \
                                     </tr>'%(TBase.SSres, TBase.dfres,   \
                                     TBase.MSres))
-            output.addhtml('<tr><td>Total</td><td>%5.3f</td><td>%5d \
+            output.Addhtml('<tr><td>Total</td><td>%5.3f</td><td>%5d \
                                     </td><td></td><td></td><td></td>'% \
                                     (TBase.SStot, TBase.dftot))
-            output.addhtml('</table>')
+            output.Addhtml('</table>')
 
         # kruskal wallis H
         if self.TestChoice.IsChecked(2):
-            output.addhtml('<p><b>Kruskal Wallis H Test</b>')
+            output.Addhtml('<p><b>Kruskal Wallis H Test</b>')
             TBase.KruskalWallisH(biglist)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.addhtml('<br>H(%d) = %5.3f, p = %1.6f'% \
+            output.Addhtml('<br>H(%d) = %5.3f, p = %1.6f'% \
                                     (TBase.df, TBase.h, TBase.prob))
 
         # Friedman test
         if self.TestChoice.IsChecked(3):
-            output.addhtml('<p><b>Friedman Chi Square</b>')
+            output.Addhtml('<p><b>Friedman Chi Square</b>')
             TBase.FriedmanChiSquare(biglist)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
                 alpha = 0.10
             else:
                 alpha = 0.05
-            output.addhtml('<br>Chi(%d) = %5.3f, p = %1.6f'% \
+            output.Addhtml('<br>Chi(%d) = %5.3f, p = %1.6f'% \
                                     (TBase.df, TBase.chisq, TBase.prob))
             # the next few lines are commented out & are experimental. They
             # help perform multiple comparisons for the Friedman test.
@@ -1920,15 +1920,15 @@ class ThreeConditionTestFrame(wx.Dialog):
             #outstring = outstring+'k,'+str(k)+','
             #outstring = outstring+'n,'+str(d[0].N)+','
             #outstring = outstring+'p,'+str(alpha)+'">Multiple Comparisons</a>'
-            #output.addhtml('<p>'+outstring+'</p>')
+            #output.Addhtml('<p>'+outstring+'</p>')
 
         # Cochranes Q
         if self.TestChoice.IsChecked(4):
-            output.addhtml('<p><b>Cochranes Q</b>')
+            output.Addhtml('<p><b>Cochranes Q</b>')
             TBase.CochranesQ(biglist)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.addhtml('<br>Q (%d) = %5.3f, p = %1.6f'% \
+            output.Addhtml('<br>Q (%d) = %5.3f, p = %1.6f'% \
                                     (TBase.df, TBase.q, TBase.prob))
         self.Close(True)
 
@@ -2034,20 +2034,20 @@ class CorrelationTestFrame(wx.Dialog):
         x2 = ManyDescriptives(self, d)
         # Kendalls tau correlation
         if self.paratests.IsChecked(0):
-            output.addhtml('<P><B>Kendalls Tau correlation</B>')
+            output.Addhtml('<P><B>Kendalls Tau correlation</B>')
             TBase.KendallsTau(x, y)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.addhtml('<BR>tau = %5.3f, z = %5.3f, p = %1.6f'% \
+            output.Addhtml('<BR>tau = %5.3f, z = %5.3f, p = %1.6f'% \
                                     (TBase.tau, TBase.z, TBase.prob))
 
         # Pearsons r correlation
         if self.paratests.IsChecked(1):
-            output.addhtml('<P><B>Pearsons correlation</B>')
+            output.Addhtml('<P><B>Pearsons correlation</B>')
             TBase.PearsonsCorrelation(x, y)
             if (self.hypchoice.GetSelection() == 0):
                 TBase.prob = TBase.prob / 2
-            output.addhtml('<BR>r (%d) = %5.3f, t = %5.3f, p = %1.6f'% \
+            output.Addhtml('<BR>r (%d) = %5.3f, t = %5.3f, p = %1.6f'% \
                                     (TBase.df, TBase.r, TBase.t, TBase.prob))
 
         # Point Biserial r
@@ -2055,15 +2055,15 @@ class CorrelationTestFrame(wx.Dialog):
             pass
         # Spearmans rho correlation
         if self.paratests.IsChecked(3):
-            output.addhtml('<P><B>Spearmans rho correlation</B>')
+            output.Addhtml('<P><B>Spearmans rho correlation</B>')
             TBase.SpearmansCorrelation(x, y)
             if (TBase.prob == -1.0):
-                output.addhtml('<BR>Cannot do Spearmans correlation \
+                output.Addhtml('<BR>Cannot do Spearmans correlation \
                                     - unequal data sizes')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     TBase.prob = TBase.prob / 2
-                output.addhtml('<BR>rho(%d) = %5.3f, p = %1.6f'% \
+                output.Addhtml('<BR>rho(%d) = %5.3f, p = %1.6f'% \
                                     (TBase.df, TBase.rho, TBase.prob))
 
         self.Close(True)
