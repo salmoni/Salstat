@@ -259,159 +259,161 @@ class GetInits:
 # class to output the results of several "descriptives" in one table
 class ManyDescriptives:
     def __init__(self, source, ds):
-        __x__ = len(ds)
-        outstring = ""
-        outstring = outstring +'<table class="table table-striped" border = "1"><tr><td>Statistic</td>'
-        for i in range(__x__):
-            outstring = outstring +'<td>'+ds[i].Name+'</td>'
+        #__x__ = len(ds)
+        str2 = '<table class="table table-striped">'
+        outlist = ['Statistic']
+        for i in ds:
+            outlist.append(i.Name)
+        ln = tabler.vtable(outlist)
+        str2 = str2 + ln
+
         if source.DescChoice.IsChecked(0):
-            outstring = outstring +'</tr><tr><td>N </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>'+str(ds[i].N)+'</td>'
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="N"'+col+str(ds[i].N)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['N']
+            for i in ds:
+                outlist.append(i.N)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(1):
-            outstring = outstring +'</tr><tr><td>Sum </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].sum
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Sum"'+col+str(ds[i].sum)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Sum']
+            for i in ds:
+                outlist.append(i.sum)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(2):
-            outstring = outstring +'</tr><tr><td>Mean </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].mean
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Mean"'+col+str(ds[i].mean)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Mean']
+            for i in ds:
+                outlist.append(i.mean)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(3):
-            outstring = outstring +'</tr><tr><td>Variance </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].samplevar
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Sample Variance"'+col+str(ds[i].samplevar)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Sample variance']
+            for i in ds:
+                outlist.append(i.samplevar)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(4):
-            outstring = outstring +'</tr><tr><td>Standard Deviation </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].stddev
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Standard Deviation"'+col+str(ds[i].stddev)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Sample Standard Deviation']
+            for i in ds:
+                outlist.append(i.stddev)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(5):
-            outstring = outstring +'</tr><tr><td>Standard Error </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].stderr
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Standard Error"'+col+str(ds[i].stderr)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Standard error']
+            for i in ds:
+                outlist.append(i.stderr)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(6):
-            outstring = outstring +'</tr><tr><td>Sum of Squares </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].sumsquares
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Sum of Squares"'+col+str(ds[i].sumsquares)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Sum of squares']
+            for i in ds:
+                outlist.append(i.sumsquares)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(7):
-            outstring = outstring +'</tr><tr><td>Sum of Squared Deviations </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].ssdevs
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Sum of Squared Deviations"'+col+str(ds[i].ssdevs)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Sum of squared deviations']
+            for i in ds:
+                outlist.append(i.ssdevs)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(8):
-            outstring = outstring +'</tr><tr><td>Coefficient of Variation </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].coeffvar
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Coefficient of Variation"'+col+str(ds[i].coeffvar)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Coefficient of variation']
+            for i in ds:
+                outlist.append(i.coeffvar)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(9):
-            outstring = outstring +'</tr><tr><td>Minimum </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].minimum
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Minimum"'+col+str(ds[i].minimum)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Minimum']
+            for i in ds:
+                outlist.append(i.minimum)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(10):
-            outstring = outstring +'</tr><tr><td>Maximum </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].maximum
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Maximum"'+col+str(ds[i].maximum)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Maximum']
+            for i in ds:
+                outlist.append(i.maximum)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(11):
-            outstring = outstring +'</tr><tr><td>Range </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].range
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Range"'+col+str(ds[i].range)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Range']
+            for i in ds:
+                outlist.append(i.range)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(12):
-            outstring = outstring +'</tr><tr><td>Number Missing</td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%6d</td>'%ds[i].missing
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Number Missing"'+col+str(ds[i].missing)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Number missing']
+            for i in ds:
+                outlist.append(i.missing)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(13):
-            outstring = outstring +'</tr><tr><td>Geometric Mean</td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].geomean
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Geometric Mean"'+col+str(ds[i].geomean)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Geometric mean']
+            for i in ds:
+                outlist.append(i.geomean)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(14):
-            outstring = outstring +'</tr><tr><td>Harmonic Mean</td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].harmmean
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Harmonic Mean"'+col+str(ds[i].harmmean)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Harmonic mean']
+            for i in ds:
+                outlist.append(i.harmmean)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(15):
-            outstring = outstring +'</tr><tr><td>Skewness </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].skewness
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Skewness"'+col+str(ds[i].skewness)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Skewness']
+            for i in ds:
+                outlist.append(i.skewness)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(16):
-            outstring = outstring +'</tr><tr><td>Kurtosis </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].kurtosis
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Kurtosis"'+col+str(ds[i].kurtosis)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Kurtosis']
+            for i in ds:
+                outlist.append(i.kurtosis)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(17):
-            outstring = outstring +'</tr><tr><td>Median </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].median
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Median"'+col+str(ds[i].median)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Median']
+            for i in ds:
+                outlist.append(i.median)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(18):
-            outstring = outstring +'</tr><tr><td>Median Absolute Deviation </td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].mad
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Mean Absolute Deviation"'+col+str(ds[i].mad)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
+            outlist = ['Median absolute deviation']
+            for i in ds:
+                outlist.append(i.mad)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if source.DescChoice.IsChecked(19):
-            outstring = outstring +'</tr><tr><td>Mode</td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5.5f</td>'%ds[i].mode
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Mode"'+col+str(ds[i].mode)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        if source.DescChoice.IsChecked(21):
-            outstring = outstring +'</tr><tr><td>Number Unique Levels</td>'
-            for i in range(__x__):
-                outstring = outstring +'<td>%5d</td>'%ds[i].numberuniques
-                col = ' column="'+str(i)+'">'
-                xmlevt = '<describe test="Number of Unique Values"'+col+str(ds[i].numberuniques)+'</describe>\n'
-                hist.AppendEvent(xmlevt)
-        output.Addhtml(outstring+'</table>')
+            outlist = ['Mode']
+            for i in ds:
+                outlist.append(i.mode)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if source.DescChoice.IsChecked(20):
+            outlist = ['Number of unique values']
+            for i in ds:
+                outlist.append(i.numberuniques)
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+        output.Addhtml(str2+'</table>\n')
 
 #---------------------------------------------------------------------------
 # class for grid - used as datagrid.
@@ -1139,6 +1141,8 @@ class MyHtmlWindow(htmllib.HtmlWindow):
         self.Saved = False
         self.AppendToPage(htmlline)
         self.WholeOutString = self.WholeOutString+htmlline + '\n'
+        r = self.scroll.GetScrollRange(wx.VERTICAL)
+        self.scroll.Scroll(0, r+10) 
 
     def write(self, TextIn):
         TextIn = '<br>'+TextIn
@@ -1237,7 +1241,7 @@ class OutputSheet(wx.Frame):
         self.CreateStatusBar()
         self.SetStatusText('SalStat Statistics')
         self.htmlpage = html2lib.WebView.New(self)
-        print dir(self.htmlpage) #.EnableContextMenu(False)
+        self.htmlpage.SetEditable(True)
         self.Addhtml('<div id="chart0001" style="width:100%; height: auto;">')
         self.Addhtml('<script type="text/javascript">%s</script></div>'%act)
         #self.htmlpage.LoadURL("http://www.google.com")
@@ -1283,6 +1287,8 @@ class OutputSheet(wx.Frame):
         self.WholeOutString = self.WholeOutString + htmlline
         htmlend = "\n\t</body>\n<html>"
         self.htmlpage.SetPage(self.WholeOutString+htmlend,"")
+        #r = self.scroll.GetScrollRange(wx.VERTICAL)
+        #self.scroll.Scroll(0, r+10) 
 
     def PrintOutput(self, event):
         data = wx.PrintDialogData()
@@ -1346,9 +1352,10 @@ class DescriptivesFrame(wx.Dialog):
         descs = []
         for i in range(len(self.colnums)):
             if self.ColChoice.IsChecked(i):
-                name = frame.grid.GetColLabelValue(i)
+                colnum = self.colnums[i]
+                name = frame.grid.GetColLabelValue(colnum)
                 descs.append(salstat_stats.FullDescriptives( \
-                                    frame.grid.CleanData(i), name, \
+                                    frame.grid.CleanData(colnum), name, \
                                     frame.grid.missing))
         ManyDescriptives(self, descs)
         self.Close(True)

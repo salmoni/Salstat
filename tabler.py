@@ -27,8 +27,27 @@ def table(ListofLists):
             # really need to figure out what parameters make a good display for each number
         ln1 = ln1 + headhtml
         ln2 = ln2 + foothtml
-    ln1 = ln1 + '</tr>' + ln2 + '</tr></table>'
+    ln1 = ln1 + '</tr>' + ln2 + '</tr>\n</table>\n'
     return ln1
+
+def vtable(List):
+    key = List[0]
+    vals = List[1:]
+    linehtml = '<tr><td>%s</td>'%key
+    for val in vals:
+        if key == 'p':
+            try:
+                linehtml = '<td>%1.6f</td>'%val
+            except TypeError:
+                linehtml = '<td>n/a</td>'
+        elif type(val) is int:
+            linehtml = linehtml + '<td>%d</td>'%val
+        elif (type(val) is str) or (type(val) is unicode):
+            linehtml = linehtml + '<td>%s</td>'%val
+        elif type(val) is float:
+            linehtml = linehtml + '<td>%s</td>'%str(val)
+    linehtml = linehtml + '</tr>\n'
+    return linehtml
 
 if __name__ == '__main__':
     a1 = ['Variable 1','Var001']
