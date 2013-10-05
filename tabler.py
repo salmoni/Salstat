@@ -33,7 +33,10 @@ def table(ListofLists):
 def vtable(List):
     key = List[0]
     vals = List[1:]
-    linehtml = '<tr><td>%s</td>'%key
+    btn_id = ' id="%s"'%key
+    chartbutton = '<a class="btn btn-mini dropdown-toggle"%s data-toggle="dropdown" \
+            href="#">Chart</a>\n'%btn_id
+    linehtml = '<tr><td>%s %s</td>'%(chartbutton, key)
     for val in vals:
         if key == 'p':
             try:

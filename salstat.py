@@ -1242,10 +1242,14 @@ class OutputSheet(wx.Frame):
         self.SetStatusText('SalStat Statistics')
         self.htmlpage = html2lib.WebView.New(self)
         self.htmlpage.SetEditable(True)
+        print self.htmlpage.CanCopy()
         self.Addhtml('<div id="chart0001" style="width:100%; height: auto;">')
         self.Addhtml('<script type="text/javascript">%s</script></div>'%act)
         #self.htmlpage.LoadURL("http://www.google.com")
         self.printer = wx.Printout()
+        wx.EVT_MENU(self, ID_OEDIT_CUT, self.CutHTML)
+        wx.EVT_MENU(self, ID_OEDIT_COPY, self.CopyHTML)
+        wx.EVT_MENU(self, ID_OEDIT_PASTE, self.PasteHTML)
         wx.EVT_MENU(self, ID_OFILE_SAVEAS, self.SaveHtmlPage)
         wx.EVT_CLOSE(self, self.DoNothing)
         wx.EVT_MENU(self, ID_OFILE_NEW, self.ClearAll)
@@ -1260,6 +1264,15 @@ class OutputSheet(wx.Frame):
         wx.EVT_TOOL(self, 403, self.SaveHtmlPage)
         wx.EVT_TOOL(self, 404, self.htmlpage.Print)
         wx.EVT_TOOL(self, 405, frame.GoHelpTopicsFrame)
+
+    def CutHTML(self, arg):
+        self.htmlpage.Cut()
+
+    def CopyHTML(self, arg):
+        self.htmlpage.Copy()
+
+    def PasteHTML(self, arg):
+        self.htmlpage.Paste()
 
     def LoadHtmlPage(self, event):
         dlg = wx.FileDialog(self, "Load Output File", "","","*.html|*.*", \
