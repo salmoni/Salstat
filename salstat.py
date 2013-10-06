@@ -15,7 +15,7 @@ import xlrd, xlwt # import xls format
 import string, os, os.path, pickle
 
 # import SalStat specific modules
-import salstat_stats, images, xlrd, tabler
+import salstat_stats, images, xlrd, tabler, charter
 import numpy, math
 
 # and for plots!
@@ -1242,7 +1242,6 @@ class OutputSheet(wx.Frame):
         self.SetStatusText('SalStat Statistics')
         self.htmlpage = html2lib.WebView.New(self)
         self.htmlpage.SetEditable(True)
-        print self.htmlpage.CanCopy()
         self.Addhtml('<div id="chart0001" style="width:100%; height: auto;">')
         self.Addhtml('<script type="text/javascript">%s</script></div>'%act)
         #self.htmlpage.LoadURL("http://www.google.com")
@@ -1320,7 +1319,7 @@ class OutputSheet(wx.Frame):
     def ClearAll(self, event):
         # check output has been saved
         self.htmlpage.WholeOutString = CreateHTMLDoc()
-        htmlend = "\n\t</body>\n<html>"
+        htmlend = "\n\t</body>\n</html>"
         self.htmlpage.SetPage(self.WholeOutString+htmlend,"")
 
 #---------------------------------------------------------------------------
@@ -2688,6 +2687,8 @@ class DataFrame(wx.Frame):
 
     def GoChartWindow(self, event):
         # Draws a line chart based on the means
+        ChartWindow = charter.ChartWindow(self)
+        ChartWindow.Show(True)
         waste, colnums = self.grid.GetUsedCols()
         if colnums != []:
             nameslist = [0]*len(colnums)

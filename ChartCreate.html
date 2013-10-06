@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Salstat chart creator</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Bootstrap -->
+        <script src="http://code.jquery.com/jquery.min.js"></script>
+        <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+        <script src="http://code.highcharts.com/highcharts.js"></script>
+        <script src="http://code.highcharts.com/modules/exporting.js"></script>
+        <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet" media="screen">
+        <style type="text/css">
+            #varControl { background: #f9f9f9; padding-left: 20px; }
+            #metaControl { background: #f9f9f9; padding-left: 20px; }
+            textarea {text-align: left; }
+        </style>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                chart = $("#preview").highcharts();
+                $('#titleChart').change(function () { 
+                    varTitle = $("#titleChart").val();
+                    chart = $("#preview").highcharts();
+                    chart.setTitle({text: varTitle}); 
+                    chart({type: 'line'});
+                    chart.redraw();
+                });
+                $('#subtitleChart').change(function () { 
+                    varSubtitle = $("#subtitleChart").val();
+                    chart = $("#preview").highcharts();
+                    chart.setTitle(null, {text: varSubtitle}); 
+                });
+                $('#titleX').change(function () { 
+                    varTitleX = $("#titleX").val();
+                    chart = $("#preview").highcharts();
+                    chart.xAxis[0].setTitle({text: varTitleX}); 
+                });
+                $('#titleY').change(function () { 
+                    varTitleY = $("#titleY").val();
+                    chart = $("#preview").highcharts();
+                    chart.yAxis[0].setTitle({text: varTitleY}); 
+                });
+                $("select").change(function() {
+                    var value = $(this).val();
+                    newval = value.split(" ");
+                    chartType = newval[0];
+                    chart = $("#preview").highcharts();
+                    alert(chartType.toLowerCase());
+                    chart({type: chartType.toLowerCase});
+                    chart.Series.update();
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div class="mainRow">
+            <div class="span3" id="varControl">
+                <h4>Chart variables</h4>
+                <form>
+                    <fieldset>
+                        <label>Variables</label>
+                        <label class="checkbox"><input type="checkbox" value="A">IV: Month</label>
+                        <label class="checkbox"><input type="checkbox" value="B">IV: City</label>
+                        <label class="checkbox"><input type="checkbox" value="C">DV: Mean temperature</label>
+                        <label class="checkbox"><input type="checkbox" value="D">Variable D</label>
+                        <label class="checkbox"><input type="checkbox" value="E">Variable E</label>
+                        <label class="checkbox"><input type="checkbox" value="F">Variable F</label>
+                        <label class="checkbox"><input type="checkbox" value="G">Variable G</label>
+                        <label class="checkbox"><input type="checkbox" value="H">Variable H</label>
+                        <label class="checkbox"><input type="checkbox" value="I">Variable I</label>
+                    </fieldset>
+                </form>
+            </div><!-- varControl -->
+
+
+
+            <div class="span6" id="preview">
+                <h4>Chart preview</h4>
+            </div><!-- id="preview" -->
+                <script type="text/javascript">
+                    $(function () {
+                        $('#preview').highcharts({
+                            chart: {
+                            type: 'line'
+                        },
+            title: {
+                text: 'Title',
+                x: -20 //center
+            },
+            subtitle: {
+                text: 'Subtitle',
+                x: -20
+            },
+            xAxis: {
+                title: {
+                    text: 'X axis title'
+                    },
+                categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            },
+            yAxis: {
+                title: {
+                    text: 'Y axis title'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+            tooltip: {
+                valueSuffix: '°C'
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle',
+                borderWidth: 0
+            },
+            series: [{
+                name: 'Tokyo',
+                data: [7.0, 6.9, 9.5, 14.5, 18.2, 21.5, 25.2, 26.5, 23.3, 18.3, 13.9, 9.6]
+            }, {
+                name: 'New York',
+                data: [-0.2, 0.8, 5.7, 11.3, 17.0, 22.0, 24.8, 24.1, 20.1, 14.1, 8.6, 2.5]
+            }, {
+                name: 'Berlin',
+                data: [-0.9, 0.6, 3.5, 8.4, 13.5, 17.0, 18.6, 17.9, 14.3, 9.0, 3.9, 1.0]
+            }, {
+                name: 'London',
+                data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
+            }]
+        });
+    });
+                </script>
+
+
+            <div class="span3" id="metaControl">
+                <h4>Chart titles</h4>
+                <form>
+                    <fieldset>
+                        <label>Chart type</label>
+                        <select class="selectpicker" id="chartType">
+                            <option>Line chart</option>
+                            <option>Spline chart</option>
+                            <option>Area chart</option>
+                            <option>Column chart</option>
+                            <option>Bar chart</option>
+                            <option>Scatter chart</option>
+                        </select>
+                        <label>Chart title</label>
+                        <input type="text" id="titleChart">
+                        <label>Chart subtitle</label>
+                        <input type="text" id="subtitleChart">
+                        <label>X-axis label</label>
+                        <input type="text" id="titleX">
+                        <label>Y-axis label</label>
+                        <input type="text" id="titleY">
+                    </fieldset>
+                </form>
+            </div><!-- id="metaControl" -->
+
+
+        </div><!-- class="row" -->
+    </body>
+</html>
+
