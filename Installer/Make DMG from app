@@ -1,0 +1,11 @@
+Make a DMG from an app file on OSX.
+
+Open disk utility
+File -> New -> Disk Image from folder
+[locate app file]
+Rename to 'salstat.dmg'
+Command-i to open 'information'
+Click on icon (blue border shows up)
+Drag Salstat icon onto icon in info window
+
+

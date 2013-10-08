@@ -12,7 +12,7 @@ exe = EXE(pyz,
           debug=False,
           strip=None,
           upx=True,
-          console=False )
+          console=False , icon='../../Salstat/salstat.icns')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
@@ -22,4 +22,4 @@ coll = COLLECT(exe,
                name='salstat')
 app = BUNDLE(coll,
              name='salstat.app',
-             icon=None)
+             icon='../../Salstat/salstat.icns')

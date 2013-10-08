@@ -1211,7 +1211,7 @@ class OutputSheet(wx.Frame):
         help_menu.Append(ID_HELP_WIZARD, '&What Test Should I Use...')
         help_menu.Append(ID_HELP_TOPICS, '&Topics...')
         help_menu.Append(ID_HELP_LICENCE, '&Licence...')
-        help_menu.Append(ID_HELP_ABOUT, '&About...')
+        help_menu.Append(wx.ID_ABOUT, '&About...')
         omenuBar = wx.MenuBar()
         omenuBar.Append(file_menu, '&File')
         omenuBar.Append(edit_menu, '&Edit')
@@ -1239,7 +1239,7 @@ class OutputSheet(wx.Frame):
         toolBar.Realize()
         self.SetToolBar(toolBar)
         self.CreateStatusBar()
-        self.SetStatusText('SalStat Statistics')
+        self.SetStatusText('Salstat statistics - results')
         self.htmlpage = html2lib.WebView.New(self)
         self.htmlpage.SetEditable(True)
         self.Addhtml('<div id="chart0001" style="width:100%; height: auto;">')
@@ -1254,7 +1254,7 @@ class OutputSheet(wx.Frame):
         wx.EVT_MENU(self, ID_OFILE_NEW, self.ClearAll)
         wx.EVT_MENU(self, ID_OFILE_PRINT, self.PrintOutput)
         wx.EVT_MENU(self, ID_OFILE_OPEN, self.LoadHtmlPage)
-        wx.EVT_MENU(self, ID_HELP_ABOUT, frame.GoHelpAboutFrame)
+        wx.EVT_MENU(self, wx.ID_ABOUT, frame.GoHelpAboutFrame)
         wx.EVT_MENU(self, ID_HELP_WIZARD, frame.GoHelpWizardFrame)
         wx.EVT_MENU(self, ID_HELP_TOPICS, frame.GoHelpTopicsFrame)
         wx.EVT_MENU(self, ID_HELP_LICENCE, frame.GoHelpLicenceFrame)
@@ -2426,7 +2426,7 @@ class PlotFrame(wx.Frame):
 # call instance of DataGrid
 # This is main interface of application
 class DataFrame(wx.Frame):
-    def __init__(self, parent, log):
+    def __init__(self, parent, log, filename=None):
         # size the frame to 600x400 - will fit in any VGA screen
         dimx = int(inits.get('gridsizex'))
         dimy = int(inits.get('gridsizey'))
@@ -2485,7 +2485,7 @@ class DataFrame(wx.Frame):
         help_menu.Append(ID_HELP_WIZARD, '&What Test Should I Use...')
         help_menu.Append(ID_HELP_TOPICS, '&Topics...')
         help_menu.Append(ID_HELP_LICENCE, '&Licence...')
-        help_menu.Append(ID_HELP_ABOUT, '&About...')
+        help_menu.Append(wx.ID_ABOUT, '&About Salstat...')
         #set up menu bar
         menuBar = wx.MenuBar()
         menuBar.Append(file_menu, '&File')
@@ -2534,6 +2534,7 @@ class DataFrame(wx.Frame):
         self.grid = SimpleGrid(self, log)
         self.grid.SetDefaultColSize(60, True)
         self.grid.SetRowLabelSize(40)
+        #self.setTitle('Go')
         #win2 = TestFrame(self, 'Tests')
         #win2.Show(True)
 
@@ -2576,13 +2577,23 @@ class DataFrame(wx.Frame):
         wx.EVT_MENU(self, ID_ANALYSE_SCRIPT, self.GoScriptWindow)
         wx.EVT_MENU(self, ID_CHART_DRAW, self.GoChartWindow)
         wx.EVT_MENU(self, ID_BARCHART_DRAW, self.GoBarChartWindow)
-        wx.EVT_MENU(self, ID_HELP_ABOUT, self.GoHelpAboutFrame)
+        wx.EVT_MENU(self, wx.ID_ABOUT, self.GoHelpAboutFrame)
         wx.EVT_MENU(self, ID_HELP_WIZARD, self.GoHelpWizardFrame)
         wx.EVT_MENU(self, ID_HELP_TOPICS, self.GoHelpTopicsFrame)
         wx.EVT_TOOL(self, 90, self.GoHelpAboutFrame)
         wx.EVT_MENU(self, ID_HELP_LICENCE, self.GoHelpLicenceFrame)
         wx.EVT_MENU(self, ID_FILE_EXIT, self.EndApplication)
         wx.EVT_CLOSE(self, self.EndApplication)
+
+    def MacOpenFile(self, filename):
+        # overrides method to load file on OSX
+        print filename
+
+    def MacReopenApp(self):
+        self.GetTopWindow().Raise()
+
+    def setTitle(self, title):
+        self.SetTitle(title)
 
     def GoClearData(self, evt):
         #shows a new data entry frame
@@ -3253,6 +3264,8 @@ $(function () {
     output = OutputSheet(frame, -1)
     output.Show(True)
     frame.Show(True)
+    filename = sys.argv[1]
+    frame.setTitle(filename)
     app.MainLoop()
 
 #---------------------------------------------------------------------------
