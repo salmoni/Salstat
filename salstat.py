@@ -16,6 +16,7 @@ import string, os, os.path, pickle
 
 # import SalStat specific modules
 import salstat_stats, images, xlrd, tabler, charter
+import MetaGrid
 import numpy, math
 
 # and for plots!
@@ -144,6 +145,31 @@ class History:
     def ClearHistory(self):
         self.history = ''
 
+class SaveDialog2(wx.Dialog):
+    def __init__(self, parent, id):
+        wx.Dialog.__init__(self, parent, id, "Save Data?", \
+                           size=(404+wind,100+wind))#, style = wx.DIALOG_MODAL)
+        icon = images.getIconIcon()
+        self.SetIcon(icon)
+        l1 = wx.StaticText(self, -1, 'Do you want to save the changes you made to', pos=(105,16))
+        l2 = wx.StaticText(self, -1, 'this document?', pos=(105, 36))
+        discardButton = wx.Button(self, 332, "Don't save", size=(90, 21),pos=(105,80))
+        saveButton = wx.Button(self, 331, "Save...", size=(69, 21),pos=(274,80))
+        CancelButton = wx.Button(self, 333, "Cancel", size=(69, 21),pos=(355,80))
+        self.Layout()
+        wx.EVT_BUTTON(self, 331, self.SaveData)
+        wx.EVT_BUTTON(self, 332, self.DiscardData)
+        wx.EVT_BUTTON(self, 333, self.CancelDialog)
+
+    def SaveData(self, event):
+        self.EndModal(2)
+
+    def DiscardData(self, event):
+        self.EndModal(3)
+
+    def CancelDialog(self, event):
+        self.EndModal(4)
+
 class SaveDialog(wx.Dialog):
     def __init__(self, parent, id):
         wx.Dialog.__init__(self, parent, id, "Save Data?", \
@@ -158,7 +184,7 @@ class SaveDialog(wx.Dialog):
         vbox.Add(l2,1, wx.ALIGN_CENTER)
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         saveButton = wx.Button(self, 331, "Save...", size=(BWidth, BHeight))
-        discardButton = wx.Button(self, 332, "Discard", size=(BWidth, BHeight))
+        discardButton = wx.Button(self, 332, "Don't save", size=(BWidth, BHeight))
         CancelButton = wx.Button(self, 333, "Cancel", size=(BWidth, BHeight))
         hbox.Add(saveButton, 0, wx.ALL, 5)
         hbox.Add(discardButton, 0, wx.ALL, 5)
@@ -420,7 +446,10 @@ class ManyDescriptives:
 class SimpleGrid(gridlib.Grid):
     def __init__(self, parent, log):
         gridlib.Grid.__init__(self, parent)
+        self.parent = parent
+        self.named = False
         self.Saved = True
+        self.filename = "Untitled"
         self.moveTo = None
         self.SetGridLineColour(wx.LIGHT_GREY)
         self.CreateGrid(int(inits.get("gridcellsy")), \
@@ -433,6 +462,22 @@ class SimpleGrid(gridlib.Grid):
         self.wildcard = "Any File (*.*)|*.*|" \
                         "ASCII data format (*.dat)|*.dat|" \
                         "SalStat Format (*.xml)|*.xml"
+        self.BeginMeta()
+
+    def SaveNative(fname):
+
+    def BeginMeta(self):
+        self.meta = {}
+        ncols = self.GetNumberCols()
+        for colidx in range(ncols):
+            labelObj = {}
+            varObj = {'label':labelObj}
+            varObj['name'] = self.GetColLabelValue(colidx)
+            varObj['ivdv'] = 'None set'
+            varObj['align'] = 'left'
+            varObj['missingvalues'] = ''
+            varObj['measure'] = 'None set'
+            self.meta[colidx] = varObj
 
     def RangeSelected(self, event):
         if event.Selecting():
@@ -449,6 +494,7 @@ class SimpleGrid(gridlib.Grid):
         xmlevt = '<data row="'+str(row)+'" col="'+str(col)+'">'+str(value)+'</data>\n'
         hist.AppendEvent(xmlevt)
         #print hist.history
+        # check if missing data and mark background if it is
 
     def CutData(self, event):
         buffer = wx.TextDataObject()
@@ -476,6 +522,7 @@ class SimpleGrid(gridlib.Grid):
             wx.TheClipboard.SetData(buffer)
             wx.TheClipboard.Close()
             self.SetCellValue(currentrow, currentcol, '')
+            self.Saved = False
 
     def CopyData(self, event):
         buffer = wx.TextDataObject()
@@ -596,8 +643,7 @@ class SimpleGrid(gridlib.Grid):
     def SaveAsDataASCII(self, event):
         default = inits.get('savedir')
         dlg = wx.FileDialog(self, "Save Data File", default,"",\
-                                    "ASCII Text (*.dat)|*.dat", wx.SAVE)
-                                    #"ASCII Text (*.dat)|*.dat|SalStat File (*.xml)|*.xml|", wx.SAVE)
+                                    "CSV text (*.csv)|*.csv|Plain text (*.txt)|*.txt", wx.SAVE)
         icon = images.getIconIcon()
         dlg.SetIcon(icon)
         if dlg.ShowModal() == wx.ID_OK:
@@ -628,39 +674,31 @@ class SimpleGrid(gridlib.Grid):
                 print "cannot do this just yet!"
             fout.close
             self.Saved = True
+            self.named = True
+            path, self.filename = os.path.split(filename)
+            self.parent.SetTitle(self.filename)
 
     def SaveDataASCII(self, event):
-        default = inits.get('savedir')
-        if (filename == 'UNTITLED'):
-            self.SaveAsDataASCII(event)
-            """dlg = wx.FileDialog(self, "Save Data File", default,"",\
-                                    "ASCII Text (*.dat)|*.dat| \
-                                    Numpy Array (*.npy)|*.npy| \
-                                    Any (*.*)| \
-                                    *.*", wx.SAVE)
-            icon = images.getIconIcon()
-            dlg.SetIcon(icon)
-            if dlg.ShowModal() == wx.ID_OK:
-                inits.update({'savedir': dlg.GetDirectory()})
-                filename = dlg.GetPath()
-            else:
-                return"""
-        fout = open(filename, "w")
-        cols, waste = self.GetUsedCols()
-        rows = self.GetUsedRows()
-        maxrows = max(rows) + 1
-        for i in range(maxrows):
-            datapoint=[]
-            for j in range(len(cols)):
-                try:
-                    datapoint.append(self.GetCellValue(i, j))
-                except:
-                    datapoint.append("0")
-            line = string.join(datapoint)
-            fout.write(line)
-            fout.write('\n')
-        fout.close
-        self.Saved = True
+        if self.named:
+            defaultDir = inits.get('savedir')
+            fout = open(defaultDir + os.sep + self.filename, "w")
+            cols, waste = self.GetUsedCols()
+            rows = self.GetUsedRows()
+            maxrows = max(rows) + 1
+            for i in range(maxrows):
+                datapoint=[]
+                for j in range(len(cols)):
+                    try:
+                        datapoint.append(self.GetCellValue(i, j))
+                    except:
+                        datapoint.append("0")
+                line = string.join(datapoint)
+                fout.write(line)
+                fout.write('\n')
+            fout.close
+            self.Saved = True
+        else:
+            self.SaveAsDataASCII(None)
 
     # Loads an ASCII data file - only with all datapoints filled though!
     # also does csv values as well
@@ -700,6 +738,10 @@ class SimpleGrid(gridlib.Grid):
                 fin.close()
                 self.Thaw()
             self.ForceRefresh()
+            self.Saved = False
+            self.named = True
+            path, self.filename = os.path.split(filename)
+            self.parent.SetTitle(self.filename)
 
     def LoadExcel(self, filename):
         try:
@@ -2428,11 +2470,16 @@ class PlotFrame(wx.Frame):
 class DataFrame(wx.Frame):
     def __init__(self, parent, log, filename=None):
         # size the frame to 600x400 - will fit in any VGA screen
+        self.hideDataGrid = False
         dimx = int(inits.get('gridsizex'))
         dimy = int(inits.get('gridsizey'))
         posx = int(inits.get('gridposx'))
         posy = int(inits.get('gridposy'))
-        wx.Frame.__init__(self,parent,-1,"SalStat Statistics", size=(dimx,\
+        if filename == None:
+            frameTitle = "Untitled"
+        else:
+            frameTitle = filename
+        wx.Frame.__init__(self,parent,-1,frameTitle, size=(dimx,\
                                     dimy), pos=(posx,posy))
         #set icon for frame (needs x-platform separator!
         icon = images.getIconIcon()
@@ -2523,6 +2570,7 @@ class DataFrame(wx.Frame):
         toolBar.AddSimpleTool(70, CopyIcon, "Copy")
         toolBar.AddSimpleTool(80, PasteIcon, "Paste")
         toolBar.AddSimpleTool(85, PrefsIcon, "Preferences")
+        toolBar.AddSimpleTool(87, PrefsIcon, "Switch to meta-data grid")
         toolBar.AddSimpleTool(90, HelpIcon, "Help")
         toolBar.SetToolBitmapSize((24,24))
         # more toolbuttons are needed: New Output, Save, Print, Cut, \
@@ -2531,9 +2579,21 @@ class DataFrame(wx.Frame):
         self.SetToolBar(toolBar)
         #still need to define event handlers
         #set up the datagrid
+        """
+        self.grid = MetaGrid.metaGrid(self)
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.metagrid = MetaGrid.metaGrid(self)
+        self.sizer.Add(self.grid, 1, wx.EXPAND)
+        self.sizer.Add(self.metagrid, 1, wx.EXPAND)
+        self.metagrid.Hide()
+        self.grid.Show()
+        self.SetSizer(self.sizer)
+        self.Layout()
+        """
         self.grid = SimpleGrid(self, log)
         self.grid.SetDefaultColSize(60, True)
         self.grid.SetRowLabelSize(40)
+
         #self.setTitle('Go')
         #win2 = TestFrame(self, 'Tests')
         #win2.Show(True)
@@ -2563,6 +2623,7 @@ class DataFrame(wx.Frame):
         wx.EVT_MENU(self, ID_EDIT_DELETEROW, self.grid.DeleteCurrentRow)
         wx.EVT_MENU(self, ID_PREF_VARIABLES, self.GoVariablesFrame)
         wx.EVT_TOOL(self, 85, self.GoVariablesFrame)
+        wx.EVT_TOOL(self, 87, self.ToggleMetaGrid)
         wx.EVT_MENU(self, ID_PREF_GRID, self.GoEditGrid)
         wx.EVT_MENU(self, ID_PREF_CELLS, self.GoGridPrefFrame)
         wx.EVT_MENU(self, ID_PREF_FONTS, self.GoFontPrefsDialog)
@@ -2585,6 +2646,10 @@ class DataFrame(wx.Frame):
         wx.EVT_MENU(self, ID_FILE_EXIT, self.EndApplication)
         wx.EVT_CLOSE(self, self.EndApplication)
 
+    def ToggleMetaGrid(self, event):
+        self.metaGrid = MetaGrid.MetaFrame(self)
+        self.metaGrid.Show(True)
+
     def MacOpenFile(self, filename):
         # overrides method to load file on OSX
         print filename
@@ -2597,6 +2662,9 @@ class DataFrame(wx.Frame):
 
     def GoClearData(self, evt):
         #shows a new data entry frame
+        self.grid.filename = "Untitled"
+        self.grid.Saved = True
+        self.grid.named = False
         self.grid.ClearGrid()
 
     def GoNewOutputSheet(self, evt):
@@ -2759,8 +2827,32 @@ class DataFrame(wx.Frame):
         win.Show(True)
 
     def EndApplication(self, evt):
-        # close the application (need to check for new data since last save)
-        # need to save the inits dictionary to .salstatrc
+        if self.grid.Saved:
+            self.FinalExit()
+        else:
+            dlg = SaveDialog2(self, -1)
+            val = dlg.ShowModal()
+            if val == 3:
+                self.FinalExit()
+            elif val == 2:
+                if self.grid.named:
+                    self.grid.SaveDataASCII(None)
+                    self.FinalExit()
+                else:
+                    defDir = inits['savedir']
+                    dlg = wx.FileDialog( \
+                            self, message="Save file as...", defaultDir=defDir,
+                            defaultFile="Untitled", style=wx.SAVE)
+                    if dlg.ShowModal() == wx.ID_OK:
+                        path, self.filename = os.path.split(dlg.GetPath())
+                        self.grid.SaveDataASCII(None)
+                        self.FinalExit()
+                    else:
+                        return
+            else:
+                return
+
+    def FinalExit(self):
         dims = self.GetSizeTuple()
         inits.update({'gridsizex': dims[0]})
         inits.update({'gridsizey': dims[1]})
@@ -2780,12 +2872,7 @@ class DataFrame(wx.Frame):
         for i in range(len(initskeys)):
             fout.write(str(initskeys[i])+' '+str(initsvalues[i])+'\n')
         fout.close()
-        if self.grid.Saved == False:
-            win = SaveDialog(self, -1)
-            win.Show(True)
-            self.grid.Saved = True
-        else:
-            frame.Destroy()
+        frame.Destroy()
 
 #---------------------------------------------------------------------------
 # Scripting API is defined here. So far, only basic (but usable!) stuff.
@@ -3255,17 +3342,19 @@ $(function () {
 });"""
     import sys
     # find init file and read otherwise create it
+    try:
+        fname = sys.argv[1]
+    except IndexError:
+        fname = None
     ini = GetInits()
     historyClass = History()
     hist = historyClass
     app = wx.App()
-    frame = DataFrame(None, sys.stdout)
+    frame = DataFrame(None, sys.stdout, filename=fname)
     frame.grid.SetFocus()
     output = OutputSheet(frame, -1)
     output.Show(True)
     frame.Show(True)
-    filename = sys.argv[1]
-    frame.setTitle(filename)
     app.MainLoop()
 
-#---------------------------------------------------------------------------
+#--------------------------------------------------------------------------
