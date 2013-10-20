@@ -464,8 +464,6 @@ class SimpleGrid(gridlib.Grid):
                         "SalStat Format (*.xml)|*.xml"
         self.BeginMeta()
 
-    def SaveNative(fname):
-
     def BeginMeta(self):
         self.meta = {}
         ncols = self.GetNumberCols()
@@ -629,6 +627,21 @@ class SimpleGrid(gridlib.Grid):
             except ValueError:
                 colsusedlist.append(0)
         return colsusedlist
+
+    def GetUsedColsType(self):
+        ColsUsedIV = []
+        ColsUsedDV = []
+        colnumsIV = []
+        colnumsDV = []
+        ColsUsed, Colnums = GetUsedCols()
+        for idx, col in enumerate(Colnums):
+            if self.meta[col].ivdv == 'IV':
+                ColsUsedIV.append(ColsUsed[idx])
+                colnumsIV.append(col)
+            elif self.meta[col].ivdv == 'DV':
+                ColsUsedDV.append(ColsUsed[idx])
+                colnumsDV.append(col)
+        return ColsUsedIV, ColsUsedDV, colnumsIV, colnumsDV
 
     def GetUsedRows(self):
         RowsUsed = []
@@ -984,7 +997,7 @@ class ScriptFrame(wx.Frame):
         PasteIcon = images.getPasteBitmap()
         HelpIcon = images.getHelpBitmap()
         toolBar = self.CreateToolBar(wx.TB_HORIZONTAL|wx.NO_BORDER| \
-                                    wx.TB_3DBUTTONS)
+                                    wx.TB_3DBUTTONS|wx.TB_TEXT)
         toolBar.AddSimpleTool(710, GoIcon,"Run Script","Run the Script")
         toolBar.AddSimpleTool(711, OpenIcon,"Open","Open Script from a File")
         toolBar.AddSimpleTool(712, SaveIcon,"Save","Save Script to a file")
@@ -1267,7 +1280,7 @@ class OutputSheet(wx.Frame):
         PrintIcon = images.getPrintBitmap()
         HelpIcon = images.getHelpBitmap()
         toolBar = self.CreateToolBar(wx.TB_HORIZONTAL|wx.NO_BORDER| \
-                                    wx.TB_3DBUTTONS)
+                                    wx.TB_3DBUTTONS|wx.TB_TEXT)
         toolBar.AddSimpleTool(401, NewIcon,"New","New Data Sheet in \
                                     separate window")
         toolBar.AddSimpleTool(402, OpenIcon,"Open","Open Data from a File")
@@ -2560,7 +2573,7 @@ class DataFrame(wx.Frame):
         HelpIcon = images.getHelpBitmap()
         #create toolbar (nothing to add yet!)
         toolBar = self.CreateToolBar(wx.TB_HORIZONTAL|wx.NO_BORDER| \
-                                    wx.TB_3DBUTTONS)
+                                    wx.TB_FLAT|wx.TB_TEXT)
         toolBar.AddSimpleTool(10, NewIcon,"New")
         toolBar.AddSimpleTool(20, OpenIcon,"Open")
         toolBar.AddSimpleTool(30, SaveIcon,"Save")

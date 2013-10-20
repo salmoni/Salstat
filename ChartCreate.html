@@ -14,66 +14,11 @@
             #metaControl { background: #f9f9f9; padding-left: 20px; }
             textarea {text-align: left; }
         </style>
-        <script type="text/javascript">
-            $(document).ready(function () {
-                chart = $("#preview").highcharts();
-                $('#titleChart').change(function () { 
-                    varTitle = $("#titleChart").val();
-                    chart = $("#preview").highcharts();
-                    chart.setTitle({text: varTitle}); 
-                    chart({type: 'line'});
-                    chart.redraw();
-                });
-                $('#subtitleChart').change(function () { 
-                    varSubtitle = $("#subtitleChart").val();
-                    chart = $("#preview").highcharts();
-                    chart.setTitle(null, {text: varSubtitle}); 
-                });
-                $('#titleX').change(function () { 
-                    varTitleX = $("#titleX").val();
-                    chart = $("#preview").highcharts();
-                    chart.xAxis[0].setTitle({text: varTitleX}); 
-                });
-                $('#titleY').change(function () { 
-                    varTitleY = $("#titleY").val();
-                    chart = $("#preview").highcharts();
-                    chart.yAxis[0].setTitle({text: varTitleY}); 
-                });
-                $("select").change(function() {
-                    var value = $(this).val();
-                    newval = value.split(" ");
-                    chartType = newval[0];
-                    chart = $("#preview").highcharts();
-                    alert(chartType.toLowerCase());
-                    chart({type: chartType.toLowerCase});
-                    chart.Series.update();
-                });
-            });
-        </script>
     </head>
     <body>
         <div class="mainRow">
-            <div class="span3" id="varControl">
-                <h4>Chart variables</h4>
-                <form>
-                    <fieldset>
-                        <label>Variables</label>
-                        <label class="checkbox"><input type="checkbox" value="A">IV: Month</label>
-                        <label class="checkbox"><input type="checkbox" value="B">IV: City</label>
-                        <label class="checkbox"><input type="checkbox" value="C">DV: Mean temperature</label>
-                        <label class="checkbox"><input type="checkbox" value="D">Variable D</label>
-                        <label class="checkbox"><input type="checkbox" value="E">Variable E</label>
-                        <label class="checkbox"><input type="checkbox" value="F">Variable F</label>
-                        <label class="checkbox"><input type="checkbox" value="G">Variable G</label>
-                        <label class="checkbox"><input type="checkbox" value="H">Variable H</label>
-                        <label class="checkbox"><input type="checkbox" value="I">Variable I</label>
-                    </fieldset>
-                </form>
-            </div><!-- varControl -->
 
-
-
-            <div class="span6" id="preview">
+            <div class="span12" id="preview">
                 <h4>Chart preview</h4>
             </div><!-- id="preview" -->
                 <script type="text/javascript">
@@ -133,31 +78,6 @@
     });
                 </script>
 
-
-            <div class="span3" id="metaControl">
-                <h4>Chart titles</h4>
-                <form>
-                    <fieldset>
-                        <label>Chart type</label>
-                        <select class="selectpicker" id="chartType">
-                            <option>Line chart</option>
-                            <option>Spline chart</option>
-                            <option>Area chart</option>
-                            <option>Column chart</option>
-                            <option>Bar chart</option>
-                            <option>Scatter chart</option>
-                        </select>
-                        <label>Chart title</label>
-                        <input type="text" id="titleChart">
-                        <label>Chart subtitle</label>
-                        <input type="text" id="subtitleChart">
-                        <label>X-axis label</label>
-                        <input type="text" id="titleX">
-                        <label>Y-axis label</label>
-                        <input type="text" id="titleY">
-                    </fieldset>
-                </form>
-            </div><!-- id="metaControl" -->
 
 
         </div><!-- class="row" -->

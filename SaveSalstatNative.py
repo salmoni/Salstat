@@ -7,6 +7,15 @@ A module to save in a native XML format for Salstat
 
 import numpy
 import datetime, pickle
+from BeautifulSoup import BeautifulStoneSoup
+
+
+def MakeString(vector):
+    # returns a string representation of a numpy vector
+    return ','.join([str(scal) for scal in vector])
+
+def MakeVector(string):
+    return numpy.array([float(scal) for scal in string.split(',')])
 
 def Label(key_value_pairs):
     num_labels = len(key_value_pairs)
@@ -56,6 +65,50 @@ class variableobj(object):
     def __init__(self, name):
         self.name = name
 
+def SaveNativeDoc(grid, filename):
+    # default suffix is .xml
+    ColsUsed, colnums = grid.GetUsedCols()
+    vars = []
+    for col in colnums:
+        var_name = grid.GetColLabelValue(col)
+        var = variableobj(var_name)
+        var.labels = {}
+        var.data = grid.CleanData(col)
+        var.ivdv = "Not set"
+        var.missingvalues = "Not set"
+        var.measure = "Not set"
+        var.align = "Not set"
+    n = NativeDoc("20131022", filename, vars)
+    try:
+        fout = open(filename, 'w')
+        fout.write(n)
+        fout.close()
+    except:
+        pass
+
+def LoadNativeDoc(grid, filename):
+    try:
+        fin = open(filename, 'r')
+        data = fin.read()
+        fin.close()
+        soup = BeautifulStoneSoup(data)
+        vars = soup.findAll('variable')
+        for idx, var in enumerate(vars):
+            var_name = var('name')[0].text
+            var_ivdv = var('ivdv')[0].text
+            var_align = var('align')[0].text
+            var_missingvalues = var('missingvalues')[0].text
+            var_data = var('data')[0].text
+            grid.SetColLabelValue(idx, var_name)
+            vector = pickle.loads(var_data)
+            for row in range(len(vector)):
+                grid.SetCellValue(row, idx, vector[row])
+            # cannot do any others just yet! 
+            # Need to have meta data in the grid
+    except: # specific exception?
+        data = ""
+
+
 if __name__ == '__main__':
     var1 = variableobj('Var001')
     var2 = variableobj('Var002')
@@ -80,5 +133,13 @@ if __name__ == '__main__':
     var2.measure = "INTERVAL"
     var3.measure = "nominal"
     vars = [var1, var2, var3]
-    print NativeDoc("20131022",'filename001',vars)
+    """
+    n = NativeDoc("20131022",'filename001',vars)
+    fout = open('/Users/alansalmoni/sal.xml','w')
+    fout.write(n)
+    fout.close()
+    """
+    vec = numpy.random.rand(400)
+    vecstr = MakeString(vec)
+    strvec = MakeVector(vecstr)
 
