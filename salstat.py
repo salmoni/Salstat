@@ -15,7 +15,7 @@ import xlrd, xlwt # import xls format
 import string, os, os.path, pickle
 
 # import SalStat specific modules
-import salstat_stats, images, xlrd, tabler, charter
+import salstat_stats, images, xlrd, tabler, charter, ChartWindow
 import MetaGrid
 import numpy, math
 
@@ -150,12 +150,15 @@ class SaveDialog2(wx.Dialog):
         wx.Dialog.__init__(self, parent, id, "Save Data?", \
                            size=(404+wind,100+wind))#, style = wx.DIALOG_MODAL)
         icon = images.getIconIcon()
-        self.SetIcon(icon)
+        #icon = wx.Icon("icons/PurpleIcon05_32.png",wx.BITMAP_TYPE_PNG)
+        iconPNG = wx.Image("icons/PurpleIcon05_64.png",wx.BITMAP_TYPE_PNG).ConvertToBitmap()
+        iconBMP = wx.StaticBitmap(self, -1, iconPNG, pos=(20,16))
         l1 = wx.StaticText(self, -1, 'Do you want to save the changes you made to', pos=(105,16))
         l2 = wx.StaticText(self, -1, 'this document?', pos=(105, 36))
         discardButton = wx.Button(self, 332, "Don't save", size=(90, 21),pos=(105,80))
         saveButton = wx.Button(self, 331, "Save...", size=(69, 21),pos=(274,80))
         CancelButton = wx.Button(self, 333, "Cancel", size=(69, 21),pos=(355,80))
+        self.SetIcon(icon)
         self.Layout()
         wx.EVT_BUTTON(self, 331, self.SaveData)
         wx.EVT_BUTTON(self, 332, self.DiscardData)
@@ -633,7 +636,7 @@ class SimpleGrid(gridlib.Grid):
         ColsUsedDV = []
         colnumsIV = []
         colnumsDV = []
-        ColsUsed, Colnums = GetUsedCols()
+        ColsUsed, Colnums = self.GetUsedCols()
         for idx, col in enumerate(Colnums):
             if self.meta[col].ivdv == 'IV':
                 ColsUsedIV.append(ColsUsed[idx])
@@ -884,6 +887,24 @@ class SimpleGrid(gridlib.Grid):
                 except ValueError:
                     pass
         return indata
+
+    def GetColumnData(self, col):
+        indata = []
+        self.missing = 0
+        for i in range(self.GetNumberRows()):
+            val = self.GetCellValue(i, col)
+            if val != "":
+                if val != missingvalue:
+                    try:
+                        indata.append(float(val))
+                    except ValueError:
+                        indata.append(val)
+                else:
+                    self.missing += 1
+        try:
+            return numpy.array(indata)
+        except TypeError:
+            return indata
 
     def GetEntireDataSet(self, numcols):
         """Returns the data specified by a list 'numcols' in a Numpy
@@ -2574,17 +2595,18 @@ class DataFrame(wx.Frame):
         #create toolbar (nothing to add yet!)
         toolBar = self.CreateToolBar(wx.TB_HORIZONTAL|wx.NO_BORDER| \
                                     wx.TB_FLAT|wx.TB_TEXT)
-        toolBar.AddSimpleTool(10, NewIcon,"New")
-        toolBar.AddSimpleTool(20, OpenIcon,"Open")
-        toolBar.AddSimpleTool(30, SaveIcon,"Save")
-        toolBar.AddSimpleTool(40, SaveAsIcon,"Save As")
-        toolBar.AddSimpleTool(50, PrintIcon,"Print")
-        toolBar.AddSimpleTool(60, CutIcon, "Cut")
-        toolBar.AddSimpleTool(70, CopyIcon, "Copy")
-        toolBar.AddSimpleTool(80, PasteIcon, "Paste")
-        toolBar.AddSimpleTool(85, PrefsIcon, "Preferences")
-        toolBar.AddSimpleTool(87, PrefsIcon, "Switch to meta-data grid")
-        toolBar.AddSimpleTool(90, HelpIcon, "Help")
+        toolBar.AddLabelTool(10, "New", wx.Bitmap("icons/IconNew.png"), shortHelp="Create a new data sheet")
+        toolBar.AddLabelTool(20, "Open", wx.Bitmap("icons/IconOpen.png"), shortHelp="Open a data file")
+        toolBar.AddLabelTool(30, "Save", wx.Bitmap("icons/IconSave.png"), shortHelp="Save these data to file")
+        toolBar.AddLabelTool(40, "Save As", wx.Bitmap("icons/IconSaveAs.png"), shortHelp="Save these data to a new filename")
+        toolBar.AddLabelTool(50, "Print", wx.Bitmap("icons/IconPrint.png"), shortHelp="Print this sheet")
+        toolBar.AddLabelTool(60, "Cut", wx.Bitmap("icons/IconCut.png"), shortHelp="Cut selection to clipboard")
+        toolBar.AddLabelTool(70, "Copy", wx.Bitmap("icons/IconCopy.png"), shortHelp="Copy selection to clipboard")
+        toolBar.AddLabelTool(80, "Paste", wx.Bitmap("icons/IconPaste.png"), shortHelp="Paste selection from clipboard")
+        toolBar.AddLabelTool(85, "Preferences", wx.Bitmap("icons/IconPrefs.png"), shortHelp="Set your preferences")
+        toolBar.AddLabelTool(87, "Meta", wx.Bitmap("icons/IconHelp.png"), shortHelp="Set variables")
+        toolBar.AddLabelTool(88, "Chart", wx.Bitmap("icons/IconHelp.png"), shortHelp="View the chart window")
+        toolBar.AddLabelTool(90, "Help", wx.Bitmap("icons/IconHelp.png"), shortHelp="Get help")
         toolBar.SetToolBitmapSize((24,24))
         # more toolbuttons are needed: New Output, Save, Print, Cut, \
         # Variables, and Wizard creates the toolbar
@@ -2637,6 +2659,7 @@ class DataFrame(wx.Frame):
         wx.EVT_MENU(self, ID_PREF_VARIABLES, self.GoVariablesFrame)
         wx.EVT_TOOL(self, 85, self.GoVariablesFrame)
         wx.EVT_TOOL(self, 87, self.ToggleMetaGrid)
+        wx.EVT_TOOL(self, 88, self.ToggleChartWindow)
         wx.EVT_MENU(self, ID_PREF_GRID, self.GoEditGrid)
         wx.EVT_MENU(self, ID_PREF_CELLS, self.GoGridPrefFrame)
         wx.EVT_MENU(self, ID_PREF_FONTS, self.GoFontPrefsDialog)
@@ -2658,6 +2681,13 @@ class DataFrame(wx.Frame):
         wx.EVT_MENU(self, ID_HELP_LICENCE, self.GoHelpLicenceFrame)
         wx.EVT_MENU(self, ID_FILE_EXIT, self.EndApplication)
         wx.EVT_CLOSE(self, self.EndApplication)
+
+    def ToggleChartWindow(self, event):
+        self.chartWindow = ChartWindow.ChartWindow(self.grid)
+        self.chartWindow.Show(True)
+        self.chartWindow.preview.SetPage(self.chartWindow.chartObject.page,"")
+        #print frame.chartObject.page
+        #frame.preview.SetPage(frame.chartObject.chartLine,"")
 
     def ToggleMetaGrid(self, event):
         self.metaGrid = MetaGrid.MetaFrame(self)

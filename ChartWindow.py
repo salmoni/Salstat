@@ -4,7 +4,8 @@ import wx
 import wx.html2 as html2lib
 import wx.propgrid as wxpg
 import images
-import sys
+import sys, numpy
+import AllRoutines
 
 #---------------------------------------------------------------------------
 # call instance of DataGrid
@@ -12,6 +13,7 @@ import sys
 class ChartWindow(wx.Frame):
     def __init__(self, parent):
         wx.Frame.__init__(self,parent,-1,"CHARTS", size=(1000,600), pos=(50,50))
+        self.grid = parent
         self.CreateStatusBar()
         #self.SetStatusText('SalStat Statistics')
         self.chartObject = ChartObject()
@@ -35,8 +37,10 @@ class ChartWindow(wx.Frame):
         self.preview = self.webview.New(self) #, size=(100,100))
         self.preview.SetSize
         self.control = ControlPanel(self, -1, self.chartObject, self.preview)
-        variables = ""
-        self.variables = VarPanel(self, -1, variables)
+        if self.grid:
+            self.variables = VarPanel(self, -1, self.grid, self.chartObject)
+        else:
+            self.variables = VarPanel(self, -1, None, self.chartObject)
         self.box = wx.BoxSizer(wx.HORIZONTAL)
         self.box.Add(self.variables, 0, wx.EXPAND)
         self.box.Add(self.preview, 1, wx.EXPAND)
@@ -61,8 +65,10 @@ class ControlPanel(wx.Panel):
         wx.StaticText(self, -1, "Legend", (20,170))
 
         self.ctrl_type = wx.ComboBox(self, -1, size=(200,-1),pos=(20,40), choices = self.types, value=self.chartObject.chart_type)
-        self.ctrl_title = wx.TextCtrl(self, -1, size=(200,-1),pos=(20,90))
-        self.ctrl_subtitle = wx.TextCtrl(self, -1, size=(200,-1),pos=(20,140))
+        self.ctrl_title = wx.TextCtrl(self, -1, size=(200,-1),pos=(20,90), \
+                value=self.chartObject.title_text)
+        self.ctrl_subtitle = wx.TextCtrl(self, -1, size=(200,-1),pos=(20,140), \
+                value=self.chartObject.subtitle_text)
         self.ctrl_align = wx.ComboBox(self, -1, size=(200,-1),pos=(20,190), choices = self.align, value=self.chartObject.legend_align)
         self.ctrl_valign = wx.ComboBox(self, -1, size=(200,-1),pos=(20,220), choices = self.valign, value=self.chartObject.legend_verticalAlign)
 
@@ -90,26 +96,90 @@ class ControlPanel(wx.Panel):
         pass
 
 class VarPanel(wx.Panel):
-    def __init__(self, parent, id, variables):
+    def __init__(self, parent, id, grid, chartObject):
         wx.Panel.__init__(self, parent, -1, size=(250, -1))
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.variables = variables
-        heading = wx.StaticText(self, -1, "Variables")
-        variables = ['Var 001 (IV)', 'Var 002 (IV)', 'Var 003 (DV)']
-        self.varlist = wx.CheckListBox(self, -1, choices=variables, \
-                size=(220, -1), pos=(15,45))
-        acceptbutton = wx.Button(self, 711, "Draw this graph")
-        self.sizer.Add(heading, 0, flag=wx.ALL, border=15)
-        self.sizer.Add(self.varlist, 1, wx.ALL, border=15)
-        self.sizer.Add(acceptbutton, 0, flag=wx.ALL, border=15)
+        self.grid = grid
+        self.parent = parent
+        self.chartObject = chartObject
+        self.stats=["Frequencies","Sum","Mean","Median","Minimum","Maximum",\
+                "Range","Variance","Standard deviation","Standard error"]
+        if not grid:
+            variables = ['Var 001 (IV)', 'Var 002 (IV)', 'Var 003 (DV)']
+        else:
+            ColsUsed, self.ColNums = self.grid.GetUsedCols()
+            variables = ColsUsed
+        wx.StaticText(self, -1, "Variables", pos=(20,20))
+        wx.StaticText(self, -1, "Chart this variable:", pos=(20,50))
+        self.DV = wx.ComboBox(self, -1, size=(190,-1),pos=(20,70), choices = variables)
+        wx.StaticText(self, -1, "by:", pos=(20,110))
+        self.stat = wx.ComboBox(self, -1, size=(190,-1), pos=(20,130),choices=self.stats)
+        wx.StaticText(self, -1, "Organised by:",pos=(20,170))
+        self.IV = wx.ComboBox(self, -1, size=(190,-1), pos=(20,190),choices=variables)
+
+        acceptbutton = wx.Button(self, 711, "Draw this graph", pos=(15,250))
         self.SetAutoLayout(True)
-        self.SetSizer(self.sizer)
         self.Layout()
         wx.EVT_BUTTON(acceptbutton, 711, self.ChangeVars)
 
     def ChangeVars(self, event):
-        checked = self.varlist.GetChecked()
+        sel_IV = self.IV.GetSelection()
+        sel_DV = self.DV.GetSelection()
+        idx_IV = self.ColNums[sel_IV]
+        idx_DV = self.ColNums[sel_DV]
+        name_IV = self.grid.GetColLabelValue(idx_IV)
+        name_DV = self.grid.GetColLabelValue(idx_DV)
+        IV = self.grid.GetColumnData(idx_IV)
+        DV = self.grid.GetColumnData(idx_DV)
+        stat = self.stats[self.stat.GetSelection()]
+        values, freqs = AllRoutines.UniqueVals(IV)
+        if stat == "Frequencies":
+            # we have all we need already
+            data = freqs
+        else:
+            data = []
+            for val in values:
+                idcs = numpy.equal(IV, val)
+                try:
+                    subset = DV[idcs]
+                except IndexError:
+                    subset = []
+                    for idx, cell in enumerate(IV):
+                        if cell == val:
+                            subset.append(DV[idx])
+                    subset = numpy.array(subset)
+                if stat == "Sum":
+                    v = AllRoutines.Sum(subset)
+                elif stat == "Mean":
+                    v = AllRoutines.Mean(subset)
+                elif stat == "Median":
+                    v = AllRoutines.Median(subset)
+                elif stat == "Minimum":
+                    v = AllRoutines.Minimum(subset)
+                elif stat == "Maximum":
+                    v = AllRoutines.Maximum(subset)
+                elif stat == "Range":
+                    v = AllRoutines.Range(subset)
+                elif stat == "Variance":
+                    v = AllRoutines.SampVar(subset)
+                elif stat == "Standard deviation":
+                    v = AllRoutines.SampStdDev(subset)
+                elif stat == "Standard Error":
+                    v = AllRoutines.StdErr(subset)
+                else:
+                    v = None
+                data.append(v)
+        self.chartObject.data = [DataObject(data)]
+        self.chartObject.data[0].name = name_DV
+        self.chartObject.xAxis_categories = values
+        self.chartObject.ToString()
+        self.parent.preview.SetPage(self.chartObject.page,"")
 
+    def ToString(self, inData):
+        try:
+            outString = '","'.join([str(idx) for idx in inData])
+            return outString
+        except:
+            return inData
 
 class DataObject(object):
     def __init__(self, data):
@@ -118,10 +188,10 @@ class DataObject(object):
 class ChartObject(object):
     def __init__(self):
         self.charthtml = """<!DOCTYPE html>\n<html>\n\t<head>\n\t\t<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>\n\t\t<script src="http://code.highcharts.com/highcharts.js"></script>\n\t\t\t<script src="http://code.highcharts.com/modules/exporting.js"></script>\n\t\t\t<script src="/js/themes/gray.js"></script>\n\t\t\t<style>\n\t\t\t\tbody { font-family: helvectica, arial, \'lucida sans\'; }\n        </style>\n\t</head>\n\t<body>\n"""
-        self.title_text = "Fruit consumption"
+        self.title_text = ""
         #self.chart_anim = { animation: false }
         self.chart_type = "area"
-        self.subtitle_text = None
+        self.subtitle_text = ""
         self.xAxis_title = None
         self.xAxis_categories = ["Apples", "Bananas", "Oranges"]
         self.xAxis_min = None
@@ -137,17 +207,23 @@ class ChartObject(object):
         self.legend_align = "do not show"
         self.legend_verticalAlign = "bottom"
         self.chart_series = None
-        self.data = [DataObject([5,7,3]), DataObject([4,2,6])]
-        self.data[0].name = "Harry"
-        self.data[1].name = "Tom"
+        self.data = None
         self.ToString()
+
+    def FloatsToString(self, inList):
+        try:
+            return '","'.join(inList)
+        except TypeError:
+            newList = ','.join([str(item) for item in inList])
+            return newList
 
     def ListToString(self, inList):
         # assumes a single list (i.e., not a list of lists)
         try:
             return '","'.join(inList)
         except TypeError:
-            return ','.join([str(item) for item in inList])
+            newList = '","'.join([str(item) for item in inList])
+            return newList
 
     def chart(self):
         chartsbit = '\tchart: {\n'
@@ -183,7 +259,7 @@ class ChartObject(object):
             xaxisbit += '\t\tminTickInterval: %s,\n'%(self.xAxis_minTickInterval)
         if self.xAxis_tickInterval:
             xaxisbit += '\t\ttickInterval: %s,\n'%(self.xAxis_tickInterval)
-        if self.xAxis_categories:
+        if self.xAxis_categories != None:
             xaxisbit += '\t\tcategories: ["%s"],\n'%(self.ListToString(self.xAxis_categories))
         if self.xAxis_title:
             xaxisbit += '\ttitle: { text: "%s" }\n'%(self.xAxis_title)
@@ -192,14 +268,14 @@ class ChartObject(object):
 
     def title(self):
         titlebit = '\ttitle: {\n'
-        if self.title_text:
+        if self.title_text != "":
             titlebit += '\t\ttext: "%s"\n'%(self.title_text)
         titlebit += '\t},\n'
         return titlebit
 
     def subtitle(self):
         subtitlebit = '\tsubtitle: {\n'
-        if self.subtitle_text:
+        if self.subtitle_text != "":
             subtitlebit += '\t\ttext: "%s,"\n'%(self.subtitle_text)
         subtitlebit += '\t},\n'
         return subtitlebit
@@ -216,18 +292,20 @@ class ChartObject(object):
         return legendbit
 
     def series(self):
-        seriesbit = '\tseries: ['
-        for datum in self.data:
-            datastr = self.ListToString(datum.data)
-            namestr = datum.name
-            seriesbit += '{\n'
-            if namestr:
-                seriesbit += '\t\tname: "%s",\n'%(namestr)
-            if datastr:
-                seriesbit += '\t\tdata: [%s]\n\t},'%(datastr)
-        seriesbit += '\t]\n'
+        if self.data:
+            seriesbit = '\tseries: ['
+            for datum in self.data:
+                datastr = self.FloatsToString(datum.data)
+                namestr = datum.name
+                seriesbit += '{\n'
+                if namestr:
+                    seriesbit += '\t\tname: "%s",\n'%(namestr)
+                if datastr:
+                    seriesbit += '\t\tdata: [%s]\n\t},'%(datastr)
+            seriesbit += '\t]\n'
+        else:
+            seriesbit = ''
         return seriesbit
-
 
     def ToString(self):
         # converts all attributes to a HighCharts string
@@ -239,18 +317,6 @@ class ChartObject(object):
                 """\t});\n});\n"""
         #print self.chartLine
         self.page = '%s<div id="chart0001" style="width:100&amp; height: auto;">\n<script type="text/javascript">\n%s</script>\n</div>\n</body>\n</html>'%(self.charthtml, self.chartLine)
-
-act = """$(function () { 
-
-        series: [{
-            name: "John",
-            data: [5, 7, 3]
-        }, {
-            name: "Jane",
-            data: [1, 0, 6]
-        }]
-    });
-});"""
 
 
 #---------------------------------------------------------------------------
