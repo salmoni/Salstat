@@ -1318,9 +1318,7 @@ class OutputSheet(wx.Frame):
         self.SetStatusText('Salstat statistics - results')
         self.htmlpage = html2lib.WebView.New(self)
         self.htmlpage.SetEditable(True)
-        self.Addhtml('<div id="chart0001" style="width:100%; height: auto;">')
-        self.Addhtml('<script type="text/javascript">%s</script></div>'%act)
-        #self.htmlpage.LoadURL("http://www.google.com")
+        self.Addhtml('')
         self.printer = wx.Printout()
         wx.EVT_MENU(self, ID_OEDIT_CUT, self.CutHTML)
         wx.EVT_MENU(self, ID_OEDIT_COPY, self.CopyHTML)
@@ -3357,32 +3355,6 @@ def CreateHTMLDoc():
 #---------------------------------------------------------------------------
 # main loop
 if __name__ == '__main__':
-    act = """        
-$(function () { 
-    $('#chart0001').highcharts({
-        chart: {
-            type: 'area'
-        },
-        title: {
-            text: 'Fruit Consumption'
-        },
-        xAxis: {
-            categories: ['Apples', 'Bananas', 'Oranges']
-        },
-        yAxis: {
-            title: {
-                text: 'Fruit eaten'
-            }
-        },
-        series: [{
-            name: 'John',
-            data: [5, 7, 3]
-        }, {
-            name: 'Jane',
-            data: [1, 0, 6]
-        }]
-    });
-});"""
     import sys
     # find init file and read otherwise create it
     try:
