@@ -158,7 +158,7 @@ class SaveDialog2(wx.Dialog):
         discardButton = wx.Button(self, 332, "Don't save", size=(90, 21),pos=(105,80))
         saveButton = wx.Button(self, 331, "Save...", size=(69, 21),pos=(274,80))
         CancelButton = wx.Button(self, 333, "Cancel", size=(69, 21),pos=(355,80))
-        self.SetIcon(icon)
+        self.SetIcon(ico)
         self.Layout()
         wx.EVT_BUTTON(self, 331, self.SaveData)
         wx.EVT_BUTTON(self, 332, self.DiscardData)
@@ -178,7 +178,7 @@ class SaveDialog(wx.Dialog):
         wx.Dialog.__init__(self, parent, id, "Save Data?", \
                            size=(270+wind,100+wind))#, style = wx.DIALOG_MODAL)
         icon = images.getIconIcon()
-        self.SetIcon(icon)
+        self.SetIcon(ico)
         self.Choice = 'none'
         vbox = wx.BoxSizer(wx.VERTICAL)
         l1 = wx.StaticText(self, -1, 'You have unsaved Data')
@@ -660,8 +660,7 @@ class SimpleGrid(gridlib.Grid):
         default = inits.get('savedir')
         dlg = wx.FileDialog(self, "Save Data File", default,"",\
                                     "CSV text (*.csv)|*.csv|Plain text (*.txt)|*.txt", wx.SAVE)
-        icon = images.getIconIcon()
-        dlg.SetIcon(icon)
+        dlg.SetIcon(ico)
         if dlg.ShowModal() == wx.ID_OK:
             inits.update({'savedir': dlg.GetDirectory()})
             filename = dlg.GetPath()
@@ -723,8 +722,7 @@ class SimpleGrid(gridlib.Grid):
         dlg = wx.FileDialog(self, "Open Data File", "","",\
                                 #self.wildcard, wx.OPEN)
                                 "All files (*.*)|*.*|", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
-        icon = images.getIconIcon()
-        dlg.SetIcon(icon)
+        dlg.SetIcon(ico)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()
             if filename[-3:] == 'xml':
@@ -848,8 +846,7 @@ class SimpleGrid(gridlib.Grid):
         default = inits.get('opendir')
         dlg = wx.FileDialog(self, "Load Data File", default,"","*.\
                                     dat|*.*", wx.OPEN)
-        icon = images.getIconIcon()
-        dlg.SetIcon(icon)
+        dlg.SetIcon(ico)
         if dlg.ShowModal() == wx.ID_OK:
             inits.update({'opendir': dlg.GetDirectory()})
             filename = dlg.GetPath()
@@ -936,8 +933,7 @@ class EditGridFrame(wx.Dialog):
     def __init__(self, parent, id):
         wx.Dialog.__init__(self, parent, id, "Change Grid Size", \
                                     size=(205, 100+wind))
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
+        self.SetIcon(ico)
         l1 = wx.StaticText(self, -1, 'Add Columns',pos=(10,15))
         l2 = wx.StaticText(self, -1, 'Add Rows',pos=(10,55))
         self.numnewcols = wx.SpinCtrl(self, -1, "", wx.Point(110,10), wx.Size(80,25))
@@ -968,8 +964,7 @@ class GridPrefs(wx.Dialog):
     def __init__(self, parent, id):
         wx.Dialog.__init__(self, parent, id, "Cell Size", \
                                     size=(205,100+wind))
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
+        self.SetIcon(ico)
         self.colwidth = wx.SpinCtrl(self, -1, "", wx.Point(110,10), wx.Size(80,25))
         self.colwidth.SetRange(1,200)
         self.colwidth.SetValue(frame.grid.GetDefaultColSize())
@@ -1005,8 +1000,7 @@ class ScriptFrame(wx.Frame):
         wx.Frame.__init__(self, parent, id, "Scripting Window", \
                                     size=(dimx, dimy), pos=(posx,posy))
         #set icon for frame (needs x-platform separator!
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
+        self.SetIcon(ico)
         self.scripted = wx.Editor(self,-1)
         GoIcon = images.getApplyBitmap()
         OpenIcon = images.getOpenBitmap()
@@ -1095,8 +1089,7 @@ class AboutFrame(wx.Frame):
         wx.Frame.__init__(self, parent, id, "About SalStat", \
                                     size=(dimx, dimy), pos=(posx, posy))
         #set icon for frame (needs x-platform separator!
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
+        self.SetIcon(ico)
         GoIcon = images.getApplyBitmap()
 
         BackIcon = images.getLeftBitmap()
@@ -1166,8 +1159,7 @@ class VariablesFrame(wx.Dialog):
         wx.Dialog.__init__(self, parent,id,"SalStat - Variables", \
                                     size=(500,185+wind))
         #set icon for frame (needs x-platform separator!
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
+        self.SetIcon(ico)
         okaybutton = wx.Button(self, 2001, "Okay",wx.Point(10,170),\
                                     wx.Size(BWidth, BHeight))
         cancelbutton = wx.Button(self, 2002, "Cancel",wx.Point(100,170),\
@@ -1267,8 +1259,8 @@ class OutputSheet(wx.Frame):
         wx.Frame.__init__(self, parent, -1, "SalStat Statistics - Output", \
                                     size=(dimx, dimy), pos=(posx, posy))
         #set icon for frame (needs x-platform separator!
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
+        #icon = images.getIconIcon()
+        self.SetIcon(ico)
         self.WholeOutString = CreateHTMLDoc()
         file_menu = wx.Menu()
         edit_menu = wx.Menu()
@@ -1405,8 +1397,7 @@ class DescriptivesFrame(wx.Dialog):
                                     size=(500,400+wind))
         x = self.GetClientSize()
         winheight = x[1]
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
+        self.SetIcon(ico)
         ColumnList, self.colnums  = frame.grid.GetUsedCols()
         # ColumnList is the col headings, colnums is the column numbers
         l0 = wx.StaticText(self,-1,"Select Column(s) to Analyse",pos=(10,10))
@@ -1457,8 +1448,7 @@ class OneConditionTestFrame(wx.Dialog):
                           size=(500,400+wind))
         x = self.GetClientSize()
         winheight = x[1]
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
+        self.SetIcon(ico)
         ColumnList, self.colnums = frame.grid.GetUsedCols()
         self.ColBox = wx.Choice(self, 101,(10,30), (110,20), choices = ColumnList)
         self.ColBox.SetSelection(0)
@@ -1596,8 +1586,7 @@ class TwoConditionTestFrame(wx.Dialog):
         x = self.GetClientSize()
         winheight = x[1]
         x = self.GetClientSize()
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
+        self.SetIcon(ico)
         colsselected =  frame.grid.GetColsUsedList()
         l0 = wx.StaticText(self,-1,"Select Columns to Analyse",pos=(10,10))
         l1 = wx.StaticText(self, -1, "Select Test(s) to Perform:", pos=(10,60))
@@ -1899,8 +1888,7 @@ class ThreeConditionTestFrame(wx.Dialog):
                                     size = (500,400+wind))
         x = self.GetClientSize()
         winheight = x[1]
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
+        self.SetIcon(ico)
         alltests = ['anova between subjects','anova within subjects',\
                                     'Kruskall Wallis','Friedman test',\
                                     'Cochranes Q']
@@ -2102,8 +2090,7 @@ class CorrelationTestFrame(wx.Dialog):
         #set icon for frame (needs x-platform separator!
         x = self.GetClientSize()
         winheight = x[1]
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
+        self.SetIcon(ico)
         colsselected =  frame.grid.GetColsUsedList()
         l0 = wx.StaticText(self,-1,"Select Columns to Analyse",pos=(10,10))
         l1 = wx.StaticText(self, -1, "Select Test(s) to Perform:", pos=(10,60))
@@ -2262,8 +2249,7 @@ class MFanovaFrame(wx.Dialog):
         #set icon for frame (needs x-platform separator!
         x = self.GetClientSize()
         winheight = x[1]
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
+        self.SetIcon(ico)
         ColumnList, self.colnums = frame.grid.GetUsedCols()
         l0 = wx.StaticText(self,-1,"Select Columns to Analyse",pos=(10,10))
         l1 = wx.StaticText(self, -1, "Select IV:", pos=(10,60))
@@ -2339,8 +2325,7 @@ class TransformFrame(wx.Dialog):
         #set icon for frame (needs x-platform separator!
         x = self.GetClientSize()
         winheight = x[1]
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
+        self.SetIcon(ico)
         self.transform = ""
         self.transformName = ""
         self.ColumnList, self.colnums = frame.grid.GetUsedCols()
@@ -2514,8 +2499,8 @@ class DataFrame(wx.Frame):
         wx.Frame.__init__(self,parent,-1,frameTitle, size=(dimx,\
                                     dimy), pos=(posx,posy))
         #set icon for frame (needs x-platform separator!
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
+        #icon = images.getIconIcon()
+        self.SetIcon(ico)
         #set up menus
         file_menu = wx.Menu()
         edit_menu = wx.Menu()
@@ -2741,8 +2726,7 @@ class DataFrame(wx.Frame):
         # shows Font dialog for the data grid (output window has its own)
         data = wx.FontData()
         dlg = wx.FontDialog(frame, data)
-        icon = images.getIconIcon()
-        self.SetIcon(icon)
+        self.SetIcon(ico)
         if dlg.ShowModal() == wx.ID_OK:
             data = dlg.GetFontData()
             #data2 = data.GetChosenFont()
@@ -3365,6 +3349,7 @@ if __name__ == '__main__':
     historyClass = History()
     hist = historyClass
     app = wx.App()
+    ico = wx.Icon('icons/PurpleIcon05_32.png',wx.BITMAP_TYPE_PNG)
     frame = DataFrame(None, sys.stdout, filename=fname)
     frame.grid.SetFocus()
     output = OutputSheet(frame, -1)
