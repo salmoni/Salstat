@@ -73,6 +73,31 @@ import numpy
 import numpy.ma
 
 
+def GetMostUsedTests():
+    return ['Count','Sum','Mean','Median','Variance (sample)', \
+            'Standard deviation (sample)', 'Standard error', \
+            "Tukey's hinges", "Skewness","Kurtosis"]
+
+def GetAllTests():
+    Alltests = ['Count','Sum','Minimum','Maximum','Range','Proportions', \
+            'Relative frequency of the mode','Cumulative sum', \
+            'Cumulative product','Cumulative percent','Frequencies', \
+            'Trimmed mean','Bi-trimmed mean','Winsorised mean','Mean','Median','Mode', \
+            'Moment',"Tukey's hinges","Moore & McCabe's hinges", \
+            'S-Plus quantiles','SPSS quantiles','Mid-step quantiles', \
+            'Quantile 1 (Hyndman & Fan)','Quantile 2 (Hyndman & Fan)', \
+            'Quantile 3 (Hyndman & Fan)','Quantile 4 (Hyndman & Fan)', \
+            'Quantile 5 (Hyndman & Fan)','Quantile 6 (Hyndman & Fan)', \
+            'Quantile 7 (Hyndman & Fan)','Quantile 8 (Hyndman & Fan)', \
+            'Quantile 9 (Hyndman & Fan)','Interquartile range', \
+            'Sum of squares','Sum of squared deviations','Variance (sample)', \
+            'Variance (population)','Standard deviation (sample)', \
+            'Standard deviation (population)','Standard error', \
+            'Coefficient of variation','Median absolute deviation', \
+            'Geometric mean','Harmonic mean','Mean of successive squared differences',\
+            'Skewness','Kurtosis']
+    return Alltests
+
 def Vsort(data):
     # check that 'data' is a vector
     return numpy.ma.sort(data)
@@ -83,7 +108,7 @@ def Msort(data):
     length = dims[0] * dims[1]
     return numpy.ma.reshape(numpy.ma.sort(numpy.ma.reshape(data, length)), dims)
 
-def UniqueVals(data):
+def UniqueVals3(data):
     """
     All unique values. Currently, only numeric values.
     """
@@ -104,6 +129,30 @@ def UniqueVals(data):
                     freq = freq + 1
             numbers.append(freq)
     return uniques, numbers
+
+def IndexMatches(value, data):
+    indices = []
+    for idx, item in enumerate(data):
+        if value == item:
+            indices.append(idx)
+    return indices
+
+def UniqueVals(data):
+    """
+    Returns unique values + frequencies
+    """
+    try:
+        uniques = set(data)
+    except TypeError:
+        data = [data]
+        uniques = data
+    length = len(uniques)
+    freqs = []
+    # now find frequencies
+    for item in uniques:
+        nummatches = IndexMatches(item, data)
+        freqs.append(Count(numpy.array(nummatches)))
+    return uniques, freqs
 
 def CalculateRanks(data, start = 1):
     data = numpy.ma.array(data)
@@ -855,4 +904,18 @@ def OutliersIQR(data):
     step1 = numpy.ma.compress(numpy.ma.greater(data, IQR[0]), data)
     step2 = numpy.ma.compress(numpy.ma.less(step1, IQR[1]), data)
     return outliers, step2
+
+
+if __name__ == '__main__':
+    data = numpy.array(([1,2,3,2,1,2,3]))
+    data = [1,2,3,2,1,2,3]
+    data = ['a','a','b','b','c','c','c','b']
+    data = "a"
+    data = 2
+    data = 3.14
+    data = {3: "hi"}
+    data = [3,2,5.65464,"hi",2,3,"hi"]
+    vals, freqs = UniqueVals3(data)
+    print vals
+    print freqs
 

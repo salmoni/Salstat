@@ -3,6 +3,13 @@ tabler.py
 Creates tables in HTML for Salstat
 Submit a list of [heading: value] pairs in the desired order
 p-values are automatically formatted as %1.6f (all other floats as %5.3f?)
+
+The first two routines are generic and for single answer results.
+
+Following are a handful of tabler functions for particular tests
+
+(c) 2013, Alan James Salmoni
+
 """
 
 def table(ListofLists):
@@ -36,7 +43,7 @@ def vtable(List):
     btn_id = ' id="%s"'%key
     chartbutton = '<a class="btn btn-mini dropdown-toggle"%s data-toggle="dropdown" \
             href="#">Chart</a>\n'%btn_id
-    linehtml = '<tr><td>%s %s</td>'%(chartbutton, key)
+    linehtml = '<tr><td>%s</td>'%(key)
     for val in vals:
         if key == 'p':
             try:
@@ -49,8 +56,60 @@ def vtable(List):
             linehtml = linehtml + '<td>%s</td>'%val
         elif type(val) is float:
             linehtml = linehtml + '<td>%s</td>'%str(val)
+        elif type(val) is tuple:
+            print "TUPLE!", val
+        else:
+            try:
+                linehtml = linehtml + '<td>%s</td>'%str(val)
+            except:
+                pass
     linehtml = linehtml + '</tr>\n'
     return linehtml
+
+def tableHinges(List):
+    key = List[0]
+    vals = List[1:]
+    linehtml = '<tr><td>%s</td>'%(key)
+    for val in vals:
+        linehtml += '<td>%s, %s</td>'%(str(val[0]), str(val[1]))
+    linehtml += '</tr>\n'
+    return linehtml
+
+def tableProportions(List):
+    """
+    Passes two arrays in a list:
+    array 1 = value
+    array 2 = corresponding proportions
+    """
+    for turn in List:
+        vals = turn[0]
+        props = turn[1]
+        table = '<table class="table table-striped">\n'
+        table += '\t<tr><th>Value</th><th>Proportion</th></tr>\n'
+        for idx, val in enumerate(vals):
+            table += '\t<tr><td>%s</td><td>%s</td></tr>\n'%(str(val),str(props[idx]))
+        table += '</table>\n'
+    return table
+
+def tableMode(List):
+    """
+    Produces a table to display modes.
+    Passed are two arrays:
+    1 = frequency
+    2 = modal values
+    """
+    table = '<h3>Mode</h3>\n<table class="table table-striped">\n'
+    table += '\t<tr><th>Frequency</th><th>Modal values</th></tr>\n'
+    for turn in List:
+        freq = turn[0]
+        vals = turn[1]
+        table += '\t<tr><td>%s</td><td>%s<br />'%(str(freq), str(vals[0]))
+        for idx in range(1, len(vals)):
+            table += '\t%s<br />\n'%(str(vals[idx]))
+        table += '</td></tr>\n\t<tr><td></td><td></td></tr>\n'
+    table += '</table>\n'
+    return table
+
 
 if __name__ == '__main__':
     a1 = ['Variable 1','Var001']

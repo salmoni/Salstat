@@ -12,11 +12,12 @@ import wx.grid as gridlib
 import wx.html as htmllib
 import wx.html2 as html2lib
 import xlrd, xlwt # import xls format
-import string, os, os.path, pickle
+import string, os, os.path, pickle, csv
 
 # import SalStat specific modules
 import salstat_stats, images, xlrd, tabler, charter, ChartWindow
-import MetaGrid
+import DescriptivesFrame
+import MetaGrid, AllRoutines
 import numpy, math
 
 # and for plots!
@@ -114,7 +115,7 @@ filename = 'UNTITLED'
 global BWidth, BHeight # ugh again!
 BWidth = 80
 BHeight = 25
-HOME = os.getcwd()
+HOME = os.getcwd()+'/'
 
 if wx.Platform == '__WXMSW__':
     face1 = 'Courier New'
@@ -159,6 +160,7 @@ class SaveDialog2(wx.Dialog):
         saveButton = wx.Button(self, 331, "Save...", size=(69, 21),pos=(274,80))
         CancelButton = wx.Button(self, 333, "Cancel", size=(69, 21),pos=(355,80))
         self.SetIcon(ico)
+        saveButton.SetDefault()
         self.Layout()
         wx.EVT_BUTTON(self, 331, self.SaveData)
         wx.EVT_BUTTON(self, 332, self.DiscardData)
@@ -166,12 +168,18 @@ class SaveDialog2(wx.Dialog):
 
     def SaveData(self, event):
         self.EndModal(2)
+        self.ExitVal = 2
 
     def DiscardData(self, event):
         self.EndModal(3)
+        self.ExitVal = 3
 
     def CancelDialog(self, event):
         self.EndModal(4)
+        self.ExitVal = 4
+
+    def GetVals(self):
+        return self.ExitVal
 
 class SaveDialog(wx.Dialog):
     def __init__(self, parent, id):
@@ -444,6 +452,249 @@ class ManyDescriptives:
             str2 = str2 + ln
         output.Addhtml(str2+'</table>\n')
 
+
+class ManyDescriptives2:
+    def __init__(self, source, vars, names):
+        #__x__ = len(ds)
+        str2 = '<table class="table table-striped">'
+        outlist = ['Statistic']
+        for name in names:
+            outlist.append(name)
+        ln = tabler.vtable(outlist)
+        str2 = str2 + ln
+
+        if "Frequency" in source.stats:
+            outlist = ['N']
+            for var in vars:
+                #outlist.append(i.N)
+                outlist.append(AllRoutines.Count(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Sum" in source.stats:
+            outlist = ['Sum']
+            for var in vars:
+                outlist.append(AllRoutines.Sum(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Minimum" in source.stats:
+            outlist = ['Minimum']
+            for var in vars:
+                outlist.append(AllRoutines.Minimum(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Maximum" in source.stats:
+            outlist = ['Maximum']
+            for var in vars:
+                outlist.append(AllRoutines.Maximum(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Range" in source.stats:
+            outlist = ['Range']
+            for var in vars:
+                outlist.append(AllRoutines.Range(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Midrange" in source.stats:
+            outlist = ['Midrange']
+            for var in vars:
+                outlist.append(AllRoutines.Midrange(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Percentages" in source.stats:
+            outlist = ['Percentages']
+            for var in vars:
+                outlist.append(AllRoutines.Percentages(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Relative frequency of the mode" in source.stats:
+            outlist = ['RelFreqMode']
+            for var in vars:
+                outlist.append(AllRoutines.RelFreqMode(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Cumulative sum" in source.stats:
+            outlist = ['CumSum']
+            for var in vars:
+                outlist.append(AllRoutines.CumSum(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Cumulative product" in source.stats:
+            outlist = ['CumProduct']
+            for var in vars:
+                outlist.append(AllRoutines.CumProduct(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Cumulative percent" in source.stats:
+            outlist = ['CumPercent']
+            for var in vars:
+                outlist.append(AllRoutines.CumPercent(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Mean" in source.stats:
+            outlist = ['Mean']
+            for var in vars:
+                outlist.append(AllRoutines.Mean(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Median" in source.stats:
+            outlist = ['Median']
+            for var in vars:
+                outlist.append(AllRoutines.Median(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Tukey's hinges" in source.stats:
+            outlist = ["Tukey's hinges"]
+            for var in vars:
+                outlist.append(AllRoutines.TukeyQuartiles(var))
+            ln = tabler.tableHinges(outlist)
+            str2 = str2 + ln
+
+        if "Moore & McCabe's hinges" in source.stats:
+            outlist = ["Moore & McCabe's hinges"]
+            for var in vars:
+                outlist.append(AllRoutines.MooreQuartiles(var))
+            ln = tabler.tableHinges(outlist)
+            str2 = str2 + ln
+
+        if "Interquartile range" in source.stats:
+            outlist = ["Interquartile range"]
+            for var in vars:
+                outlist.append(AllRoutines.InterquartileRange(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Sum of squares" in source.stats:
+            outlist = ["Sum of squares"]
+            for var in vars:
+                outlist.append(AllRoutines.SS(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Sum of squared deviations" in source.stats:
+            outlist = ["Sum of squared deviations"]
+            for var in vars:
+                outlist.append(AllRoutines.SSDevs(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Variance (sample)" in source.stats:
+            outlist = ['Variance (sample)']
+            for var in vars:
+                outlist.append(AllRoutines.SampVar(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Variance (population)" in source.stats:
+            outlist = ['Variance (population)']
+            for var in vars:
+                outlist.append(AllRoutines.PopVar(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Standard deviation (sample)" in source.stats:
+            outlist = ['Standard Deviation (sample)']
+            for var in vars:
+                outlist.append(AllRoutines.SampStdDev(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Standard deviation (population)" in source.stats:
+            outlist = ['Standard deviation (population)']
+            for var in vars:
+                outlist.append(AllRoutines.PopStdDev(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Standard error" in source.stats:
+            outlist = ['Standard error']
+            for var in vars:
+                outlist.append(AllRoutines.StdErr(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Coefficient of variation" in source.stats:
+            outlist = ['Coefficient of variation']
+            for var in vars:
+                outlist.append(AllRoutines.CoeffVar(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Median absolute deviation" in source.stats:
+            outlist = ['Median absolute deviation']
+            for var in vars:
+                outlist.append(AllRoutines.MAD(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Geometric mean" in source.stats:
+            outlist = ['Geometric mean']
+            for var in vars:
+                outlist.append(AllRoutines.GeometricMean(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Harmonic mean" in source.stats:
+            outlist = ['Harmonic mean']
+            for var in vars:
+                outlist.append(AllRoutines.HarmonicMean(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Mean of subsequent squared differences" in source.stats:
+            outlist = ['Mean of subsequent squared differences']
+            for var in vars:
+                outlist.append(AllRoutines.MSSD(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Skewness" in source.stats:
+            outlist = ['Skewness']
+            for var in vars:
+                outlist.append(AllRoutines.Skewness(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        if "Kurtosis" in source.stats:
+            outlist = ['Kurtosis']
+            for var in vars:
+                outlist.append(AllRoutines.Kurtosis(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+        str2 += '</table>\n'
+
+        if "Proportions" in source.stats:
+            outlist = []
+            for var in vars:
+                outlist.append(AllRoutines.Proportions(var))
+            ln = tabler.tableProportions(outlist)
+            str2 = str2 + ln
+
+        if "Mode" in source.stats:
+            outlist = []
+            for var in vars:
+                outlist.append(AllRoutines.Mode(var))
+            ln = tabler.tableMode(outlist)
+            str2 = str2 + ln
+
+
+
+
+        output.Addhtml(str2)
+
 #---------------------------------------------------------------------------
 # class for grid - used as datagrid.
 class SimpleGrid(gridlib.Grid):
@@ -499,51 +750,106 @@ class SimpleGrid(gridlib.Grid):
 
     def CutData(self, event):
         buffer = wx.TextDataObject()
-        currentcol = self.GetGridCursorCol()
-        currentrow = self.GetGridCursorRow()
-        if self.IsSelection():
-            self.tl = self.GetSelectionBlockTopLeft()[0]
-            self.br = self.GetSelectionBlockBottomRight()[0]
-            top = self.tl[0]
-            left = self.tl[1]
-            bot = self.br[0] + 1
-            right = self.br[1] + 1
-            data = ''
+        Cells = self.GetSelectedCells()
+        Cols  = self.GetSelectedCols()
+        Rows  = self.GetSelectedRows()
+        TopLt = self.GetSelectionBlockTopLeft()
+        BotRt = self.GetSelectionBlockBottomRight()
+        if len(TopLt) > 0:
+            top = TopLt[0][0]
+            left = TopLt[0][1]
+            bot = BotRt[0][0] + 1
+            right = BotRt[0][1] + 1
+            data = []
             for row in range(top, bot):
                 line = []
                 for col in range(left, right):
                     val = str(self.GetCellValue(row, col))
-                    self.SetCellValue(row, col, '')
                     line.append(val)
-                data = data + '\t'.join(line) + '\r'
+                data.append('\t'.join(line))
+            data = '\r'.join(data)
+        elif len(Cols) > 0:
+            data = []
+            for row in range(self.GetNumberRows()):
+                line = []
+                for col in Cols:
+                    line.append(str(self.GetCellValue(row, col)))
+                data.append('\t'.join(line))
+            data = '\r'.join(data)
+        elif len(Rows) > 0:
+            data = []
+            for row in Rows:
+                line = []
+                for col in range(self.GetNumberCols()):
+                    line.append(str(self.GetCellValue(row, col)))
+                data.append('\t'.join(line))
+            data = '\r'.join(data)
+        elif len(Cells) > 0:
+            print "CELLS!"
         else:
+            currentcol = self.GetGridCursorCol()
+            currentrow = self.GetGridCursorRow()
             data = self.GetCellValue(currentrow, currentcol)
         if (wx.TheClipboard.Open()):
             buffer.SetText(data)
             wx.TheClipboard.SetData(buffer)
             wx.TheClipboard.Close()
-            self.SetCellValue(currentrow, currentcol, '')
+            if len(TopLt) > 0:
+                for row in range(top, bot):
+                    for col in range(left, right):
+                        self.SetCellValue(row, col, '')
+            elif len(Cols) > 0:
+                for row in range(0, self.GetNumberRows()):
+                    for col in Cols:
+                        self.SetCellValue(row, col, '')
+            elif len(Rows) > 0:
+                for row in Rows:
+                    for col in range(0, self.GetNumberCols()):
+                        self.SetCellValue(row, col, '')
+            #self.SetCellValue(currentrow, currentcol, '')
             self.Saved = False
 
     def CopyData(self, event):
         buffer = wx.TextDataObject()
-        currentcol = self.GetGridCursorCol()
-        currentrow = self.GetGridCursorRow()
-        if self.IsSelection(): # extend this only if SalStat can paste lists
-            self.tl = self.GetSelectionBlockTopLeft()[0]
-            self.br = self.GetSelectionBlockBottomRight()[0]
-            top = self.tl[0]
-            left = self.tl[1]
-            bot = self.br[0] + 1
-            right = self.br[1] + 1
-            data = ''
+        Cells = self.GetSelectedCells()
+        Cols  = self.GetSelectedCols()
+        Rows  = self.GetSelectedRows()
+        TopLt = self.GetSelectionBlockTopLeft()
+        BotRt = self.GetSelectionBlockBottomRight()
+        if len(TopLt) > 0:
+            top = TopLt[0][0]
+            left = TopLt[0][1]
+            bot = BotRt[0][0] + 1
+            right = BotRt[0][1] + 1
+            data = []
             for row in range(top, bot):
                 line = []
                 for col in range(left, right):
                     val = str(self.GetCellValue(row, col))
                     line.append(val)
-                data = data + '\t'.join(line) + '\r'
+                data.append('\t'.join(line))
+            data = '\r'.join(data)
+        elif len(Cols) > 0:
+            data = []
+            for row in range(self.GetNumberRows()):
+                line = []
+                for col in Cols:
+                    line.append(str(self.GetCellValue(row, col)))
+                data.append('\t'.join(line))
+            data = '\r'.join(data)
+        elif len(Rows) > 0:
+            data = []
+            for row in Rows:
+                line = []
+                for col in range(self.GetNumberCols()):
+                    line.append(str(self.GetCellValue(row, col)))
+                data.append('\t'.join(line))
+            data = '\r'.join(data)
+        elif len(Cells) > 0:
+            print "CELLS!"
         else:
+            currentcol = self.GetGridCursorCol()
+            currentrow = self.GetGridCursorRow()
             data = self.GetCellValue(currentrow, currentcol)
         if (wx.TheClipboard.Open()):
             buffer.SetText(data)
@@ -552,8 +858,17 @@ class SimpleGrid(gridlib.Grid):
 
     def PasteData(self, event):
         buffer = wx.TextDataObject()
-        currentcol = self.GetGridCursorCol()
-        currentrow = self.GetGridCursorRow()
+        Cols = self.GetSelectedCols()
+        Rows = self.GetSelectedRows()
+        if len(Cols) > 0:
+            currentcol = Cols[0]
+            currentrow = 0
+        elif len(Rows) > 0:
+            currentcol = 0
+            currentrow = Rows[0]
+        else:
+            currentcol = self.GetGridCursorCol()
+            currentrow = self.GetGridCursorRow()
         res = wx.TheClipboard.Open()
         if res:
             data = wx.TheClipboard.GetData(buffer)
@@ -633,7 +948,7 @@ class SimpleGrid(gridlib.Grid):
 
     def GetUsedColsType(self):
         ColsUsedIV = []
-        ColsUsedDV = []
+        ColsUsed
         colnumsIV = []
         colnumsDV = []
         ColsUsed, Colnums = self.GetUsedCols()
@@ -725,32 +1040,38 @@ class SimpleGrid(gridlib.Grid):
         dlg.SetIcon(ico)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()
-            if filename[-3:] == 'xml':
+            ext = os.path.splitext(filename)[1]
+            if ext == '.xml':
                 self.LoadNativeXML(filename)
-            if filename[-3:] == "xls" or filename[-4:] == "xlsx":
+            if ext == ".xls" or ext == ".xlsx":
                 self.LoadExcel(filename)
-            else:
+            elif ext == ".txt" or ext == ".csv":
                 inits.update({'opendir': dlg.GetDirectory()})
                 self.ClearGrid()
                 # exception handler here!
                 try:
                     fin = open(filename, "r")
+                    self.Freeze()
+                    sniffer = csv.Sniffer()
+                    sample = ''
+                    for i in range(5):
+                        sample += fin.readline()
+                    dialect = sniffer.sniff(sample, delimiters=',\t')
+                    fin.seek(0)
+                    try:
+                        reader = csv.reader(fin, dialect=dialect)
+                    except TypeError:
+                        reader = csv.reader(fin)
+                    for idxrow, row in enumerate(reader):
+                        for idxcol, item in enumerate(row):
+                            self.SetCellValue(idxrow, idxcol, item)
                 except IOError:
                     pass # what to do if they filename isn't visible? Messagebox?
-                gridline = 0
-                self.Freeze()
-                for i in fin.readlines():
-                    words = string.split(i)
-                    if len(words) > self.GetNumberCols():
-                        NumberCols = len(words) - self.GetNumberCols() + 10
-                        self.AddNCells(NumberCols, 0)
-                    for j in range(len(words)):
-                        self.SetCellValue(gridline, j, words[j])
-                    gridline = gridline + 1
-                    if (gridline == self.GetNumberRows()):
-                        self.AddNCells(0,10)
-                fin.close()
-                self.Thaw()
+                finally:
+                    fin.close()
+                    self.Thaw()
+            else:
+                pass # unknown file extension?! Maybe try MIME type?
             self.ForceRefresh()
             self.Saved = False
             self.named = True
@@ -1347,7 +1668,8 @@ class OutputSheet(wx.Frame):
             fin = open(inputfilename, 'r')
             data = fin.read()
             fin.close()
-            self.htmlpage.SetPage(data,"")
+            self.htmlpage.SetPage(data,HOME)
+            self.htmlpage.Reload() # hack to make content appear
             inits.update({'opendir': dlg.GetDirectory()})
     
     def SaveHtmlPage(self):
@@ -1364,7 +1686,8 @@ class OutputSheet(wx.Frame):
     def Addhtml(self, htmlline):
         self.WholeOutString = self.WholeOutString + htmlline
         htmlend = "\n\t</body>\n<html>"
-        self.htmlpage.SetPage(self.WholeOutString+htmlend,"")
+        self.htmlpage.SetPage(self.WholeOutString+htmlend,HOME)
+        #self.htmlpage.Reload()
         #r = self.scroll.GetScrollRange(wx.VERTICAL)
         #self.scroll.Scroll(0, r+10) 
 
@@ -1386,11 +1709,12 @@ class OutputSheet(wx.Frame):
         # check output has been saved
         self.htmlpage.WholeOutString = CreateHTMLDoc()
         htmlend = "\n\t</body>\n</html>"
-        self.htmlpage.SetPage(self.WholeOutString+htmlend,"")
+        self.htmlpage.SetPage(self.WholeOutString+htmlend,HOME)
+        self.htmlpage.Reload()
 
 #---------------------------------------------------------------------------
 # user selects which cols to analyse, and what stats to have
-class DescriptivesFrame(wx.Dialog):
+class DescriptivesFrame2(wx.Dialog):
     def __init__(self, parent, id):
         wx.Dialog.__init__(self, parent, id, \
                                     "Descriptive Statistics", \
@@ -2668,9 +2992,10 @@ class DataFrame(wx.Frame):
     def ToggleChartWindow(self, event):
         self.chartWindow = ChartWindow.ChartWindow(self.grid)
         self.chartWindow.Show(True)
-        self.chartWindow.preview.SetPage(self.chartWindow.chartObject.page,"")
+        self.chartWindow.preview.SetPage(self.chartWindow.chartObject.page,HOME)
+        self.chartWindow.preview.Reload()
         #print frame.chartObject.page
-        #frame.preview.SetPage(frame.chartObject.chartLine,"")
+        #frame.preview.SetPage(frame.chartObject.chartLine,HOME)
 
     def ToggleMetaGrid(self, event):
         self.metaGrid = MetaGrid.MetaFrame(self)
@@ -2734,8 +3059,31 @@ class DataFrame(wx.Frame):
 
     def GoContinuousDescriptives(self, evt):
         # shows the continuous descriptives dialog
-        win = DescriptivesFrame(frame, -1)
-        win.Show(True)
+        #win = DescriptivesFrame(frame, -1)
+        win = DescriptivesFrame.DFrame(frame, -1, self.grid)
+        res = win.ShowModal()
+        if win.res == "ok":
+            vals = win.GetValues()
+        data = []
+        names = []
+        try:
+            win.stats
+            win.IVs
+        except NameError:
+            pass
+        else:
+            for i in win.IVs:
+                colnum = win.ColNums[i]
+                data.append(numpy.array(self.grid.CleanData(colnum)))
+                names.append(self.grid.GetColLabelValue(colnum))
+                """
+                name = self.grid.GetColLabelValue(colnum)
+                descs.append(salstat_stats.FullDescriptives( \
+                                        self.grid.CleanData(colnum), name, \
+                                        self.grid.missing))
+                """
+            ManyDescriptives2(win, data, names)
+        win.Destroy()
 
     def GoTransformData(self, event):
         win = TransformFrame(frame, -1)
@@ -3334,7 +3682,7 @@ def CreateHTMLDoc():
         page = fin.read()
         fin.close()
     except IOError:
-        page = """<!DOCTYPE html>\n<html>\n    <head>\n        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>\n        <script src="http://code.highcharts.com/highcharts.js"></script>\n        <script src="http://code.highcharts.com/modules/exporting.js"></script>\n        <script src="/js/themes/gray.js"></script>\n        <style>\n            body { font-family: helvectica, arial, \'lucida sans\'; }\n        </style>\n    </head>\n    <body>\n        <a href="http://www.salstat.com" alt="Go to the Salstat home page"><img src="http://bit.ly/1fqFdQm" alt="Salstat Statistics" style="float: right;"></a>\n        <h2>Salstat Statistics</h2>\n\n\n"""   
+        page = """<!DOCTYPE html>\n<html>\n    <head>\n        <script src="jquery/1.8.2/jquery.min.js"></script>\n        <script src="highcharts/3.0.7/highcharts.js"></script>\n        <script src="highcharts/3.0.7/exporting.js"></script>\n        <script src="/js/themes/gray.js"></script>\n        <style>\n            body { font-family: helvectica, arial, \'lucida sans\'; }\n        </style>\n    </head>\n    <body>\n        <a href="http://www.salstat.com" alt="Go to the Salstat home page"><img src="http://bit.ly/1fqFdQm" alt="Salstat Statistics" style="float: right;"></a>\n        <h2>Salstat Statistics</h2>\n\n\n"""   
     return page
 
 #---------------------------------------------------------------------------
