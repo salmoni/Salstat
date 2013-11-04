@@ -75,16 +75,72 @@ def tableHinges(List):
     linehtml += '</tr>\n'
     return linehtml
 
+def tableMultiples(vals, varName):
+    table = '<h3>%s</h3><table class="table table-striped">\n'%varName
+    table += '\t<tr><th>Value</th>'
+    try:
+        if vals['freqs']:
+            table += '<th>Frequencies</th>'
+    except ValueError:
+        table += '<th>Frequencies</th>'
+    try:
+        if vals['props']:
+            table += '<th>Proportions</th>'
+    except ValueError:
+        table += '<th>Proportions</th>'
+    try:
+        if vals['percs']:
+            table += '<th>Percentages</th>'
+    except ValueError:
+        table += '<th>Percentages</th>'
+    table += '</tr>\n'
+    N = len(vals['values'])
+    for idx in range(N):
+        table += '\t<tr><td>%s</td>'%vals['values'][idx]
+        try:
+            if vals['freqs']:
+                table += '<td>%s</td>'%vals['freqs'][idx]
+        except ValueError:
+            table += '<td>%s</td>'%vals['freqs'][idx]
+        try:
+            if vals['props']:
+                table += '<td>%s</td>'%vals['props'][idx]
+        except ValueError:
+            table += '<td>%s</td>'%vals['props'][idx]
+        try:
+            if vals['percs']:
+                table += '<td>%s %%</td>'%vals['percs'][idx]
+        except ValueError:
+            table += '<td>%s %%</td>'%vals['percs'][idx]
+        table += '</tr>\n'
+    table += '</table>\n'
+    return table
+
+def tableFrequencies(List):
+    table = '<table class="table table-striped">\n'
+    table += '\t<tr><th>Value</th><th>Frequency</th></tr>\n'
+    for var in List:
+        values = var[0]
+        freqs  = var[1]
+        table += '<table class="table table-striped">\n'
+        table += '\t<tr><th>Value</th><th>Frequency</th></tr>\n'
+        for idx, row in enumerate(values):
+            table += '\t<tr><td>%s</td><td>%s</td></tr>\n'%(str(row),str(freqs[idx]))
+        table += '</table>\n'
+    return table
+        
 def tableProportions(List):
     """
     Passes two arrays in a list:
     array 1 = value
     array 2 = corresponding proportions
     """
+    print List
+    table = ''
     for turn in List:
         vals = turn[0]
         props = turn[1]
-        table = '<table class="table table-striped">\n'
+        table += '<table class="table table-striped">\n'
         table += '\t<tr><th>Value</th><th>Proportion</th></tr>\n'
         for idx, val in enumerate(vals):
             table += '\t<tr><td>%s</td><td>%s</td></tr>\n'%(str(val),str(props[idx]))

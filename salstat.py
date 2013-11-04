@@ -293,166 +293,138 @@ class GetInits:
         self.ReadInitFile(initfilename) # damn hack!
 
 #---------------------------------------------------------------------------
+# method to calculate the descriptives with multiple grouping variables
+def GetGroups(groupingvars):
+    groups = []
+    k = len(groupingvars)
+    N = len(groupingvars[0])
+    for idx in range(N):
+        row = [var[idx] for var in groupingvars]
+        if row not in groups:
+            groups.append(row)
+    return groups
+
+def ExtractGroupsData(group, groupingvars, variable):
+    N = len(variable)
+    data = []
+    for idx in range(N):
+        row = [element[idx] for element in groupingvars]
+        if group == row:
+            data.append(variable[idx])
+    return data
+
+def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varnames):
+    table = '<h3>Descriptives</h3>\n<table class="table table-striped">\n'
+    table += '\t<tr><th>Variable</th>'
+    for groupname in groupnames:
+        table += '<th>%s</th>'%(groupname)
+    for stat in stats:
+        table += '<th>%s</th>'%(stat)
+    table += '</tr>\n'
+    k = len(groups)
+    for idx, var in enumerate(variables):
+        table += '\t<tr>'
+        #for varname in scorenames:
+        table += '<td rowspan="%d">%s</td>'%(k, varnames[idx])
+        for group in groups:
+            for element in group:
+                table += '<td>%s</td>'%element
+            data = numpy.array(ExtractGroupsData(group, groupingvars, var))
+            if "Count" in stats:
+                val = AllRoutines.Count(data)
+                table += '<td>%s</td>'%str(val)
+            if "Sum" in stats:
+                val = AllRoutines.Sum(data)
+                table += '<td>%s</td>'%str(val)
+            if "Mean" in stats:
+                val = AllRoutines.Mean(data)
+                table += '<td>%s</td>'%str(val)
+            if "Median" in stats:
+                val = AllRoutines.Median(data)
+                table += '<td>%s</td>'%str(val)
+            if "Variance (sample)" in stats:
+                val = AllRoutines.SampVar(data)
+                table += '<td>%s</td>'%str(val)
+            if "Standard deviation (sample)" in stats:
+                val = AllRoutines.SampStdDev(data)
+                table += '<td>%s</td>'%str(val)
+            if "Standard error" in stats:
+                val = AllRoutines.StdErr(data)
+                table += '<td>%s</td>'%str(val)
+            if "Tukey's hinges" in stats:
+                val = AllRoutines.TukeyQuartiles(data)
+                table += '<td>%s, %s</td>'%(str(val[0]), str(val[1]))
+            if "Moore & McCabe's hinges" in stats:
+                val = AllRoutines.MooreQuartiles(data)
+                table += '<td>%s, %s</td>'%(str(val[0]),str(val[1]))
+            if "Skewness" in stats:
+                val = AllRoutines.Skewness(data)
+                table += '<td>%s</td>'%str(val)
+            if "Kurtosis" in stats:
+                val = AllRoutines.Kurtosis(data)
+                table += '<td>%s</td>'%str(val)
+            if "Minimum" in stats:
+                val = AllRoutines.Minimum(data)
+                table += '<td>%s</td>'%str(val)
+            if "Maximum" in stats:
+                val = AllRoutines.Maximum(data)
+                table += '<td>%s</td>'%str(val)
+            if "Range" in stats:
+                val = AllRoutines.Range(data)
+                table += '<td>%s</td>'%str(val)
+            if "Cumulative sum" in stats:
+                val = AllRoutines.CumSum(data)
+                table += '<td>%s</td>'%str(val)
+            if "Cumulative product" in stats:
+                val = AllRoutines.CumProd(data)
+                table += '<td>%s</td>'%str(val)
+            if "Sum" in stats:
+                val = AllRoutines.Sum(data)
+                table += '<td>%s</td>'%str(val)
+            if "Cumulative percent" in stats:
+                val = AllRoutines.CumPercent(data)
+                table += '<td>%s</td>'%str(val)
+            if "Quantile 1 (Hyndman & Fan)" in stats:
+                val = AllRoutines.Sum(data)
+                table += '<td>%s</td>'%str(val)
+            if "Interquartile range" in stats:
+                val = AllRoutines.InterquartileRange(data)
+                table += '<td>%s</td>'%str(val)
+            if "Sum of squares" in stats:
+                val = AllRoutines.SS(data)
+                table += '<td>%s</td>'%str(val)
+            if "Sum of squared deviations" in stats:
+                val = AllRoutines.SSDevs(data)
+                table += '<td>%s</td>'%str(val)
+            if "Variance (population)" in stats:
+                val = AllRoutines.PopVar(data)
+                table += '<td>%s</td>'%str(val)
+            if "Standard deviation (population)" in stats:
+                val = AllRoutines.PopStdDev(data)
+                table += '<td>%s</td>'%str(val)
+            if "Coefficient of variation" in stats:
+                val = AllRoutines.CoeffVar(data)
+                table += '<td>%s</td>'%str(val)
+            if "Median absolute deviation" in stats:
+                val = AllRoutines.MAD(data)
+                table += '<td>%s</td>'%str(val)
+            if "Geometric mean" in stats:
+                val = AllRoutines.GeometricMean(data)
+                table += '<td>%s</td>'%str(val)
+            if "Harmonic mean" in stats:
+                val = AllRoutines.HarmonicMean(data)
+                table += '<td>%s</td>'%str(val)
+            if "Mean of successive squared differences" in stats:
+                val = AllRoutines.MSSD(data)
+                table += '<td>%s</td>'%str(val)
+
+            table += '</tr>\n'
+        table += '</tr>\n'
+    table += '</table>\n'
+    output.Addhtml(table)
+
+#---------------------------------------------------------------------------
 # class to output the results of several "descriptives" in one table
-class ManyDescriptives:
-    def __init__(self, source, ds):
-        #__x__ = len(ds)
-        str2 = '<table class="table table-striped">'
-        outlist = ['Statistic']
-        for i in ds:
-            outlist.append(i.Name)
-        ln = tabler.vtable(outlist)
-        str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(0):
-            outlist = ['N']
-            for i in ds:
-                outlist.append(i.N)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(1):
-            outlist = ['Sum']
-            for i in ds:
-                outlist.append(i.sum)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(2):
-            outlist = ['Mean']
-            for i in ds:
-                outlist.append(i.mean)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(3):
-            outlist = ['Sample variance']
-            for i in ds:
-                outlist.append(i.samplevar)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(4):
-            outlist = ['Sample Standard Deviation']
-            for i in ds:
-                outlist.append(i.stddev)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(5):
-            outlist = ['Standard error']
-            for i in ds:
-                outlist.append(i.stderr)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(6):
-            outlist = ['Sum of squares']
-            for i in ds:
-                outlist.append(i.sumsquares)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(7):
-            outlist = ['Sum of squared deviations']
-            for i in ds:
-                outlist.append(i.ssdevs)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(8):
-            outlist = ['Coefficient of variation']
-            for i in ds:
-                outlist.append(i.coeffvar)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(9):
-            outlist = ['Minimum']
-            for i in ds:
-                outlist.append(i.minimum)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(10):
-            outlist = ['Maximum']
-            for i in ds:
-                outlist.append(i.maximum)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(11):
-            outlist = ['Range']
-            for i in ds:
-                outlist.append(i.range)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(12):
-            outlist = ['Number missing']
-            for i in ds:
-                outlist.append(i.missing)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(13):
-            outlist = ['Geometric mean']
-            for i in ds:
-                outlist.append(i.geomean)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(14):
-            outlist = ['Harmonic mean']
-            for i in ds:
-                outlist.append(i.harmmean)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(15):
-            outlist = ['Skewness']
-            for i in ds:
-                outlist.append(i.skewness)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(16):
-            outlist = ['Kurtosis']
-            for i in ds:
-                outlist.append(i.kurtosis)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(17):
-            outlist = ['Median']
-            for i in ds:
-                outlist.append(i.median)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(18):
-            outlist = ['Median absolute deviation']
-            for i in ds:
-                outlist.append(i.mad)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(19):
-            outlist = ['Mode']
-            for i in ds:
-                outlist.append(i.mode)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if source.DescChoice.IsChecked(20):
-            outlist = ['Number of unique values']
-            for i in ds:
-                outlist.append(i.numberuniques)
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-        output.Addhtml(str2+'</table>\n')
-
-
 class ManyDescriptives2:
     def __init__(self, source, vars, names):
         #__x__ = len(ds)
@@ -463,7 +435,7 @@ class ManyDescriptives2:
         ln = tabler.vtable(outlist)
         str2 = str2 + ln
 
-        if "Frequency" in source.stats:
+        if "Count" in source.stats:
             outlist = ['N']
             for var in vars:
                 #outlist.append(i.N)
@@ -503,13 +475,6 @@ class ManyDescriptives2:
             outlist = ['Midrange']
             for var in vars:
                 outlist.append(AllRoutines.Midrange(var))
-            ln = tabler.vtable(outlist)
-            str2 = str2 + ln
-
-        if "Percentages" in source.stats:
-            outlist = ['Percentages']
-            for var in vars:
-                outlist.append(AllRoutines.Percentages(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
@@ -676,12 +641,29 @@ class ManyDescriptives2:
 
         str2 += '</table>\n'
 
-        if "Proportions" in source.stats:
-            outlist = []
-            for var in vars:
-                outlist.append(AllRoutines.Proportions(var))
-            ln = tabler.tableProportions(outlist)
-            str2 = str2 + ln
+        if ("Frequencies" in source.stats) \
+                or ("Proportions" in source.stats) \
+                or ("Percentages" in source.stats):
+            for idx, var in enumerate(vars):
+                vals = {}
+                if "Frequencies" in source.stats:
+                    values, freqs = AllRoutines.Frequencies(var)
+                    vals['values'] = values
+                    vals['freqs'] = freqs
+                else:
+                    vals['freqs'] = None
+                if "Proportions" in source.stats:
+                    values, props = AllRoutines.Proportions(var)
+                    vals['props'] = props
+                else:
+                    vals['props'] = None
+                if "Percentages" in source.stats:
+                    values, percs = AllRoutines.Percentages(var)
+                    vals['percs'] = percs
+                else:
+                    vals['percs'] = None
+                ln = tabler.tableMultiples(vals, names[idx])
+                str2 += ln
 
         if "Mode" in source.stats:
             outlist = []
@@ -689,9 +671,6 @@ class ManyDescriptives2:
                 outlist.append(AllRoutines.Mode(var))
             ln = tabler.tableMode(outlist)
             str2 = str2 + ln
-
-
-
 
         output.Addhtml(str2)
 
@@ -1190,7 +1169,7 @@ class SimpleGrid(gridlib.Grid):
         return indata
 
     # Routine to return a "clean" list of data from one column
-    def CleanData(self, col):
+    def GetColumnData(self, col):
         indata = []
         self.missing = 0
         for i in range(self.GetNumberRows()):
@@ -1206,7 +1185,7 @@ class SimpleGrid(gridlib.Grid):
                     pass
         return indata
 
-    def GetColumnData(self, col):
+    def CleanData(self, col):
         indata = []
         self.missing = 0
         for i in range(self.GetNumberRows()):
@@ -3030,7 +3009,7 @@ class DataFrame(wx.Frame):
         dlg = wx.FindReplaceDialog(self.grid, data, 'Find and Replace', \
                                     wx.FR_REPLACEDIALOG)
         dlg.data = data
-        dlg.Show(True)
+        res = dlg.Show(True)
 
     def GoEditGrid(self, event):
         #shows dialog for editing the data grid
@@ -3069,20 +3048,27 @@ class DataFrame(wx.Frame):
         try:
             win.stats
             win.IVs
+            if len(win.GRPs) > 0: # user's selected grouping variables
+                groupedVars = [self.grid.CleanData(col) for col in win.GRPs]
+                groups = GetGroups(groupedVars)
+                IVs = [self.grid.CleanData(col) for col in win.IVs]
+                groupnames = win.varListGRP.GetCheckedStrings()
+                varnames = win.varListIV.GetCheckedStrings()
+                GroupedDescriptives(groups, groupedVars, IVs, win.stats, groupnames, varnames)
+            else:
+                for i in win.IVs:
+                    colnum = win.ColNums[i]
+                    data.append(numpy.array(self.grid.CleanData(colnum)))
+                    names.append(self.grid.GetColLabelValue(colnum))
+                    """
+                    name = self.grid.GetColLabelValue(colnum)
+                    descs.append(salstat_stats.FullDescriptives( \
+                                            self.grid.CleanData(colnum), name, \
+                                            self.grid.missing))
+                    """
+                ManyDescriptives2(win, data, names)
         except NameError:
             pass
-        else:
-            for i in win.IVs:
-                colnum = win.ColNums[i]
-                data.append(numpy.array(self.grid.CleanData(colnum)))
-                names.append(self.grid.GetColLabelValue(colnum))
-                """
-                name = self.grid.GetColLabelValue(colnum)
-                descs.append(salstat_stats.FullDescriptives( \
-                                        self.grid.CleanData(colnum), name, \
-                                        self.grid.missing))
-                """
-            ManyDescriptives2(win, data, names)
         win.Destroy()
 
     def GoTransformData(self, event):

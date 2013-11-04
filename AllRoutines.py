@@ -79,11 +79,12 @@ def GetMostUsedTests():
             "Tukey's hinges", "Skewness","Kurtosis"]
 
 def GetAllTests():
-    Alltests = ['Count','Sum','Minimum','Maximum','Range','Proportions', \
-            'Relative frequency of the mode','Cumulative sum', \
-            'Cumulative product','Cumulative percent','Frequencies', \
-            'Trimmed mean','Bi-trimmed mean','Winsorised mean','Mean','Median','Mode', \
-            'Moment',"Tukey's hinges","Moore & McCabe's hinges", \
+    Alltests = ['Count','Sum','Minimum','Maximum','Range','Frequencies',\
+            'Proportions','Percentages','Relative frequency of the mode',\
+            'Cumulative sum', \
+            'Cumulative product','Cumulative percent', \
+            'Trimmed mean','Bi-trimmed mean','Winsorised mean','Mean','Median',\
+            'Mode','Moment',"Tukey's hinges","Moore & McCabe's hinges", \
             'S-Plus quantiles','SPSS quantiles','Mid-step quantiles', \
             'Quantile 1 (Hyndman & Fan)','Quantile 2 (Hyndman & Fan)', \
             'Quantile 3 (Hyndman & Fan)','Quantile 4 (Hyndman & Fan)', \
@@ -94,7 +95,8 @@ def GetAllTests():
             'Variance (population)','Standard deviation (sample)', \
             'Standard deviation (population)','Standard error', \
             'Coefficient of variation','Median absolute deviation', \
-            'Geometric mean','Harmonic mean','Mean of successive squared differences',\
+            'Geometric mean','Harmonic mean', \
+            'Mean of successive squared differences',\
             'Skewness','Kurtosis']
     return Alltests
 
@@ -142,7 +144,7 @@ def UniqueVals(data):
     Returns unique values + frequencies
     """
     try:
-        uniques = set(data)
+        uniques = list(set(data))
     except TypeError:
         data = [data]
         uniques = data
@@ -188,7 +190,7 @@ def GetCorrelationnMatrix(data):
 
 def Count(data):
     """
-    Frequencies
+    Count
     """
     data = numpy.ma.array(data)
     return int(numpy.ma.count(data))
@@ -255,7 +257,9 @@ def Proportions(data):
     Proportions
     """
     un, nu = Frequencies(data)
-    return un, nu / numpy.ma.sum(nu)
+    nu = numpy.ma.array((nu),numpy.float)
+    props = nu / nu.sum()
+    return un, props
     #CumPercent(numbers) / 100.0
 
 def Percentages(data):
