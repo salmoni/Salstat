@@ -19,6 +19,7 @@ class DFrame(wx.Dialog):
                 size = (800,600),style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.grid = grid
         self.res = None
+        self.alphaValNeeded = False
         self.SetMinSize((400,300))
         ico = wx.Icon('icons/PurpleIcon05_32.png',wx.BITMAP_TYPE_PNG)
         self.SetIcon(ico)
@@ -28,11 +29,16 @@ class DFrame(wx.Dialog):
         sizerL = wx.BoxSizer(wx.VERTICAL)
         sizerR = wx.BoxSizer(wx.VERTICAL)
 
-        panelR03 = wx.Panel(self)
+        panelR03 = wx.Panel(self, size=(-1, 30))
         self.tests = wx.Notebook(self)
+        panelR02 = wx.Panel(self, size=(-1, 30))
 
         cancelButton = wx.Button(panelR03, 1341, "Cancel", pos=(20,0), size=(90,-1))
         okButton = wx.Button(panelR03, 1342, "Analyse", pos=(130,0), size=(90,-1))
+
+        wx.StaticText(panelR02, -1, "Alpha value:", pos=(0,-1))
+        self.alphaText = wx.TextCtrl(panelR02, -1, pos=(120,0), size=(40,-1))
+        self.alphaText.Disable()
 
         t1 = wx.StaticText(self, -1, "Describe these variables:")
         t2 = wx.StaticText(self, -1, "Grouped by these variables:")
@@ -58,6 +64,7 @@ class DFrame(wx.Dialog):
 
         sizerR.Add(t4, 0, wx.ALL, border=bord)
         sizerR.Add(self.tests, 1, wx.EXPAND|wx.ALL)
+        sizerR.Add(panelR02, 0, wx.ALL|wx.ALIGN_LEFT, border=bord)
         sizerR.Add(panelR03, 0, wx.ALL|wx.ALIGN_RIGHT, border=bord)
 
         sizerH01.Add(sizerL, 1, wx.EXPAND|wx.ALL, border=bord)
@@ -76,7 +83,9 @@ class DFrame(wx.Dialog):
 
     def OkayButton(self, event):
         self.res = "ok"
-        self.Close()
+        alpha_val = self.alphaText.GetValue()
+        if self.CanClose():
+            self.Close()
 
     def GetValues(self):
         IVs = self.varListIV.GetChecked()
@@ -89,6 +98,17 @@ class DFrame(wx.Dialog):
             self.stats = self.testListShort.GetCheckedStrings()
         elif page == 1:
             self.stats = self.testListLong.GetCheckedStrings()
+
+    def CanClose(self):
+        if self.alphaValNeeded:
+            try:
+                self.alpha = float(alpha_val)
+                if (self.alpha > 0.0) and (self.alpha < 1.0):
+                    return True
+                else:
+                    return False
+            except ValueError:
+                return False
 
     def GetVars(self):
         if self.grid:
