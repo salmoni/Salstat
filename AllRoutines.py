@@ -76,7 +76,7 @@ import numpy.ma
 def GetMostUsedTests():
     return ['Count','Sum','Mean','Median','Variance (sample)', \
             'Standard deviation (sample)', 'Standard error', \
-            "Tukey's hinges", "Skewness","Kurtosis"]
+            "Quartiles", "Skewness","Kurtosis"]
 
 def GetAllTests():
     Alltests = ['Count','Sum','Minimum','Maximum','Range','Frequencies',\
@@ -84,7 +84,7 @@ def GetAllTests():
             'Cumulative sum', \
             'Cumulative product','Cumulative percent', \
             'Trimmed mean','Bi-trimmed mean','Winsorised mean','Mean','Median',\
-            'Mode','Moment',"Tukey's hinges","Moore & McCabe's hinges", \
+            'Mode','Moment',"Quartiles","Tukey's hinges","Moore & McCabe's hinges", \
             'S-Plus quantiles','SPSS quantiles','Mid-step quantiles', \
             'Quantile 1 (Hyndman & Fan)','Quantile 2 (Hyndman & Fan)', \
             'Quantile 3 (Hyndman & Fan)','Quantile 4 (Hyndman & Fan)', \
@@ -97,8 +97,18 @@ def GetAllTests():
             'Coefficient of variation','Median absolute deviation', \
             'Geometric mean','Harmonic mean', \
             'Mean of successive squared differences',\
-            'Skewness','Kurtosis']
+            'Skewness','Kurtosis', 'Confidence intervals']
     return Alltests
+
+def GetExtraTests():
+    Extratests = ['S-Plus quantiles','SPSS quantiles','Mid-step quantiles', \
+            'Quantile 1 (Hyndman & Fan)','Quantile 2 (Hyndman & Fan)', \
+            'Quantile 3 (Hyndman & Fan)','Quantile 4 (Hyndman & Fan)', \
+            'Quantile 5 (Hyndman & Fan)','Quantile 6 (Hyndman & Fan)', \
+            'Quantile 7 (Hyndman & Fan)','Quantile 8 (Hyndman & Fan)', \
+            'Quantile 9 (Hyndman & Fan)','Trimmed mean','Bi-trimmed mean',\
+            'Confidence intervals']
+    return Extratests
 
 def Vsort(data):
     # check that 'data' is a vector
