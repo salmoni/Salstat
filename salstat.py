@@ -16,7 +16,7 @@ import string, os, os.path, pickle, csv
 
 # import SalStat specific modules
 import salstat_stats, images, xlrd, tabler, charter, ChartWindow
-import DescriptivesFrame
+import DescriptivesFrame, PrefsFrame
 import MetaGrid, AllRoutines
 import numpy, math
 
@@ -52,6 +52,7 @@ ID_PREF_VARIABLES = wx.NewId()
 ID_PREF_GRID = wx.NewId()
 ID_PREF_CELLS = wx.NewId()
 ID_PREF_FONTS = wx.NewId()
+ID_PREF_GEN = wx.NewId()
 ID_PREPARATION_DESCRIPTIVES = wx.NewId()
 ID_PREPARATION_TRANSFORM = wx.NewId()
 ID_PREPARATION_OUTLIERS = wx.NewId()
@@ -102,6 +103,7 @@ ID_TITLE_GXAXIS = wx.NewId()
 ID_TITLE_GTITLE = wx.NewId()
 ID_TITLE_LEGEND = wx.NewId()
 ID_TITLE_GRID = wx.NewId()
+ID_FIND_STRING = wx.NewId()
 
 DescList=['N','Sum','Mean','Variance','Standard Deviation','Standard Error',\
                                     'Sum of Squares','Sum of Squared Devs', \
@@ -321,7 +323,7 @@ def ExtractGroupsData(group, groupingvars, variable):
             data.append(variable[idx])
     return data
 
-def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varnames):
+def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varnames,alpha):
     table = '<h3>Descriptives</h3>\n<table class="table table-striped">\n'
     table += '\t<tr><th>Variable</th>'
     for groupname in groupnames:
@@ -389,14 +391,8 @@ def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varn
             if "Cumulative product" in stats:
                 val = AllRoutines.CumProd(data)
                 table += '<td>%s</td>'%str(val)
-            if "Sum" in stats:
-                val = AllRoutines.Sum(data)
-                table += '<td>%s</td>'%str(val)
             if "Cumulative percent" in stats:
                 val = AllRoutines.CumPercent(data)
-                table += '<td>%s</td>'%str(val)
-            if "Quantile 1 (Hyndman & Fan)" in stats:
-                val = AllRoutines.Sum(data)
                 table += '<td>%s</td>'%str(val)
             if "Interquartile range" in stats:
                 val = AllRoutines.InterquartileRange(data)
@@ -429,6 +425,47 @@ def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varn
                 val = AllRoutines.MSSD(data)
                 table += '<td>%s</td>'%str(val)
 
+            if "S-Plus quantiles" in stats:
+                val = AllRoutines.SPQuantile(data,alpha)
+                table += '<td>%s</td>'%str(val)
+            if "SPSS quantiles" in stats:
+                val = AllRoutines.TradQuantile(data,alpha)
+                table += '<td>%s</td>'%str(val)
+            if "Mid-step quantiles" in stats:
+                val = AllRoutines.MidstepQuantile(data,alpha)
+                table += '<td>%s</td>'%str(val)
+            if "Quantile 1 (Hyndman & Fan)" in stats:
+                val = AllRoutines.Q1(data,alpha)
+                table += '<td>%s</td>'%str(val)
+            if "Quantile 2 (Hyndman & Fan)" in stats:
+                val = AllRoutines.Q2(data,alpha)
+                table += '<td>%s</td>'%str(val)
+            if "Quantile 3 (Hyndman & Fan)" in stats:
+                val = AllRoutines.Q3(data,alpha)
+                table += '<td>%s</td>'%str(val)
+            if "Quantile 4 (Hyndman & Fan)" in stats:
+                val = AllRoutines.Q4(data,alpha)
+                table += '<td>%s</td>'%str(val)
+            if "Quantile 5 (Hyndman & Fan)" in stats:
+                val = AllRoutines.Q5(data,alpha)
+                table += '<td>%s</td>'%str(val)
+            if "Quantile 6 (Hyndman & Fan)" in stats:
+                val = AllRoutines.Q6(data,alpha)
+                table += '<td>%s</td>'%str(val)
+            if "Quantile 7 (Hyndman & Fan)" in stats:
+                val = AllRoutines.Q7(data,alpha)
+                table += '<td>%s</td>'%str(val)
+            if "Quantile 8 (Hyndman & Fan)" in stats:
+                val = AllRoutines.Q8(data,alpha)
+                table += '<td>%s</td>'%str(val)
+            if "Quantile 9 (Hyndman & Fan)" in stats:
+                val = AllRoutines.Q9(data,alpha)
+                table += '<td>%s</td>'%str(val)
+
+            if "Trimmed mean" in stats:
+                val = AllRoutines.TrimmedMean(data,alpha)
+                table += '<td>%s</td>'%str(val)
+
             table += '</tr>\n'
         table += '</tr>\n'
     table += '</table>\n'
@@ -437,7 +474,7 @@ def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varn
 #---------------------------------------------------------------------------
 # class to output the results of several "descriptives" in one table
 class ManyDescriptives2:
-    def __init__(self, source, vars, names):
+    def __init__(self, source, vars, names,alpha):
         #__x__ = len(ds)
         str2 = '<table class="table table-striped">'
         outlist = ['Statistic']
@@ -615,6 +652,13 @@ class ManyDescriptives2:
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
+        if "Trimmed mean" in source.stats:
+            outlist = ['Trimmed mean']
+            for var in vars:
+                outlist.append(AllRoutines.TrimmedMean(var,alpha))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
         if "Geometric mean" in source.stats:
             outlist = ['Geometric mean']
             for var in vars:
@@ -649,6 +693,87 @@ class ManyDescriptives2:
                 outlist.append(AllRoutines.Kurtosis(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
+
+        if "S-Plus quantiles" in source.stats:
+            outlist = ['S-Plus quantiles']
+            for var in vars:
+                outlist.append(AllRoutines.SPQuantile(var,alpha))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+        if "SPSS quantiles" in source.stats:
+            outlist = ['SPSS quantiles']
+            for var in vars:
+                outlist.append(AllRoutines.TradQuantile(var,alpha))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+        if "Mid-step quantiles" in source.stats:
+            outlist = ['Mid-step quantiles']
+            for var in vars:
+                outlist.append(AllRoutines.MidstepQuantiles(var,alpha))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+        if "Quantile 1 (Hyndman & Fan)" in source.stats:
+            outlist = ['Quantile 1 (Hyndman & Fan)']
+            for var in vars:
+                outlist.append(AllRoutines.Q1(var,alpha))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+        if "Quantile 2 (Hyndman & Fan)" in source.stats:
+            outlist = ['Quantile 2 (Hyndman & Fan)']
+            for var in vars:
+                outlist.append(AllRoutines.Q2(var,alpha))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+        if "Quantile 3 (Hyndman & Fan)" in source.stats:
+            outlist = ['Quantile 3 (Hyndman & Fan)']
+            for var in vars:
+                outlist.append(AllRoutines.Q3(var,alpha))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+        if "Quantile 4 (Hyndman & Fan)" in source.stats:
+            outlist = ['Quantile 4 (Hyndman & Fan)']
+            for var in vars:
+                outlist.append(AllRoutines.Q4(var,alpha))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+        if "Quantile 5 (Hyndman & Fan)" in source.stats:
+            outlist = ['Quantile 5 (Hyndman & Fan)']
+            for var in vars:
+                outlist.append(AllRoutines.Q5(var,alpha))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+        if "Quantile 6 (Hyndman & Fan)" in source.stats:
+            outlist = ['Quantile 6 (Hyndman & Fan)']
+            for var in vars:
+                outlist.append(AllRoutines.Q6(var,alpha))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+        if "Quantile 7 (Hyndman & Fan)" in source.stats:
+            outlist = ['Quantile 7 (Hyndman & Fan)']
+            for var in vars:
+                outlist.append(AllRoutines.Q7(var,alpha))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+        if "Quantile 8 (Hyndman & Fan)" in source.stats:
+            outlist = ['Quantile 8 (Hyndman & Fan)']
+            for var in vars:
+                outlist.append(AllRoutines.Q8(var,alpha))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+        if "Quantile 9 (Hyndman & Fan)" in source.stats:
+            outlist = ['Quantile 9 (Hyndman & Fan)']
+            for var in vars:
+                outlist.append(AllRoutines.Q9(var,alpha))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+
+
+            if "Trimmed mean" in stats:
+                val = AllRoutines.TrimmedMean(data,alpha)
+                table += '<td>%s</td>'%str(val)
+
+
+
 
         str2 += '</table>\n'
 
@@ -1019,6 +1144,48 @@ class SimpleGrid(gridlib.Grid):
             self.Saved = True
         else:
             self.SaveAsDataASCII(None)
+
+    def LoadFile(self, filename):
+        # Loads a filename. This is a generic routine to handle
+        # command-line arguments
+        ext = os.path.splitext(filename)[1]
+        if ext == '.xml':
+            self.LoadNativeXML(filename)
+        if ext == ".xls" or ext == ".xlsx":
+            self.LoadExcel(filename)
+        elif ext == ".txt" or ext == ".csv":
+            inits.update({'opendir': dlg.GetDirectory()})
+            self.ClearGrid()
+            # exception handler here!
+            try:
+                fin = open(filename, "r")
+                self.Freeze()
+                sniffer = csv.Sniffer()
+                sample = ''
+                for i in range(5):
+                    sample += fin.readline()
+                dialect = sniffer.sniff(sample, delimiters=',\t')
+                fin.seek(0)
+                try:
+                    reader = csv.reader(fin, dialect=dialect)
+                except TypeError:
+                    reader = csv.reader(fin)
+                for idxrow, row in enumerate(reader):
+                    for idxcol, item in enumerate(row):
+                        self.SetCellValue(idxrow, idxcol, item)
+            except IOError:
+                pass # what to do if they filename isn't visible? Messagebox?
+            finally:
+                fin.close()
+                self.Thaw()
+        else:
+            pass # unknown file extension?! Maybe try MIME type?
+        self.ForceRefresh()
+        self.Saved = False
+        self.named = True
+        path, self.filename = os.path.split(filename)
+        self.parent.SetTitle(self.filename)
+        
 
     # Loads an ASCII data file - only with all datapoints filled though!
     # also does csv values as well
@@ -2866,6 +3033,7 @@ class DataFrame(wx.Frame):
         prefs_menu.Append(ID_PREF_GRID, 'Add Columns and Rows...')
         prefs_menu.Append(ID_PREF_CELLS, 'Change Cell Size...')
         prefs_menu.Append(ID_PREF_FONTS, 'Change the Font...')
+        prefs_menu.Append(ID_PREF_GEN, 'Preferences...')
         analyse_menu.Append(ID_PREPARATION_DESCRIPTIVES, 'Descriptive Statistics...')
         analyse_menu.Append(ID_PREPARATION_TRANSFORM, 'Transform Data...')
         analyse_menu.AppendSeparator()
@@ -2931,17 +3099,6 @@ class DataFrame(wx.Frame):
         self.SetToolBar(toolBar)
         #still need to define event handlers
         #set up the datagrid
-        """
-        self.grid = MetaGrid.metaGrid(self)
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.metagrid = MetaGrid.metaGrid(self)
-        self.sizer.Add(self.grid, 1, wx.EXPAND)
-        self.sizer.Add(self.metagrid, 1, wx.EXPAND)
-        self.metagrid.Hide()
-        self.grid.Show()
-        self.SetSizer(self.sizer)
-        self.Layout()
-        """
         self.grid = SimpleGrid(self, log)
         self.grid.SetDefaultColSize(60, True)
         self.grid.SetRowLabelSize(40)
@@ -2974,6 +3131,7 @@ class DataFrame(wx.Frame):
         wx.EVT_MENU(self, ID_EDIT_DELETECOL, self.grid.DeleteCurrentCol)
         wx.EVT_MENU(self, ID_EDIT_DELETEROW, self.grid.DeleteCurrentRow)
         wx.EVT_MENU(self, ID_PREF_VARIABLES, self.GoVariablesFrame)
+        wx.EVT_MENU(self, ID_PREF_GEN, self.NewPrefs)
         wx.EVT_TOOL(self, 85, self.GoVariablesFrame)
         wx.EVT_TOOL(self, 87, self.ToggleMetaGrid)
         wx.EVT_TOOL(self, 88, self.ToggleChartWindow)
@@ -2998,6 +3156,26 @@ class DataFrame(wx.Frame):
         wx.EVT_MENU(self, ID_HELP_LICENCE, self.GoHelpLicenceFrame)
         wx.EVT_MENU(self, ID_FILE_EXIT, self.EndApplication)
         wx.EVT_CLOSE(self, self.EndApplication)
+        #wx.EVT_FIND(self, ID_FIND_STRING, self.OnFind)
+        #wx.EVT_FIND_NEXT(self, ID_FIND_STRING, self.on_find)
+        #wx.EVT_FIND_REPLACE(self, ID_FIND_STRING, self.on_find)
+        #wx.EVT_FIND_REPLACE_ALL(self, ID_FIND_STRING, self.on_find)
+        if filename:
+            frameTitle = filename
+            self.grid.LoadFile(filename)
+
+    def NewPrefs(self, event):
+        PFrame = PrefsFrame.PFrame(None, -1, self.grid)
+        PWin = PFrame.ShowModal()
+        if PFrame.res == "ok":
+            vals = PFrame.Vals
+            self.grid.SetDefaultRowSize(int(vals.CellHeight))
+            self.grid.SetDefaultColSize(int(vals.CellWidth))
+            # do the rest
+            self.grid.ForceRefresh()
+        else:
+            pass
+        PFrame.Destroy()
 
     def ToggleChartWindow(self, event):
         self.chartWindow = ChartWindow.ChartWindow(self.grid)
@@ -3033,14 +3211,150 @@ class DataFrame(wx.Frame):
         SheetWin = OutputSheet(frame, -1)
         SheetWin.Show(True)
 
+    def CheckMatch(self, val, fstring):
+        if fstring in val:
+            return True
+        else:
+            return False
+
+    def SearchUp(self, fstring, rstring = None):
+        maxrows = self.grid.GetNumberRows()
+        maxcols = self.grid.GetNumberCols()
+        if self.newsearch:
+            self.srow = self.grid.GetGridCursorCol()
+            self.scol = self.grid.GetGridCursorRow()
+            self.newsearch = False
+        val = self.grid. GetCellValue(self.srow, self.scol)
+        res = self.CheckMatch(val, fstring)
+        if res:
+            self.grid.SetGridCursor(self.srow, self.scol)
+            self.grid.SelectBlock(self.srow, self.scol,self.srow, self.scol)
+            if self.srow > 0:
+                self.srow = self.srow - 1
+            return
+        for idx_row in range(self.srow+1, 0, -1):
+            val = self.grid. GetCellValue(idx_row, self.scol)
+            res = self.CheckMatch(val, fstring)
+            if res:
+                self.srow = idx_row
+                self.grid.SetGridCursor(self.srow, self.scol)
+                self.grid.SelectBlock(self.srow, self.scol,self.srow, self.scol)
+                return
+        for idx_col in range(self.scol, 0, -1):
+            for idx_row in range(maxrows, 0, -1):
+                val = self.grid.GetCellValue(idx_row, idx_col)
+                res = self.CheckMatch(val, fstring)
+                if res:
+                    self.srow = idx_row
+                    self.scol = idx_col
+                    self.grid.SetGridCursor(self.srow, self.scol)
+                    self.grid.SelectBlock(self.srow, self.scol,self.srow, self.scol)
+                    return
+        self.scol = maxcols
+        self.srow = maxrows
+
+    def SearchDown(self, fstring, rstring = None):
+        maxrows = self.grid.GetNumberRows()
+        maxcols = self.grid.GetNumberCols()
+        if self.newsearch:
+            self.srow = self.grid.GetGridCursorCol()
+            self.scol = self.grid.GetGridCursorRow()
+            self.newsearch = False
+        val = self.grid. GetCellValue(self.srow, self.scol)
+        res = self.CheckMatch(val, fstring)
+        if res:
+            self.grid.SetGridCursor(self.srow, self.scol)
+            self.grid.SelectBlock(self.srow, self.scol,self.srow, self.scol)
+            if self.srow < maxrows:
+                self.srow = self.srow + 1
+            return
+        for idx_row in range(self.srow+1, maxrows):
+            val = self.grid. GetCellValue(idx_row, self.scol)
+            res = self.CheckMatch(val, fstring)
+            if res:
+                self.srow = idx_row
+                self.grid.SetGridCursor(self.srow, self.scol)
+                self.grid.SelectBlock(self.srow, self.scol,self.srow, self.scol)
+                return
+        for idx_col in range(self.scol, maxcols):
+            for idx_row in range(0, maxrows):
+                val = self.grid.GetCellValue(idx_row, idx_col)
+                res = self.CheckMatch(val, fstring)
+                if res:
+                    self.srow = idx_row
+                    self.scol = idx_col
+                    self.grid.SetGridCursor(self.srow, self.scol)
+                    self.grid.SelectBlock(self.srow, self.scol,self.srow, self.scol)
+                    return
+        self.scol = 0
+        self.srow = 0
+
+    def OnFind(self, event):
+        try:
+            self.newsearch
+        except AttributeError:
+            self.newsearch = True
+        fstring = event.GetFindString()
+        Fdata = event.GetFlags()
+        if Fdata in [0,2,4,6]:
+            Fdown = False
+        else:
+            Fdown = True
+        if Fdata in [0,1,4,5]:
+            Fwhole = False
+        else:
+            Fwhole = True
+        if Fdata in [0,1,2,3]:
+            Fcase = False
+        else:
+            Fcase = True
+        if Fdown:
+            self.SearchDown(fstring)
+        else:
+            self.SearchUp(fstring)
+
+    def OnFindNext(self, event):
+        fstring = event.GetFindString()
+        Fdata = event.GetFlags()
+        if Fdata in [0,2,4,6]:
+            Fdown = False
+        else:
+            Fdown = True
+        if Fdata in [0,1,4,5]:
+            Fwhole = False
+        else:
+            Fwhole = True
+        if Fdata in [0,1,2,3]:
+            Fcase = False
+        else:
+            Fcase = True
+        if Fdown:
+            self.SearchDown(fstring)
+        else:
+            self.SearchUp(fstring)
+
+    def OnFindReplace(self, event):
+        fstring = event.GetFindString()
+        rstring = event.GetReplaceString()
+        Fdata = event.GetFlags()
+
+    def OnFindReplaceAll(self, event):
+        fstring = event.GetFindString()
+        rstring = event.GetReplaceString()
+        Fdata = event.GetFlags()
+
     def GoFindDialog(self, event):
         # Shows the find & replace dialog
         # NOTE - this doesn't appear to work on the grid, so I might be missing something...
         data = wx.FindReplaceData()
-        dlg = wx.FindReplaceDialog(self.grid, data, 'Find and Replace', \
+        self.dlg = wx.FindReplaceDialog(self, data, 'Find and Replace', \
                                     wx.FR_REPLACEDIALOG)
-        dlg.data = data
-        res = dlg.Show(True)
+        self.dlg.data = data
+        self.dlg.Bind(wx.EVT_FIND, self.OnFind)
+        self.dlg.Bind(wx.EVT_FIND_NEXT, self.OnFindNext)
+        self.dlg.Bind(wx.EVT_FIND_REPLACE, self.OnFindReplace)
+        self.dlg.Bind(wx.EVT_FIND_REPLACE_ALL, self.OnFindReplaceAll)
+        res = self.dlg.Show(True)
 
     def GoEditGrid(self, event):
         #shows dialog for editing the data grid
@@ -3085,19 +3399,22 @@ class DataFrame(wx.Frame):
                 IVs = [self.grid.CleanData(col) for col in win.IVs]
                 groupnames = win.varListGRP.GetCheckedStrings()
                 varnames = win.varListIV.GetCheckedStrings()
-                GroupedDescriptives(groups, groupedVars, IVs, win.stats, groupnames, varnames)
+                alpha = win.alpha
+                GroupedDescriptives(groups, groupedVars, IVs, win.stats, groupnames, varnames,alpha)
             else:
                 for i in win.IVs:
                     colnum = win.ColNums[i]
                     data.append(numpy.array(self.grid.CleanData(colnum)))
                     names.append(self.grid.GetColLabelValue(colnum))
+                    alpha = win.alpha
+                    print alpha
                     """
                     name = self.grid.GetColLabelValue(colnum)
                     descs.append(salstat_stats.FullDescriptives( \
                                             self.grid.CleanData(colnum), name, \
                                             self.grid.missing))
                     """
-                ManyDescriptives2(win, data, names)
+                ManyDescriptives2(win, data, names,alpha)
         except NameError:
             pass
         win.Destroy()

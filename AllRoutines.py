@@ -346,7 +346,6 @@ def TrimmedData(Data, Lsplit, Usplit = None):
     Data = numpy.ma.sort(Data)
     LB = Q7(Data, Lsplit)
     UB = Q7(Data, Usplit)
-    print LB, UB
     Data = Data[numpy.ma.greater(Data, LB)]
     Data = Data[numpy.ma.less(Data,UB)]
     return Data

@@ -135,7 +135,6 @@ def tableProportions(List):
     array 1 = value
     array 2 = corresponding proportions
     """
-    print List
     table = ''
     for turn in List:
         vals = turn[0]

@@ -8,10 +8,21 @@ import os
 import wx
 
 
+class ReturnVals(object):
+    def __init__(self, NumRows, NumCols, CellHeight, CellWidth, WorkingDir):
+        self.NumRows = NumRows
+        self.NumCols = NumCols
+        self.CellHeight = CellHeight
+        self.CellWidth = CellWidth
+        self.workingdir = WorkingDir
+
 class PFrame(wx.Dialog):
     def __init__(self, parent, id, grid, initdir=None):
         wx.Dialog.__init__(self, parent, id, "Preferences", \
                 size = (600,400),style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        if not grid:
+            pass
+        self.res = None
         self.tabs = wx.Notebook(self, -1, pos=(20,20), size=(560,300))
         self.panel_gen = wx.Panel(self.tabs, -1)
         self.panel_grid = wx.Panel(self.tabs, -1)
@@ -28,10 +39,10 @@ class PFrame(wx.Dialog):
         wx.StaticText(self.panel_grid, -1, "Size:", pos=(380,110))
         wx.StaticText(self.panel_out, -1, "Font face:", pos=(20,30))
         wx.StaticText(self.panel_out, -1, "Size:", pos=(380,30))
-        self.numcols = wx.TextCtrl(self.panel_grid, -1, pos=(160,30), size=(60,21))
-        self.numrows = wx.TextCtrl(self.panel_grid, -1, pos=(160,60), size=(60,21))
-        self.cellwidth = wx.TextCtrl(self.panel_grid, -1, pos=(400,30), size=(60,21))
-        self.cellheight = wx.TextCtrl(self.panel_grid, -1, pos=(400,60), size=(60,21))
+        self.numcols = wx.TextCtrl(self.panel_grid, -1, pos=(160,30), size=(60,21),value=str(grid.GetNumberCols()))
+        self.numrows = wx.TextCtrl(self.panel_grid, -1, pos=(160,60), size=(60,21),value=str(grid.GetNumberRows()))
+        self.cellwidth = wx.TextCtrl(self.panel_grid, -1, pos=(400,30), size=(60,21),value=str(grid.GetDefaultColSize()))
+        self.cellheight = wx.TextCtrl(self.panel_grid, -1, pos=(400,60), size=(60,21),value=str(grid.GetDefaultRowSize()))
         self.directory = wx.TextCtrl(self.panel_gen, -1, pos=(160,30),size=(260,21))
         #self.font_sizeO = wx.TextCtrl(self.panel_out, -1, pos=(430,30),size=(30,21))
         self.font_faceG = wx.TextCtrl(self.panel_grid, -1, pos=(160,110),size=(200,21))
@@ -48,22 +59,24 @@ class PFrame(wx.Dialog):
         wx.EVT_BUTTON(self, 2297, self.Okay)
 
     def GetValues(self):
-        self.NumRows = self.numrows.GetValue()
-        self.NumCols = self.numcols.GetValue()
-        self.CellHeight = self.cellheight.GetValue()
-        self.CellWidth = self.cellwidth.GetValue()
-        self.workingdir = self.directory.GetValue()
+        NumRows = self.numrows.GetValue()
+        NumCols = self.numcols.GetValue()
+        CellHeight = self.cellheight.GetValue()
+        CellWidth = self.cellwidth.GetValue()
+        workingdir = self.directory.GetValue()
+        self.Vals = ReturnVals(NumRows, NumCols, CellHeight, CellWidth, workingdir)
 
     def Okay(self, event):
         self.GetValues()
+        self.res = "ok"
         self.Close()
 
     def Cancel(self, event):
-        self.Destroy()
+        self.Close()
 
 if __name__ == '__main__':
     app = wx.App()
     frame = PFrame(None, -1, None)
-    frame.Show(True)
+    PWin = frame.Show()
     app.MainLoop()
 

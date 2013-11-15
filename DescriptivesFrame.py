@@ -50,8 +50,8 @@ class DFrame(wx.Dialog):
         self.varListGRP = wx.CheckListBox(self, -1, choices=self.vars)
 
         testshort, testlong = self.GetTests()
-        self.testListShort = wx.CheckListBox(self.tests, -1, choices=testshort)
-        self.testListLong  = wx.CheckListBox(self.tests, -1, choices=testlong)
+        self.testListShort = wx.CheckListBox(self.tests, 1343, choices=testshort)
+        self.testListLong  = wx.CheckListBox(self.tests, 1344, choices=testlong)
         self.tests.AddPage(self.testListShort, "Most used tests")
         self.tests.AddPage(self.testListLong, "All tests")
 
@@ -76,9 +76,28 @@ class DFrame(wx.Dialog):
         self.Layout()
         wx.EVT_BUTTON(self, 1341, self.CancelButton)
         wx.EVT_BUTTON(self, 1342, self.OkayButton)
+        wx.EVT_CHECKLISTBOX(self, 1343, self.CheckChecked)
+        wx.EVT_CHECKLISTBOX(self, 1344, self.CheckChecked)
+
+    def CheckChecked(self, event):
+        page = self.tests.GetSelection()
+        if page == 0:
+            stats = self.testListShort.GetCheckedStrings()
+        elif page == 1:
+            stats = self.testListLong.GetCheckedStrings()
+        alphaFlag = False
+        for stat in stats:
+            if stat in self.alphaTests:
+                self.alphaText.Enable()
+                self.alphaValNeeded = True
+                alphaFlag = True
+        if not alphaFlag:
+            self.alphaText.Disable()
+            self.alphaValNeeded = False
 
     def CancelButton(self, event):
         self.res = "cancel"
+        self.alpha = None
         self.Close()
 
     def OkayButton(self, event):
@@ -100,15 +119,18 @@ class DFrame(wx.Dialog):
             self.stats = self.testListLong.GetCheckedStrings()
 
     def CanClose(self):
+        self.alpha = None
         if self.alphaValNeeded:
             try:
-                self.alpha = float(alpha_val)
+                self.alpha = float(self.alphaText.GetValue())
                 if (self.alpha > 0.0) and (self.alpha < 1.0):
                     return True
                 else:
                     return False
             except ValueError:
                 return False
+        else:
+            return True
 
     def GetVars(self):
         if self.grid:
@@ -120,6 +142,7 @@ class DFrame(wx.Dialog):
     def GetTests(self):
         testshort = AllRoutines.GetMostUsedTests()
         testlong  = AllRoutines.GetAllTests()
+        self.alphaTests = AllRoutines.GetExtraTests()
         return testshort, testlong
 
     def OnClose(self, event):
@@ -129,6 +152,7 @@ class DFrame(wx.Dialog):
 if __name__ == '__main__':
     app = wx.App()
     frame = DFrame(None, -1, None)
-    frame.Show(True)
+    frame.ShowModal()
+    print frame.alpha
     app.MainLoop()
 
