@@ -1437,37 +1437,6 @@ class EditGridFrame(wx.Dialog):
         self.Close(True)
 
 #---------------------------------------------------------------------------
-# grid preferences - set row & col sizes
-class GridPrefs(wx.Dialog):
-    def __init__(self, parent, id):
-        wx.Dialog.__init__(self, parent, id, "Cell Size", \
-                                    size=(205,100+wind))
-        self.SetIcon(ico)
-        self.colwidth = wx.SpinCtrl(self, -1, "", wx.Point(110,10), wx.Size(80,25))
-        self.colwidth.SetRange(1,200)
-        self.colwidth.SetValue(frame.grid.GetDefaultColSize())
-        self.rowheight= wx.SpinCtrl(self, -1, "", wx.Point(110,50), wx.Size(80,25))
-        self.rowheight.SetRange(1,100)
-        self.rowheight.SetValue(frame.grid.GetDefaultRowSize())
-        l1 = wx.StaticText(self, -1, 'Column Width:',pos=(10,15))
-        l2 = wx.StaticText(self, -1, 'Row Height:',pos=(10,55))
-        okaybutton = wx.Button(self, 321, "Okay", wx.Point(10, 90), \
-                                    wx.Size(BWidth, BHeight))
-        cancelbutton = wx.Button(self, 322, "Cancel", wx.Point(110,90),\
-                                    wx.Size(BWidth, BHeight))
-        wx.EVT_BUTTON(self, 321, self.OkayButtonPressed)
-        wx.EVT_BUTTON(self, 322, self.OnCloseGridPrefs)
-
-    def OkayButtonPressed(self, event):
-        frame.grid.SetDefaultColSize(self.colwidth.GetValue(), True)
-        frame.grid.SetDefaultRowSize(self.rowheight.GetValue(), True)
-        frame.grid.ForceRefresh()
-        self.Close(True)
-
-    def OnCloseGridPrefs(self, event):
-        self.Close(True)
-
-#---------------------------------------------------------------------------
 # shows the scripting window for entering Python syntax commands
 class ScriptFrame(wx.Frame):
     def __init__(self, parent, id):
@@ -1814,6 +1783,17 @@ class OutputSheet(wx.Frame):
         wx.EVT_TOOL(self, 403, self.SaveHtmlPage)
         wx.EVT_TOOL(self, 404, self.htmlpage.Print)
         wx.EVT_TOOL(self, 405, frame.GoHelpTopicsFrame)
+        self.Bind(html2lib.EVT_WEBVIEW_NAVIGATING, self.OnWebViewNavigating, self.htmlpage)
+
+    def OnWebViewNavigating(self, evt):
+        """
+        Interrupts an event when a user clicks on a hyperlink in the results page.
+        It then uses this link to perform its next action. 
+        This, of course, means I need to create a table of possible actions and
+        ensure Salstat does the right thing.
+        """
+        print evt.GetURL()
+        evt.Veto()
 
     def Undo(self, event):
         self.htmlpage.Undo()
@@ -1854,7 +1834,7 @@ class OutputSheet(wx.Frame):
             self.Saved = True
 
     def Addhtml(self, htmlline):
-        self.WholeOutString = self.WholeOutString + htmlline
+        self.WholeOutString = self.WholeOutString + htmlline + '<p><a href="nav.html">Navigate</a></p>'
         htmlend = "\n\t</body>\n<html>"
         self.htmlpage.SetPage(self.WholeOutString+htmlend,HOME)
         #self.htmlpage.Reload()
@@ -3030,9 +3010,6 @@ class DataFrame(wx.Frame):
         edit_menu.Append(ID_EDIT_DELETECOL, 'Delete Current Column')
         edit_menu.Append(ID_EDIT_DELETEROW, 'Delete Current Row')
         prefs_menu.Append(ID_PREF_VARIABLES, 'Variables...')
-        prefs_menu.Append(ID_PREF_GRID, 'Add Columns and Rows...')
-        prefs_menu.Append(ID_PREF_CELLS, 'Change Cell Size...')
-        prefs_menu.Append(ID_PREF_FONTS, 'Change the Font...')
         prefs_menu.Append(ID_PREF_GEN, 'Preferences...')
         analyse_menu.Append(ID_PREPARATION_DESCRIPTIVES, 'Descriptive Statistics...')
         analyse_menu.Append(ID_PREPARATION_TRANSFORM, 'Transform Data...')
@@ -3135,9 +3112,6 @@ class DataFrame(wx.Frame):
         wx.EVT_TOOL(self, 85, self.GoVariablesFrame)
         wx.EVT_TOOL(self, 87, self.ToggleMetaGrid)
         wx.EVT_TOOL(self, 88, self.ToggleChartWindow)
-        wx.EVT_MENU(self, ID_PREF_GRID, self.GoEditGrid)
-        wx.EVT_MENU(self, ID_PREF_CELLS, self.GoGridPrefFrame)
-        wx.EVT_MENU(self, ID_PREF_FONTS, self.GoFontPrefsDialog)
         wx.EVT_MENU(self, ID_PREPARATION_DESCRIPTIVES, self.GoContinuousDescriptives)
         wx.EVT_MENU(self, ID_PREPARATION_TRANSFORM, self.GoTransformData)
         wx.EVT_MENU(self, ID_PREPARATION_OUTLIERS, self.GoCheckOutliers)
@@ -3165,14 +3139,29 @@ class DataFrame(wx.Frame):
             self.grid.LoadFile(filename)
 
     def NewPrefs(self, event):
-        PFrame = PrefsFrame.PFrame(None, -1, self.grid)
+        PFrame = PrefsFrame.PFrame(None, -1, self.grid, inits['savedir'])
         PWin = PFrame.ShowModal()
         if PFrame.res == "ok":
             vals = PFrame.Vals
-            self.grid.SetDefaultRowSize(int(vals.CellHeight))
-            self.grid.SetDefaultColSize(int(vals.CellWidth))
-            # do the rest
+            self.grid.SetDefaultRowSize(vals.CellHeight)
+            self.grid.SetDefaultColSize(vals.CellWidth)
+            numcols = self.grid.GetNumberCols()
+            numrows = self.grid.GetNumberRows()
+            diff = vals.NumCols - numcols
+            if diff > 0:
+                self.grid.AppendCols(diff)
+            elif diff < 0:
+                self.grid.DeleteCols(vals.NumCols, -diff)
+            diff = vals.NumRows - numrows
+            if diff > 0:
+                self.grid.AppendRows(diff)
+            elif diff < 0:
+                self.grid.DeleteRows(vals.NumRows, -diff)
+            if vals.font:
+                self.grid.SetDefaultCellFont(vals.font)
             self.grid.ForceRefresh()
+            inits['opendir'] = vals.workingdir
+            inits['savedir'] = vals.workingdir
         else:
             pass
         PFrame.Destroy()
@@ -3356,30 +3345,10 @@ class DataFrame(wx.Frame):
         self.dlg.Bind(wx.EVT_FIND_REPLACE_ALL, self.OnFindReplaceAll)
         res = self.dlg.Show(True)
 
-    def GoEditGrid(self, event):
-        #shows dialog for editing the data grid
-        win = EditGridFrame(frame, -1)
-        win.Show(True)
-
     def GoVariablesFrame(self, evt):
         # shows Variables dialog
         win = VariablesFrame(frame, -1)
         win.Show(True)
-
-    def GoGridPrefFrame(self, evt):
-        # shows Grid Preferences form
-        win = GridPrefs(frame, -1)
-        win.Show(True)
-
-    def GoFontPrefsDialog(self, evt):
-        # shows Font dialog for the data grid (output window has its own)
-        data = wx.FontData()
-        dlg = wx.FontDialog(frame, data)
-        self.SetIcon(ico)
-        if dlg.ShowModal() == wx.ID_OK:
-            data = dlg.GetFontData()
-            #data2 = data.GetChosenFont()
-            self.grid.SetDefaultCellFont(data.GetChosenFont())
 
     def GoContinuousDescriptives(self, evt):
         # shows the continuous descriptives dialog
