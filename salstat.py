@@ -136,6 +136,10 @@ if wx.Platform == '__WXMSW__':
     wind = 50
     DOCDIR = 'c:\My Documents'
     INITDIR = os.getcwd()
+    import _winreg as wreg
+    current_file = __file__
+    key = wreg.CreateKey(wreg.HKEY_LOCAL_MACHINE, "Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BEHAVIOURS")
+    wreg.SetValue(key, current_file, wreg.REG_SZ, "10001")
 else:
     face1 = 'Helvetica'
     face2 = 'Times'
@@ -638,6 +642,14 @@ class ManyDescriptives2:
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
+        if "Quartiles" in source.stats:
+            outlist = ['Quartiles']
+            for var in vars:
+                val = AllRoutines.Quartiles(var)
+                outlist.append((val[0], val[2]))
+            ln = tabler.tableHinges(outlist)
+            str2 = str2 + ln
+
         if "Coefficient of variation" in source.stats:
             outlist = ['Coefficient of variation']
             for var in vars:
@@ -767,13 +779,11 @@ class ManyDescriptives2:
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-
-            if "Trimmed mean" in stats:
-                val = AllRoutines.TrimmedMean(data,alpha)
-                table += '<td>%s</td>'%str(val)
-
-
-
+        """
+        if "Trimmed mean" in stats:
+            val = AllRoutines.TrimmedMean(data,alpha)
+            table += '<td>%s</td>'%str(val)
+        """
 
         str2 += '</table>\n'
 
@@ -1792,8 +1802,8 @@ class OutputSheet(wx.Frame):
         This, of course, means I need to create a table of possible actions and
         ensure Salstat does the right thing.
         """
-        print evt.GetURL()
-        evt.Veto()
+        action = evt.GetURL()
+        #evt.Veto()
 
     def Undo(self, event):
         self.htmlpage.Undo()
@@ -1834,8 +1844,8 @@ class OutputSheet(wx.Frame):
             self.Saved = True
 
     def Addhtml(self, htmlline):
-        self.WholeOutString = self.WholeOutString + htmlline + '<p><a href="nav.html">Navigate</a></p>'
-        htmlend = "\n\t</body>\n<html>"
+        self.WholeOutString = self.WholeOutString + htmlline
+        htmlend = "\n\t</body>\n</html>"
         self.htmlpage.SetPage(self.WholeOutString+htmlend,HOME)
         #self.htmlpage.Reload()
         #r = self.scroll.GetScrollRange(wx.VERTICAL)
@@ -1857,10 +1867,10 @@ class OutputSheet(wx.Frame):
 
     def ClearAll(self, event):
         # check output has been saved
-        self.htmlpage.WholeOutString = CreateHTMLDoc()
+        self.WholeOutString = CreateHTMLDoc()
         htmlend = "\n\t</body>\n</html>"
         self.htmlpage.SetPage(self.WholeOutString+htmlend,HOME)
-        self.htmlpage.Reload()
+        #self.htmlpage.Reload()
 
 #---------------------------------------------------------------------------
 # user selects which cols to analyse, and what stats to have
@@ -3357,35 +3367,34 @@ class DataFrame(wx.Frame):
         res = win.ShowModal()
         if win.res == "ok":
             vals = win.GetValues()
-        data = []
-        names = []
-        try:
-            win.stats
-            win.IVs
-            if len(win.GRPs) > 0: # user's selected grouping variables
-                groupedVars = [self.grid.CleanData(col) for col in win.GRPs]
-                groups = GetGroups(groupedVars)
-                IVs = [self.grid.CleanData(col) for col in win.IVs]
-                groupnames = win.varListGRP.GetCheckedStrings()
-                varnames = win.varListIV.GetCheckedStrings()
-                alpha = win.alpha
-                GroupedDescriptives(groups, groupedVars, IVs, win.stats, groupnames, varnames,alpha)
-            else:
-                for i in win.IVs:
-                    colnum = win.ColNums[i]
-                    data.append(numpy.array(self.grid.CleanData(colnum)))
-                    names.append(self.grid.GetColLabelValue(colnum))
+            data = []
+            names = []
+            try:
+                win.stats
+                win.IVs
+                if len(win.GRPs) > 0: # user's selected grouping variables
+                    groupedVars = [self.grid.CleanData(col) for col in win.GRPs]
+                    groups = GetGroups(groupedVars)
+                    IVs = [self.grid.CleanData(col) for col in win.IVs]
+                    groupnames = win.varListGRP.GetCheckedStrings()
+                    varnames = win.varListIV.GetCheckedStrings()
                     alpha = win.alpha
-                    print alpha
-                    """
-                    name = self.grid.GetColLabelValue(colnum)
-                    descs.append(salstat_stats.FullDescriptives( \
+                    GroupedDescriptives(groups, groupedVars, IVs, win.stats, groupnames, varnames,alpha)
+                else:
+                    for i in win.IVs:
+                        colnum = win.ColNums[i]
+                        data.append(numpy.array(self.grid.CleanData(colnum)))
+                        names.append(self.grid.GetColLabelValue(colnum))
+                        alpha = win.alpha
+                        """
+                        name = self.grid.GetColLabelValue(colnum)
+                        descs.append(salstat_stats.FullDescriptives( \
                                             self.grid.CleanData(colnum), name, \
                                             self.grid.missing))
-                    """
-                ManyDescriptives2(win, data, names,alpha)
-        except NameError:
-            pass
+                        """
+                    ManyDescriptives2(win, data, names,alpha)
+            except NameError:
+                pass
         win.Destroy()
 
     def GoTransformData(self, event):
