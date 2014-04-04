@@ -74,9 +74,9 @@ import numpy.ma
 
 
 def GetMostUsedTests():
-    return ['Count','Sum','Mean','Median','Variance (sample)', \
-            'Standard deviation (sample)', 'Standard error', \
-            "Quartiles", "Skewness","Kurtosis"]
+    return ['Count','Sum','Mean','Median',"Quartiles",  \
+            'Variance (sample)', 'Standard deviation (sample)', \
+            'Standard error', "Skewness","Kurtosis"]
 
 def GetAllTests():
     Alltests = ['Count','Sum','Minimum','Maximum','Range','Frequencies',\

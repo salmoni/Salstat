@@ -329,12 +329,15 @@ def ExtractGroupsData(group, groupingvars, variable):
     return data
 
 def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varnames,alpha):
+    notests = ['Frequencies','Proportions','Percentages', 'Relative frequency of the mode', \
+            'Trimmed mean', 'Bi-trimmed mean', 'Mode', 'Moment']
     table = '<h3>Descriptives</h3>\n<table class="table table-striped">\n'
     table += '\t<tr><th>Variable</th>'
     for groupname in groupnames:
         table += '<th>%s</th>'%(groupname)
     for stat in stats:
-        table += '<th>%s</th>'%(stat)
+        if stat not in notests:
+            table += '<th>%s</th>'%(stat)
     table += '</tr>\n'
     k = len(groups)
     for idx, var in enumerate(variables):
@@ -350,36 +353,6 @@ def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varn
                 table += '<td>%s</td>'%str(val)
             if "Sum" in stats:
                 val = AllRoutines.Sum(data)
-                table += '<td>%s</td>'%str(val)
-            if "Mean" in stats:
-                val = AllRoutines.Mean(data)
-                table += '<td>%s</td>'%str(val)
-            if "Median" in stats:
-                val = AllRoutines.Median(data)
-                table += '<td>%s</td>'%str(val)
-            if "Variance (sample)" in stats:
-                val = AllRoutines.SampVar(data)
-                table += '<td>%s</td>'%str(val)
-            if "Standard deviation (sample)" in stats:
-                val = AllRoutines.SampStdDev(data)
-                table += '<td>%s</td>'%str(val)
-            if "Standard error" in stats:
-                val = AllRoutines.StdErr(data)
-                table += '<td>%s</td>'%str(val)
-            if "Quartiles" in stats:
-                val = AllRoutines.Quartiles(data)
-                table += '<td>%s, %s</td>'%(str(val[0]), str(val[1]))
-            if "Tukey's hinges" in stats:
-                val = AllRoutines.TukeyQuartiles(data)
-                table += '<td>%s, %s</td>'%(str(val[0]), str(val[1]))
-            if "Moore & McCabe's hinges" in stats:
-                val = AllRoutines.MooreQuartiles(data)
-                table += '<td>%s, %s</td>'%(str(val[0]),str(val[1]))
-            if "Skewness" in stats:
-                val = AllRoutines.Skewness(data)
-                table += '<td>%s</td>'%str(val)
-            if "Kurtosis" in stats:
-                val = AllRoutines.Kurtosis(data)
                 table += '<td>%s</td>'%str(val)
             if "Minimum" in stats:
                 val = AllRoutines.Minimum(data)
@@ -399,37 +372,21 @@ def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varn
             if "Cumulative percent" in stats:
                 val = AllRoutines.CumPercent(data)
                 table += '<td>%s</td>'%str(val)
-            if "Interquartile range" in stats:
-                val = AllRoutines.InterquartileRange(data)
+            if "Mean" in stats:
+                val = AllRoutines.Mean(data)
                 table += '<td>%s</td>'%str(val)
-            if "Sum of squares" in stats:
-                val = AllRoutines.SS(data)
+            if "Median" in stats:
+                val = AllRoutines.Median(data)
                 table += '<td>%s</td>'%str(val)
-            if "Sum of squared deviations" in stats:
-                val = AllRoutines.SSDevs(data)
-                table += '<td>%s</td>'%str(val)
-            if "Variance (population)" in stats:
-                val = AllRoutines.PopVar(data)
-                table += '<td>%s</td>'%str(val)
-            if "Standard deviation (population)" in stats:
-                val = AllRoutines.PopStdDev(data)
-                table += '<td>%s</td>'%str(val)
-            if "Coefficient of variation" in stats:
-                val = AllRoutines.CoeffVar(data)
-                table += '<td>%s</td>'%str(val)
-            if "Median absolute deviation" in stats:
-                val = AllRoutines.MAD(data)
-                table += '<td>%s</td>'%str(val)
-            if "Geometric mean" in stats:
-                val = AllRoutines.GeometricMean(data)
-                table += '<td>%s</td>'%str(val)
-            if "Harmonic mean" in stats:
-                val = AllRoutines.HarmonicMean(data)
-                table += '<td>%s</td>'%str(val)
-            if "Mean of successive squared differences" in stats:
-                val = AllRoutines.MSSD(data)
-                table += '<td>%s</td>'%str(val)
-
+            if "Quartiles" in stats:
+                val = AllRoutines.Quartiles(data)
+                table += '<td>%s, %s</td>'%(str(val[0]), str(val[1]))
+            if "Tukey's hinges" in stats:
+                val = AllRoutines.TukeyQuartiles(data)
+                table += '<td>%s, %s</td>'%(str(val[0]), str(val[1]))
+            if "Moore & McCabe's hinges" in stats:
+                val = AllRoutines.MooreQuartiles(data)
+                table += '<td>%s, %s</td>'%(str(val[0]),str(val[1]))
             if "S-Plus quantiles" in stats:
                 val = AllRoutines.SPQuantile(data,alpha)
                 table += '<td>%s</td>'%str(val)
@@ -466,10 +423,56 @@ def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varn
             if "Quantile 9 (Hyndman & Fan)" in stats:
                 val = AllRoutines.Q9(data,alpha)
                 table += '<td>%s</td>'%str(val)
-
+            if "Interquartile range" in stats:
+                val = AllRoutines.InterquartileRange(data)
+                table += '<td>%s</td>'%str(val)
+            if "Sum of squares" in stats:
+                val = AllRoutines.SS(data)
+                table += '<td>%s</td>'%str(val)
+            if "Sum of squared deviations" in stats:
+                val = AllRoutines.SSDevs(data)
+                table += '<td>%s</td>'%str(val)
+            if "Variance (sample)" in stats:
+                val = AllRoutines.SampVar(data)
+                table += '<td>%s</td>'%str(val)
+            if "Variance (population)" in stats:
+                val = AllRoutines.PopVar(data)
+                table += '<td>%s</td>'%str(val)
+            if "Standard deviation (sample)" in stats:
+                val = AllRoutines.SampStdDev(data)
+                table += '<td>%s</td>'%str(val)
+            if "Standard deviation (population)" in stats:
+                val = AllRoutines.PopStdDev(data)
+                table += '<td>%s</td>'%str(val)
+            if "Standard error" in stats:
+                val = AllRoutines.StdErr(data)
+                table += '<td>%s</td>'%str(val)
+            if "Coefficient of variation" in stats:
+                val = AllRoutines.CoeffVar(data)
+                table += '<td>%s</td>'%str(val)
+            if "Median absolute deviation" in stats:
+                val = AllRoutines.MAD(data)
+                table += '<td>%s</td>'%str(val)
+            if "Geometric mean" in stats:
+                val = AllRoutines.GeometricMean(data)
+                table += '<td>%s</td>'%str(val)
+            if "Harmonic mean" in stats:
+                val = AllRoutines.HarmonicMean(data)
+                table += '<td>%s</td>'%str(val)
+            if "Mean of successive squared differences" in stats:
+                val = AllRoutines.MSSD(data)
+                table += '<td>%s</td>'%str(val)
+            if "Skewness" in stats:
+                val = AllRoutines.Skewness(data)
+                table += '<td>%s</td>'%str(val)
+            if "Kurtosis" in stats:
+                val = AllRoutines.Kurtosis(data)
+                table += '<td>%s</td>'%str(val)
+            """
             if "Trimmed mean" in stats:
                 val = AllRoutines.TrimmedMean(data,alpha)
                 table += '<td>%s</td>'%str(val)
+            """
 
             table += '</tr>\n'
         table += '</tr>\n'
@@ -1774,7 +1777,7 @@ class OutputSheet(wx.Frame):
         self.CreateStatusBar()
         self.SetStatusText('Salstat statistics - results')
         self.htmlpage = html2lib.WebView.New(self)
-        self.htmlpage.SetEditable(True)
+        #self.htmlpage.SetEditable(True)
         self.Addhtml('')
         self.printer = wx.Printout()
         wx.EVT_MENU(self, ID_OEDIT_UNDO, self.Undo)
