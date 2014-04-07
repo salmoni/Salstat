@@ -1377,6 +1377,18 @@ class SimpleGrid(gridlib.Grid):
                     pass
         return indata
 
+    def GetColumnRawData(self, col):
+        indata = []
+        self.missing = 0
+        for i in range(self.GetNumberRows()):
+            datapoint = self.GetCellValue(i, col)
+            if datapoint != '':
+                if datapoint != missingvalue:
+                    indata.append(datapoint)
+                else:
+                    self.missing += 1
+        return indata
+
     def CleanData(self, col):
         indata = []
         self.missing = 0
@@ -1854,6 +1866,7 @@ class OutputSheet(wx.Frame):
         self.WholeOutString = self.WholeOutString + htmlline
         htmlend = "\n\t</body>\n</html>"
         self.htmlpage.SetPage(self.WholeOutString+htmlend,HOME)
+        print "Page = ",self.WholeOutString+htmlend
         #self.htmlpage.Reload()
         #r = self.scroll.GetScrollRange(wx.VERTICAL)
         #self.scroll.Scroll(0, r+10) 
@@ -3155,6 +3168,17 @@ class DataFrame(wx.Frame):
             frameTitle = filename
             self.grid.LoadFile(filename)
 
+    def ToggleChartWindow(self, event):
+        self.chartWindow = ChartWindow.ChartWindow(self)
+        self.chartWindow.Show(True)
+        self.chartWindow.preview.SetPage(self.chartWindow.chartObject.page,HOME)
+        self.chartWindow.preview.Reload()
+        #print frame.chartObject.page
+        #frame.preview.SetPage(frame.chartObject.chartLine,HOME)
+
+    def ReceiveChart(self, chartString):
+        output.Addhtml(chartString)
+
     def NewPrefs(self, event):
         PFrame = PrefsFrame.PFrame(None, -1, self.grid, inits['savedir'])
         PWin = PFrame.ShowModal()
@@ -3182,14 +3206,6 @@ class DataFrame(wx.Frame):
         else:
             pass
         PFrame.Destroy()
-
-    def ToggleChartWindow(self, event):
-        self.chartWindow = ChartWindow.ChartWindow(self.grid)
-        self.chartWindow.Show(True)
-        self.chartWindow.preview.SetPage(self.chartWindow.chartObject.page,HOME)
-        self.chartWindow.preview.Reload()
-        #print frame.chartObject.page
-        #frame.preview.SetPage(frame.chartObject.chartLine,HOME)
 
     def ToggleMetaGrid(self, event):
         self.metaGrid = MetaGrid.MetaFrame(self)
@@ -4025,4 +4041,4 @@ if __name__ == '__main__':
     frame.Show(True)
     app.MainLoop()
 
-#--------------------------------------------------------------------------
+#"Apples", "Bananas", "Oranges"--------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import time
 import wx
 import wx.html2 as html2lib
 import wx.propgrid as wxpg
@@ -7,13 +8,40 @@ import images
 import sys, numpy
 import AllRoutines
 
+
+#---------------------------------------------------------------------------
+# Ancilliary functions
+def GetGroups(groupingvars):
+    """
+    Receives a list of vectors and calculates the permuations
+    """
+    groups = []
+    k = len(groupingvars)
+    N = len(groupingvars[0])
+    for idx in range(N):
+        row = [var[idx] for var in groupingvars]
+        if row not in groups:
+            groups.append(row)
+    return groups
+
+def ExtractGroupsData(group, groupingvars, variable):
+    N = len(variable)
+    data = []
+    for idx in range(N):
+        row = [element[idx] for element in groupingvars]
+        if group == row:
+            data.append(variable[idx])
+    return data
+
 #---------------------------------------------------------------------------
 # call instance of DataGrid
 # This is main interface of application
 class ChartWindow(wx.Frame):
     def __init__(self, parent):
-        wx.Frame.__init__(self,parent,-1,"CHARTS", size=(1000,600), pos=(50,50))
-        self.grid = parent
+        wx.Frame.__init__(self, parent, -1,"CHARTS", size=(1000,600), pos=(50,50))
+        self.parent = parent
+        self.embed = False
+        self.grid = parent.grid
         self.CreateStatusBar()
         #self.SetStatusText('SalStat Statistics')
         self.chartObject = ChartObject()
@@ -21,6 +49,7 @@ class ChartWindow(wx.Frame):
         OpenIcon = images.getOpenBitmap()
         SaveIcon = images.getSaveBitmap()
         PrintIcon = images.getPrintBitmap()
+        EmbedIcon = images.getPrintBitmap()
         toolBar = self.CreateToolBar(wx.TB_HORIZONTAL|wx.NO_BORDER| \
                                     wx.TB_3DBUTTONS | wx.TB_TEXT)
         #ToolNew = wx.ToolBarToolBase(toolBar)
@@ -29,6 +58,7 @@ class ChartWindow(wx.Frame):
         toolBar.AddSimpleTool(20, OpenIcon,"Open")
         toolBar.AddSimpleTool(30, SaveIcon,"Save")
         toolBar.AddSimpleTool(50, PrintIcon,"Print")
+        toolBar.AddSimpleTool(70, EmbedIcon, "Embed")
         toolBar.SetToolBitmapSize((24,24))
         toolBar.Realize()
         self.SetToolBar(toolBar)
@@ -48,6 +78,13 @@ class ChartWindow(wx.Frame):
         self.SetAutoLayout(True)
         self.SetSizer(self.box)
         self.Layout()
+        wx.EVT_TOOL(self, 70, self.EmbedChart)
+
+    def EmbedChart(self, event):
+        #self.embed = True
+        print "At embedChart"
+        chart = self.chartObject.FinalToString()
+        self.parent.ReceiveChart(chart)
 
 class ControlPanel(wx.Panel):
     def __init__(self, parent, id, chartObject, webview):
@@ -58,6 +95,9 @@ class ControlPanel(wx.Panel):
                 'bar', 'pie', 'scatter']
         self.align =  ["left", "center", "right", "do not show"]
         self.valign = ["top","middle","bottom"]
+        self.aligned = ["Do not display legend","Top left","Top middle","Top right", \
+                "Centre left","Centre middle","Centre right", \
+                "Bottom left","Bottom middle","Bottom right"]
 
         wx.StaticText(self, -1, "Chart type", (20,20))
         wx.StaticText(self, -1, "Chart title", (20,70))
@@ -72,7 +112,7 @@ class ControlPanel(wx.Panel):
         self.ctrl_align = wx.ComboBox(self, -1, size=(200,-1),pos=(20,190), choices = self.align, value=self.chartObject.legend_align)
         self.ctrl_valign = wx.ComboBox(self, -1, size=(200,-1),pos=(20,220), choices = self.valign, value=self.chartObject.legend_verticalAlign)
 
-        changebutton = wx.Button(self, 710, "Change settings")
+        changebutton = wx.Button(self, 710, "Change settings", pos=(15,280))
         wx.EVT_BUTTON(changebutton, 710, self.ChangeSettings)
 
     def ChangeSettings(self, event):
@@ -107,7 +147,7 @@ class VarPanel(wx.Panel):
             variables = ['Var 001 (IV)', 'Var 002 (IV)', 'Var 003 (DV)']
         else:
             ColsUsed, self.ColNums = self.grid.GetUsedCols()
-            variables = ColsUsed
+            variables = ['None'] + ColsUsed
         wx.StaticText(self, -1, "Variables", pos=(20,20))
         wx.StaticText(self, -1, "Chart this variable:", pos=(20,50))
         self.DV = wx.ComboBox(self, -1, size=(190,-1),pos=(20,70), choices = variables)
@@ -120,59 +160,89 @@ class VarPanel(wx.Panel):
         self.SetAutoLayout(True)
         self.Layout()
         wx.EVT_BUTTON(acceptbutton, 711, self.ChangeVars)
+        self.ChangeVars(None)
+
+    def GetSetDV(self, col_DV, col_IV):
+        if col_DV == 0:
+            self.valid_content = False
+        else:
+            self.valid_content = True
+            name_DV = self.grid.GetColLabelValue(col_DV-1)
+            self.chartObject.yAxis_title = name_DV
+            test = self.stat.GetStringSelection()
+            if col_IV == 0: # no grouping
+                data = self.grid.GetColumnData(col_DV-1)
+                values, freqs = AllRoutines.UniqueVals(data)
+            else: # is grouping
+                data_IV = self.grid.GetColumnRawData(col_IV-1)
+                data_DV = self.grid.GetColumnData(col_DV-1)
+                groups = GetGroups([data_IV])
+                data = []
+                for group in groups:
+                    data_section = numpy.array(ExtractGroupsData(group, [data_IV], data_DV))
+                    if test == "":
+                        pass
+                    elif test == "Frequencies":
+                        data.append(AllRoutines.Count(data_section))
+                    elif test == "Sum":
+                        data.append(AllRoutines.Sum(data_section))
+                    elif test == "Mean":
+                        data.append(AllRoutines.Mean(data_section))
+                    elif test == "Median":
+                        data.append(AllRoutines.Median(data_section))
+                    elif test == "Minimum":
+                        data.append(AllRoutines.Minimum(data_section))
+                    elif test == "Maximum":
+                        data.append(AllRoutines.Maximum(data_section))
+                    elif test == "Range":
+                        data.append(AllRoutines.Range(data_section))
+                    elif test == "Variance":
+                        data.append(AllRoutines.SampVar(data_section))
+                    elif test == "Standard deviation":
+                        data.append(AllRoutines.SampStdDev(data_section))
+                    elif test == "Standard error":
+                        data.append(AllRoutines.StdErr(data_section))
+            self.chartObject.data = [data]
+            yAxisText = '%s of %s'%(test, name_DV)
+            self.chartObject.yAxis_title = yAxisText
+
+    def GetSetIV(self, col_IV):
+        if col_IV == 0:
+            # remove x-axis details or specify no x-axis details
+            self.chartObject.xAxis_categories = None
+            self.chartObject.xAxis_min = None
+            self.chartObject.xAxis_max = None
+            self.chartObject.xAxis_minTickInterval = None
+            self.chartObject.zAxis_TickInterval = None
+            test = self.stat.GetStringSelection()
+            yAxisText = '%s'%(test)
+            self.chartObject.yAxis_title = yAxisText
+        else:
+            name_IV = self.grid.GetColLabelValue(col_IV - 1)
+            data_IV = self.grid.GetColumnRawData(col_IV - 1)
+            values, freqs = AllRoutines.UniqueVals(data_IV)
+            self.chartObject.xAxis_title = name_IV
+            self.chartObject.xAxis_categories = values
+            self.chartObject.xAxis_min = None
+            self.chartObject.xAxis_max = None
+            self.chartObject.xAxis_minTickInterval = None
+            self.chartObject.zAxis_TickInterval = None
+            test = self.stat.GetStringSelection()
+            yAxisText = '%s'%(test)
+            self.chartObject.yAxis_title = yAxisText
 
     def ChangeVars(self, event):
-        sel_IV = self.IV.GetSelection()
-        sel_DV = self.DV.GetSelection()
-        idx_IV = self.ColNums[sel_IV]
-        idx_DV = self.ColNums[sel_DV]
-        name_IV = self.grid.GetColLabelValue(idx_IV)
-        name_DV = self.grid.GetColLabelValue(idx_DV)
-        IV = self.grid.GetColumnData(idx_IV)
-        DV = self.grid.GetColumnData(idx_DV)
-        stat = self.stats[self.stat.GetSelection()]
-        values, freqs = AllRoutines.UniqueVals(IV)
-        if stat == "Frequencies":
-            # we have all we need already
-            data = freqs
+        col_IV = self.IV.GetSelection()
+        self.GetSetIV(col_IV)
+        col_DV = self.DV.GetSelection()
+        self.GetSetDV(col_DV, col_IV)
+        if self.valid_content:
+            self.chartObject.ToString()
+            self.parent.preview.SetPage(self.chartObject.page,"")
         else:
-            data = []
-            for val in values:
-                idcs = numpy.equal(IV, val)
-                try:
-                    subset = DV[idcs]
-                except IndexError:
-                    subset = []
-                    for idx, cell in enumerate(IV):
-                        if cell == val:
-                            subset.append(DV[idx])
-                    subset = numpy.array(subset)
-                if stat == "Sum":
-                    v = AllRoutines.Sum(subset)
-                elif stat == "Mean":
-                    v = AllRoutines.Mean(subset)
-                elif stat == "Median":
-                    v = AllRoutines.Median(subset)
-                elif stat == "Minimum":
-                    v = AllRoutines.Minimum(subset)
-                elif stat == "Maximum":
-                    v = AllRoutines.Maximum(subset)
-                elif stat == "Range":
-                    v = AllRoutines.Range(subset)
-                elif stat == "Variance":
-                    v = AllRoutines.SampVar(subset)
-                elif stat == "Standard deviation":
-                    v = AllRoutines.SampStdDev(subset)
-                elif stat == "Standard Error":
-                    v = AllRoutines.StdErr(subset)
-                else:
-                    v = None
-                data.append(v)
-        self.chartObject.data = [DataObject(data)]
-        self.chartObject.data[0].name = name_DV
-        self.chartObject.xAxis_categories = values
-        self.chartObject.ToString()
-        self.parent.preview.SetPage(self.chartObject.page,"")
+            help_prompt = "<br /><br /><br /><p>To create a chart, simply select which variable you want to display (to the left of this message)"
+            self.parent.preview.SetPage(help_prompt, "")
+        #print self.chartObject.page
 
     def ToString(self, inData):
         try:
@@ -193,7 +263,7 @@ class ChartObject(object):
         self.chart_type = "area"
         self.subtitle_text = ""
         self.xAxis_title = None
-        self.xAxis_categories = ["Apples", "Bananas", "Oranges"]
+        self.xAxis_categories = []
         self.xAxis_min = None
         self.xAxis_max = None
         self.xAxis_minTickInterval = None
@@ -232,6 +302,7 @@ class ChartObject(object):
         if self.subtitle_text:
             pass
         chartsbit += '\t},\n'
+        chartsbit += '\tcredits: {\n\t\ttext: "Analysed with Salstat",\n\t\thref: "http://www.salstat.com"\n\t},\n'
         return chartsbit
 
     def yAxis(self):
@@ -262,7 +333,7 @@ class ChartObject(object):
         if self.xAxis_categories != None:
             xaxisbit += '\t\tcategories: ["%s"],\n'%(self.ListToString(self.xAxis_categories))
         if self.xAxis_title:
-            xaxisbit += '\ttitle: { text: "%s" }\n'%(self.xAxis_title)
+            xaxisbit += '\t\ttitle: { text: "%s" }\n'%(self.xAxis_title)
         xaxisbit += '\t},\n'
         return xaxisbit
 
@@ -294,12 +365,9 @@ class ChartObject(object):
     def series(self):
         if self.data:
             seriesbit = '\tseries: ['
-            for datum in self.data:
-                datastr = self.FloatsToString(datum.data)
-                namestr = datum.name
+            for data_set in self.data:
+                datastr = self.FloatsToString(data_set)
                 seriesbit += '{\n'
-                if namestr:
-                    seriesbit += '\t\tname: "%s",\n'%(namestr)
                 if datastr:
                     seriesbit += '\t\tdata: [%s]\n\t},'%(datastr)
             seriesbit += '\t]\n'
@@ -318,6 +386,17 @@ class ChartObject(object):
         #print self.chartLine
         self.page = '%s<div id="chart0001" style="width:100&amp; height: auto;">\n<script type="text/javascript">\n%s</script>\n</div>\n</body>\n</html>'%(self.charthtml, self.chartLine)
 
+    def FinalToString(self):
+        # converts all attributes to a HighCharts string ready for the output screen
+        # uses timestamp as DIV id
+        t = str(time.time()).translate(None, '.')
+        self.chartLine = """\t$(function () {\n\t$("#Chart_%s").highcharts({\n"""%t + \
+                self.chart() + self.title() + self.subtitle() + \
+                self.xAxis() + self.yAxis() + self.legend() + \
+                self.series() + \
+                """\t});\n});\n"""
+        #print self.chartLine
+        return '<div id="Chart_%s" style="width:100&amp; height: auto;">\n<script type="text/javascript">\n%s</script>\n</div>\n'%(t, self.chartLine)
 
 #---------------------------------------------------------------------------
 # main loop
