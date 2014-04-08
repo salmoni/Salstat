@@ -12,7 +12,8 @@ import wx.grid as gridlib
 import wx.html as htmllib
 import wx.html2 as html2lib
 import xlrd, xlwt # import xls format
-import string, os, os.path, pickle, csv
+import string, os, os.path, pickle, csv, sys
+import urlparse, urllib
 
 # import SalStat specific modules
 import salstat_stats, images, xlrd, tabler, charter, ChartWindow
@@ -127,6 +128,8 @@ global BWidth, BHeight # ugh again!
 BWidth = 80
 BHeight = 25
 HOME = os.getcwd()+'/'
+base_file_name = os.path.abspath(__file__)
+basedir, script_name = os.path.split(base_file_name)
 
 if wx.Platform == '__WXMSW__':
     face1 = 'Courier New'
@@ -150,6 +153,9 @@ else:
     wind = 50
     DOCDIR = os.environ['HOME']
     INITDIR = DOCDIR
+
+def FileToURL(path):
+    return urlparse.urljoin('file:', urllib.pathname2url(path))
 
 class History:
     def __init__(self):
@@ -1865,11 +1871,12 @@ class OutputSheet(wx.Frame):
     def Addhtml(self, htmlline):
         self.WholeOutString = self.WholeOutString + htmlline
         htmlend = "\n\t</body>\n</html>"
-        self.htmlpage.SetPage(self.WholeOutString+htmlend,HOME)
-        #print "Page = ",self.WholeOutString+htmlend
-        #self.htmlpage.Reload()
-        #r = self.scroll.GetScrollRange(wx.VERTICAL)
-        #self.scroll.Scroll(0, r+10) 
+        fout = open('tmp/output.html','w')
+        fout.write(self.WholeOutString+htmlend)
+        fout.close()
+        file_loc = FileToURL(basedir+os.sep+'tmp/output.html')
+        self.htmlpage.LoadURL(file_loc)
+        #self.htmlpage.SetPage(self.WholeOutString+htmlend,HOME)
 
     def PrintOutput(self, event):
         data = wx.PrintDialogData()
