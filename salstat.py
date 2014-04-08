@@ -140,10 +140,14 @@ if wx.Platform == '__WXMSW__':
     wind = 50
     DOCDIR = 'c:\My Documents'
     INITDIR = os.getcwd()
-    import _winreg as wreg
-    current_file = __file__
-    key = wreg.CreateKey(wreg.HKEY_LOCAL_MACHINE, "Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BEHAVIOURS")
-    wreg.SetValue(key, current_file, wreg.REG_SZ, "10001")
+    # I got the following lines from the wxPython group but it's a red herring
+    # it was to ensure Javascript files would load properly.
+    # The solution was to use WebView.LoadURL not WebView.SetPage :-)
+    #import _winreg as wreg
+    #current_file = __file__
+    #key = wreg.CreateKey(wreg.HKEY_CURRENT_USER, "Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION")
+    #wreg.SetValueEx(key, current_file, 0, wreg.REG_DWORD, 10001)
+    #wreg.SetValueEx(key, "python.exe", 0, wreg.REG_DWORD, 10001)
 else:
     face1 = 'Helvetica'
     face2 = 'Times'
