@@ -1866,7 +1866,7 @@ class OutputSheet(wx.Frame):
         self.WholeOutString = self.WholeOutString + htmlline
         htmlend = "\n\t</body>\n</html>"
         self.htmlpage.SetPage(self.WholeOutString+htmlend,HOME)
-        print "Page = ",self.WholeOutString+htmlend
+        #print "Page = ",self.WholeOutString+htmlend
         #self.htmlpage.Reload()
         #r = self.scroll.GetScrollRange(wx.VERTICAL)
         #self.scroll.Scroll(0, r+10) 
