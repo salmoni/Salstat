@@ -82,7 +82,6 @@ class ChartWindow(wx.Frame):
 
     def EmbedChart(self, event):
         #self.embed = True
-        print "At embedChart"
         chart = self.chartObject.FinalToString()
         self.parent.ReceiveChart(chart)
 
