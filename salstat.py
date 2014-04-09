@@ -1216,8 +1216,8 @@ class SimpleGrid(gridlib.Grid):
     def LoadDataASCII(self, event):
         default = inits.get('opendir')
         dlg = wx.FileDialog(self, "Open Data File", "","",\
-                                #self.wildcard, wx.OPEN)
-                                "All files (*.*)|*.*|", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
+                                #self.wildcard, wx.OPEN) \
+                                "All files (*.*)|*.*", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
         dlg.SetIcon(ico)
         if dlg.ShowModal() == wx.ID_OK:
             filename = dlg.GetPath()

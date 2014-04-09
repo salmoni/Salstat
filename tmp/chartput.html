@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+		<script src="http://code.highcharts.com/highcharts.js"></script>
+			<script src="http://code.highcharts.com/modules/exporting.js"></script>
+			<script src="/js/themes/gray.js"></script>
+			<style>
+				body { font-family: helvectica, arial, 'lucida sans'; }
+        </style>
+	</head>
+	<body>
+<div id="chart0001" style="width:100&amp; height: auto;">
+<script type="text/javascript">
+	$(function () {
+	$("#chart0001").highcharts({
+	chart: {
+		type: "area"	},
+	credits: {
+		text: "Analysed with Salstat",
+		href: "http://www.salstat.com"
+	},
+	title: {
+		text: "title here"
+	},
+	subtitle: {
+	},
+	xAxis: {
+	},
+	yAxis: {
+		title: { text: "Frequencies of D" }
+	},
+	legend: {
+		align: "do not show",
+		verticalAlign: "bottom",
+		enabled: false,
+	},
+	series: [{
+		data: [0.0,3.0,4.0,2.0,3.0,3.0,4.0,0.0,5.0,4.0,6.0,4.0,4.0,3.0,2.0,0.0,3.0,2.0,4.0,2.0,4.0,4.0,2.0,4.0,3.0,2.0,2.0,5.0,4.0,2.0,3.0,4.0,3.0,6.0,1.0,3.0,6.0,5.0,4.0,5.0,5.0,8.0,6.0,5.0,6.0,4.0,5.0,5.0,5.0,4.0,6.0,3.0,4.0,1.0,5.0,5.0,6.0,5.0,5.0,4.0,3.0,4.0,6.0,3.0,4.0,5.0,4.0,6.0,3.0,6.0]
+	},	]
+	});
+});
+</script>
+</div>
+</body>
+</html>

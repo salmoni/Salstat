@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-import time
+import time, os, os.path
+import urlparse, urllib
 import wx
 import wx.html2 as html2lib
-import wx.propgrid as wxpg
+#import wx.propgrid as wxpg
 import images
 import sys, numpy
 import AllRoutines
-
 
 #---------------------------------------------------------------------------
 # Ancilliary functions
@@ -32,6 +32,12 @@ def ExtractGroupsData(group, groupingvars, variable):
         if group == row:
             data.append(variable[idx])
     return data
+
+def FileToURL(path):
+    return urlparse.urljoin('file:', urllib.pathname2url(path))
+
+base_file_name = os.path.abspath(__file__)
+basedir, script_name = os.path.split(base_file_name)
 
 #---------------------------------------------------------------------------
 # call instance of DataGrid
@@ -67,10 +73,12 @@ class ChartWindow(wx.Frame):
         self.preview = self.webview.New(self) #, size=(100,100))
         self.preview.SetSize
         self.control = ControlPanel(self, -1, self.chartObject, self.preview)
+        # Windows crash not before here...
         if self.grid:
             self.variables = VarPanel(self, -1, self.grid, self.chartObject)
         else:
             self.variables = VarPanel(self, -1, None, self.chartObject)
+        # ...but IS before here!
         self.box = wx.BoxSizer(wx.HORIZONTAL)
         self.box.Add(self.variables, 0, wx.EXPAND)
         self.box.Add(self.preview, 1, wx.EXPAND)
@@ -82,6 +90,7 @@ class ChartWindow(wx.Frame):
 
     def EmbedChart(self, event):
         #self.embed = True
+        print self.chartObject.page
         chart = self.chartObject.FinalToString()
         self.parent.ReceiveChart(chart)
 
@@ -129,7 +138,13 @@ class ControlPanel(wx.Panel):
         #legend = self.ctrl_legendpos.GetValue()
         #x_max = self.ctrl_xaxismax.GetValue()
         self.chartObject.ToString()
-        self.WebView.SetPage(self.chartObject.page, "")
+        #self.WebView.SetPage(self.chartObject.page, "")
+        fout = open('tmp/chartput.html','w')
+        fout.write(self.chartObject.page)
+        fout.close()
+        file_loc = FileToURL(basedir+os.sep+'tmp/chartput.html')
+        self.parent.preview.LoadURL(file_loc)
+        #self.WebView.LoadURL(FileToURL(self.chartObject.page))
 
     def ConstructGraphCode(self, codes):
         pass
@@ -162,14 +177,14 @@ class VarPanel(wx.Panel):
         self.ChangeVars(None)
 
     def GetSetDV(self, col_DV, col_IV):
-        if col_DV == 0:
+        if col_DV < 1:
             self.valid_content = False
         else:
             self.valid_content = True
-            name_DV = self.grid.GetColLabelValue(col_DV-1)
+            name_DV = self.grid.GetColLabelValue(col_DV - 1)
             self.chartObject.yAxis_title = name_DV
             test = self.stat.GetStringSelection()
-            if col_IV == 0: # no grouping
+            if col_IV < 1: # no grouping
                 data = self.grid.GetColumnData(col_DV-1)
                 values, freqs = AllRoutines.UniqueVals(data)
             else: # is grouping
@@ -206,7 +221,7 @@ class VarPanel(wx.Panel):
             self.chartObject.yAxis_title = yAxisText
 
     def GetSetIV(self, col_IV):
-        if col_IV == 0:
+        if col_IV < 1:
             # remove x-axis details or specify no x-axis details
             self.chartObject.xAxis_categories = None
             self.chartObject.xAxis_min = None
@@ -237,10 +252,20 @@ class VarPanel(wx.Panel):
         self.GetSetDV(col_DV, col_IV)
         if self.valid_content:
             self.chartObject.ToString()
-            self.parent.preview.SetPage(self.chartObject.page,"")
+            #self.parent.preview.SetPage(self.chartObject.page,"")
+            fout = open('tmp/chartput.html','w')
+            fout.write(self.chartObject.page)
+            fout.close()
+            file_loc = FileToURL(basedir+os.sep+'tmp/chartput.html')
+            self.parent.preview.LoadURL(file_loc)
         else:
             help_prompt = "<br /><br /><br /><p>To create a chart, simply select which variable you want to display (to the left of this message)"
-            self.parent.preview.SetPage(help_prompt, "")
+            #self.parent.preview.SetPage(help_prompt, "")
+            fout = open('tmp/chartput.html','w')
+            fout.write(help_prompt)
+            fout.close()
+            file_loc = FileToURL(basedir+os.sep+'tmp/chartput.html')
+            self.parent.preview.LoadURL(file_loc)
         #print self.chartObject.page
 
     def ToString(self, inData):
@@ -403,7 +428,13 @@ if __name__ == '__main__':
     app = wx.App()
     frame = ChartWindow(None)
     frame.Show(True)
-    frame.preview.SetPage(frame.chartObject.page,"")
+    #frame.preview.SetPage(frame.chartObject.page,"")
+    fout = open('tmp/chartput.html','w')
+    fout.write(frame.chartObject.page)
+    fout.close()
+    file_loc = FileToURL(basedir+os.sep+'tmp/chartput.html')
+    self.parent.preview.LoadURL(file_loc)
+    #frame.preview.LoadURL(FileToURL(self.chartObject.page))
     #print frame.chartObject.page
     #frame.preview.SetPage(frame.chartObject.chartLine,"")
     app.MainLoop()
