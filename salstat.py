@@ -147,7 +147,6 @@ if wx.Platform == '__WXMSW__':
     current_file = __file__
     key = wreg.CreateKey(wreg.HKEY_CURRENT_USER, "Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION")
     wreg.SetValueEx(key, current_file, 0, wreg.REG_DWORD, 10001)
-    wreg.SetValueEx(key, "python.exe", 0, wreg.REG_DWORD, 10001)
 else:
     face1 = 'Helvetica'
     face2 = 'Times'
