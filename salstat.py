@@ -3186,7 +3186,6 @@ class DataFrame(wx.Frame):
             fname = res[0]
             varnames = res[1]
             newdata = res[2]
-            print varnames
             nRows = len(newdata)
             kCols = 0
             for row in range(nRows):
@@ -3210,6 +3209,8 @@ class DataFrame(wx.Frame):
                 n = len(dataRow)
                 for idxCol, colValue in enumerate(dataRow):
                     self.grid.SetCellValue(idxRow, idxCol, colValue)
+            self.grid.Saved = False
+            self.grid.named = False
         else:
             pass
 

@@ -45,7 +45,8 @@ class GetFilename(object):
         dlg = wx.FileDialog(parent, message="Open a CSV file", defaultDir=startDir, \
                 wildcard="CSV text (*.csv)|*.csv|Plain text (*.txt)|*.txt|\
                 Data file (*.dat)|*.dat|Any file (*.*)|*.*")
-        #dlg.SetIcon(ico)
+        ico = wx.Icon('icons/PurpleIcon05_32.png',wx.BITMAP_TYPE_PNG)
+        dlg.SetIcon(ico)
         if dlg.ShowModal() == wx.ID_OK:
             self.fileName = dlg.GetPath()
             if os.path.exists(self.fileName):
@@ -77,6 +78,7 @@ class PanelDelimiter(wx.Panel):
         self.edit_01 = wx.TextCtrl(self.box, 761, pos=(235,44), size=(30,-1))
         self.edit_02 = wx.TextCtrl(self.box, 762, pos=(125,79), size=(45,-1))
         self.del_02.SetValue(True)
+        self.edit_02.SetValue('"')
 
 ################################################
 # Panel for fixed width files
@@ -116,9 +118,10 @@ class ImportDialog(wx.Dialog):
         #self.grid.HideRowLabels()
         self.MaxRows = 100
         self.MaxCols = 8
-        self.grid.CreateGrid(self.MaxRows,self.MaxCols)
         self.grid.SetColLabelSize(16)
         self.grid.SetRowLabelSize(40)
+        self.grid.SetDefaultColSize(60)
+        self.grid.CreateGrid(self.MaxRows,self.MaxCols)
         for i in range(8):
             self.grid.SetRowSize(i,16)
             self.grid.SetColLabelValue(i, " ")
@@ -218,9 +221,38 @@ class ImportDialog(wx.Dialog):
             except IndexError:
                 break
 
-    #def GetHeader(self, data, delims, quotes):
-
     def ParseLine(self, line, delims, quotes):
+        """
+        Parses a line of text into components. This attempts to 
+        be a proper parser that can cope with multiple delimiters.
+        """
+        inQuote = False # flag for being 'within' quotes
+        token = '' # current token
+        tokens = [] # list of tokens
+        for char in line:
+            if inQuote: # so if we're in the middle of a quote...
+                if char == inQuoteChar: # ...and have a matching quote character...
+                    tokens.append(token) # add the token to list (ignore quote character)
+                    token = '' # and begin new token
+                    inQuote = False # flag that we're not in a quote any more
+                else: # But if char is a non-matching quote...
+                    token += char # ...just add to token 
+            elif char in delims: # or if char is a delimiter...
+                if len(token) > 0: # ...and token is worth recording...
+                    tokens.append(token) # add token to list
+                    token = '' # and begin new token
+                else: # if token has 0 length and no content...
+                    pass # ...adjacent delimiters so do nothing
+            elif char in quotes: # But if char is a quote...
+                inQuoteChar = char # record it to check for matching quote later
+                inQuote = True # and flag that we're in a quotation
+            else: # And if char is anything else...
+                token += char # add to token
+        if len(token) > 0: # Check if last item is worth recording (len > 0)
+            tokens.append(token) # add to list of tokens
+        return tokens # return list of tokens
+
+    def ParseLine2(self, line, delims, quotes):
         """
         Parses a line of text into components. This attempts to 
         be a proper parser that can cope with multiple delimiters.
@@ -265,6 +297,7 @@ class ImportDialog(wx.Dialog):
 
     def CancelButton(self, event):
         # let's get out!
+        self.FileName.fileName = None
         self.Close()
 
     def ImportButton(self, event):
