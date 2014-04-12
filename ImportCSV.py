@@ -4,7 +4,21 @@ ImportCSV.py
 A Python module to import all manner of CSV files. Produces a dialog 
 in wxPython for users to specify things like delimiters and so on.
 
-Requires a single parameter: the directory to start
+Usage:
+
+
+import ImportCSV
+
+def GetData(frame, base_directory):
+    result = ImportCSV.ImportCSV(base_directory)
+    if result == None:
+        # User did not select file 
+    else:
+        file_name = result[0]       # string
+        variable_names = result[1]  # list
+        data = result[2]            # list of lists
+
+Requires two parameters: a wxFrame and the directory to start
 Returns:
 
 1. Name of imported file
@@ -78,10 +92,10 @@ class PanelFixedWidth(wx.Panel):
 # Main class that binds it all together
 
 class ImportDialog(wx.Dialog):
-    def __init__(self, startDir):
+    def __init__(self, FileName):
         wx.Dialog.__init__(self, None, title="Importing a CSV file",\
                 size=(600,470))
-        self.FileName = GetFilename(self, startDir)
+        self.FileName = FileName
         self.decider = wx.Notebook(self, -1, pos=(10,0), \
                 size=(580,240), style=wx.NB_TOP)
         self.p1 = PanelDelimiter(self.decider, self.FileName.fileName)
@@ -125,13 +139,17 @@ class ImportDialog(wx.Dialog):
         wx.EVT_SPINCTRL(self, 766, self.AttemptPreview)
 
     def AttemptPreview(self, event=None):
-        # retrieve data 
-        data = []
-        fin = open(self.FileName.fileName,'r')
-        data = fin.read()
-        fin.close()
-        # populate preview
-        self.FillGrid(data)
+        # check we have filename first
+        if self.FileName.fileName == None:
+            return
+        else:
+            # retrieve data 
+            data = []
+            fin = open(self.FileName.fileName,'r')
+            data = fin.read()
+            fin.close()
+            # populate preview
+            self.FillGrid(data)
 
     def FillGrid(self, data):
         # Fill self.grid with data and variables
@@ -256,7 +274,7 @@ class ImportDialog(wx.Dialog):
 ################################################
 # Function to control all this
 
-def ImportCSV(startDir):
+def ImportCSV(frame, startDir):
     """
     Controls all the module.
     Parameters: startDir: where to start the file dialog
@@ -265,14 +283,23 @@ def ImportCSV(startDir):
     headers: Variable name (None if none selected)
     data: data as a list of lists
     """
-    dlg = ImportDialog(startDir)
-    if dlg.ShowModal():
-        variableNames = dlg.headers
-        data = None
-        return dlg.FileName.fileName, dlg.headers, dlg.gridData
-    else:
+    FileName = GetFilename(frame, startDir)
+    if FileName.fileName == None:
         return None
-    dlg.Destroy()
+    dlg = ImportDialog(FileName)
+    if dlg.ShowModal():
+        if dlg.FileName.fileName == None:
+            dlg.Destroy()
+            return None
+        else:
+            fileName = dlg.FileName.fileName
+            variableNames = dlg.headers
+            data = dlg.gridData
+            dlg.Destroy()
+            return fileName, variableNames, data
+    else:
+        dlg.Destroy()
+        return None
 
 
 ################################################

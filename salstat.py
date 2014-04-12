@@ -18,7 +18,7 @@ import urlparse, urllib
 # import SalStat specific modules
 import salstat_stats, images, xlrd, tabler, charter, ChartWindow
 import DescriptivesFrame, PrefsFrame
-import MetaGrid, AllRoutines
+import MetaGrid, AllRoutines, ImportCSV
 import numpy, math
 
 # and for plots!
@@ -3179,6 +3179,14 @@ class DataFrame(wx.Frame):
             self.grid.LoadFile(filename)
 
     def ToggleChartWindow(self, event):
+        res = ImportCSV.ImportCSV(self, '/Users/alansalmoni/')
+        if res != None:
+            fname = res[0]
+            varnames = res[1]
+            newdata = res[2]
+            print fname, varnames, newdata
+        else:
+            print "None"
         self.chartWindow = ChartWindow.ChartWindow(self)
         self.chartWindow.Show(True)
         self.chartWindow.preview.SetPage(self.chartWindow.chartObject.page,HOME)
