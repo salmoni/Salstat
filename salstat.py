@@ -3108,6 +3108,7 @@ class DataFrame(wx.Frame):
         toolBar.AddLabelTool(85, "Preferences", wx.Bitmap("icons/IconPrefs.png"), shortHelp="Set your preferences")
         toolBar.AddLabelTool(87, "Meta", wx.Bitmap("icons/IconHelp.png"), shortHelp="Set variables")
         toolBar.AddLabelTool(88, "Chart", wx.Bitmap("icons/IconHelp.png"), shortHelp="View the chart window")
+        toolBar.AddLabelTool(89, "Import CSV",wx.Bitmap("icons/IconHelp.png"), shortHelp="Import a CSV file")
         toolBar.AddLabelTool(90, "Help", wx.Bitmap("icons/IconHelp.png"), shortHelp="Get help")
         toolBar.SetToolBitmapSize((24,24))
         # more toolbuttons are needed: New Output, Save, Print, Cut, \
@@ -3152,6 +3153,7 @@ class DataFrame(wx.Frame):
         wx.EVT_TOOL(self, 85, self.GoVariablesFrame)
         wx.EVT_TOOL(self, 87, self.ToggleMetaGrid)
         wx.EVT_TOOL(self, 88, self.ToggleChartWindow)
+        wx.EVT_TOOL(self, 89, self.ImportCSVWindow)
         wx.EVT_MENU(self, ID_PREPARATION_DESCRIPTIVES, self.GoContinuousDescriptives)
         wx.EVT_MENU(self, ID_PREPARATION_TRANSFORM, self.GoTransformData)
         wx.EVT_MENU(self, ID_PREPARATION_OUTLIERS, self.GoCheckOutliers)
@@ -3178,15 +3180,40 @@ class DataFrame(wx.Frame):
             frameTitle = filename
             self.grid.LoadFile(filename)
 
-    def ToggleChartWindow(self, event):
+    def ImportCSVWindow(self, event):
         res = ImportCSV.ImportCSV(self, '/Users/alansalmoni/')
         if res != None:
             fname = res[0]
             varnames = res[1]
             newdata = res[2]
-            print fname, varnames, newdata
+            print varnames
+            nRows = len(newdata)
+            kCols = 0
+            for row in range(nRows):
+                if len(newdata[row]) > kCols:
+                    kCols = len(newdata[row])
+            # resize grid to accommodate data
+            cols = self.grid.GetNumberCols()
+            num_cols_to_append = kCols + 10 # 10 spare
+            self.grid.DeleteCols(pos=0, numCols=cols)
+            self.grid.AppendCols(numCols=num_cols_to_append)
+            rows = self.grid.GetNumberRows()
+            num_rows_to_append = nRows + 10
+            self.grid.DeleteRows(pos=0, numRows=rows)
+            self.grid.AppendRows(numRows=num_rows_to_append)
+            try:
+                for idxCol, colLabel in enumerate(varnames):
+                    self.grid.SetColLabelValue(idxCol, colLabel)
+            except:
+                pass
+            for idxRow, dataRow in enumerate(newdata):
+                n = len(dataRow)
+                for idxCol, colValue in enumerate(dataRow):
+                    self.grid.SetCellValue(idxRow, idxCol, colValue)
         else:
-            print "None"
+            pass
+
+    def ToggleChartWindow(self, event):
         self.chartWindow = ChartWindow.ChartWindow(self)
         self.chartWindow.Show(True)
         self.chartWindow.preview.SetPage(self.chartWindow.chartObject.page,HOME)
