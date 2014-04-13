@@ -18,7 +18,7 @@ import urlparse, urllib
 # import SalStat specific modules
 import salstat_stats, images, xlrd, tabler, charter, ChartWindow
 import DescriptivesFrame, PrefsFrame
-import MetaGrid, AllRoutines, ImportCSV
+import MetaGrid, AllRoutines, ImportCSV, ImportSS
 import numpy, math
 
 # and for plots!
@@ -1041,13 +1041,19 @@ class SimpleGrid(gridlib.Grid):
     def SelectAllCells(self, event):
         self.SelectAll()
 
-    def ResizeGrid(self, ncols, nrows):
-        spare = 10 # extra spaces
+    def ResizeGrid(self, nCols, nRows, spare=10):
         # check that data is saved before clearing!
         self.ClearGrid()
-        self.AppendCols(ncols + spare)
-        self.AppendRows(nrows + spare)
-    
+        # resize grid to accommodate data
+        actual_cols = self.GetNumberCols()
+        num_cols_to_append = nCols + spare
+        self.DeleteCols(pos=0, numCols=actual_cols)
+        self.AppendCols(numCols=num_cols_to_append)
+        actual_rows = self.GetNumberRows()
+        num_rows_to_append = nRows + spare
+        self.DeleteRows(pos=0, numRows=actual_rows)
+        self.AppendRows(numRows=num_rows_to_append)
+
     # adds columns and rows to the grid
     def AddNCells(self, numcols, numrows):
         insert = self.AppendCols(numcols)
@@ -2925,77 +2931,6 @@ class TransformFrame(wx.Dialog):
         self.Close(True)
 
 #---------------------------------------------------------------------------
-# Plot Window
-# This frame holds the plots using the wx.PlotCanvas widget
-class PlotFrame(wx.Frame):
-    def __init__(self, parent, log):
-        wx.Frame.__init__(self, parent, -1,"SalStat Plot (Basic!)", \
-                                    size=(500,400))
-        file_menu = wx.Menu()
-        edit_menu = wx.Menu()
-        title_menu = wx.Menu()
-        file_menu.Append(ID_FILE_GSAVEAS, 'Save &As...')
-        file_menu.Append(ID_FILE_GPRINTSETUP, 'Page Setup...')
-        file_menu.Append(ID_FILE_GPRINTPREVIEW, 'Print Preview...')
-        file_menu.Append(ID_FILE_GPRINT, '&Pryint...')
-        file_menu.Append(ID_FILE_GCLOSE, '&Close')
-        title_menu.Append(ID_TITLE_GTITLE, '&Graph Title...')
-        title_menu.Append(ID_TITLE_GXAXIS, '&X Axis Label...')
-        title_menu.Append(ID_TITLE_GYAXIS, '&Y Axis Label...')
-        title_menu.Append(ID_TITLE_LEGEND, '&Enable Legend', kind=wx.ITEM_CHECK)
-        title_menu.Append(ID_TITLE_GRID, 'Enable &Grid', kind=wx.ITEM_CHECK)
-        gmenuBar = wx.MenuBar()
-        gmenuBar.Append(file_menu, '&File')
-        gmenuBar.Append(edit_menu, '&Edit')
-        gmenuBar.Append(title_menu, '&Plot')
-        EVT_MENU(self, ID_FILE_GSAVEAS, self.SaveAs)
-        EVT_MENU(self, ID_FILE_GPRINTSETUP, self.PrintSetup)
-        EVT_MENU(self, ID_FILE_GPRINTPREVIEW, self.PrintPreview)
-        EVT_MENU(self, ID_FILE_GPRINT, self.PrintGraph)
-        EVT_MENU(self, ID_FILE_GCLOSE, self.CloseWindow)
-        EVT_MENU(self, ID_TITLE_GTITLE, self.SetTitle)
-        EVT_MENU(self, ID_TITLE_GXAXIS, self.SetXAxis)
-        EVT_MENU(self, ID_TITLE_GYAXIS, self.SetYAxis)
-        EVT_MENU(self, ID_TITLE_LEGEND, self.EnableLegend)
-        EVT_MENU(self, ID_TITLE_GRID, self.EnableGrid)
-        self.SetMenuBar(gmenuBar)
-        self.client = wx.PyPlot.PlotCanvas(self)
-
-    def EnableGrid(self, event):
-        self.client.SetEnableGrid(event.IsChecked())
-
-    def SetTitle(self, event):
-        dlg = wx.TextEntryDialog(self, 'Enter the graph title','Graph Title')
-        dlg.SetValue(self.client.getTitle())
-        # the previous line doesn't work.
-        if dlg.ShowModal() == wx.ID_OK:
-            self.client.setTitle(dlg.GetValue())
-
-    def SetXAxis(self, event):
-        pass
-
-    def SetYAxis(self, event):
-        pass
-
-    def EnableLegend(self, event):
-        self.client.SetEnableLegend(event.IsChecked())
-
-    def PrintSetup(self, event):
-        self.client.PageSetup()
-
-    def PrintPreview(self, event):
-        self.client.PrintPreview()
-
-    def PrintGraph(self, event):
-        self.client.Printout()
-
-    def SaveAs(self, event):
-        self.client.SaveFile()
-
-    def CloseWindow(self, event):
-        self.Close(True)
-
-#---------------------------------------------------------------------------
 # call instance of DataGrid
 # This is main interface of application
 class DataFrame(wx.Frame):
@@ -3109,6 +3044,7 @@ class DataFrame(wx.Frame):
         toolBar.AddLabelTool(87, "Meta", wx.Bitmap("icons/IconHelp.png"), shortHelp="Set variables")
         toolBar.AddLabelTool(88, "Chart", wx.Bitmap("icons/IconHelp.png"), shortHelp="View the chart window")
         toolBar.AddLabelTool(89, "Import CSV",wx.Bitmap("icons/IconHelp.png"), shortHelp="Import a CSV file")
+        toolBar.AddLabelTool(891, "Import Spreadsheet",wx.Bitmap("icons/IconHelp.png"), shortHelp="Import spreadsheet")
         toolBar.AddLabelTool(90, "Help", wx.Bitmap("icons/IconHelp.png"), shortHelp="Get help")
         toolBar.SetToolBitmapSize((24,24))
         # more toolbuttons are needed: New Output, Save, Print, Cut, \
@@ -3154,6 +3090,7 @@ class DataFrame(wx.Frame):
         wx.EVT_TOOL(self, 87, self.ToggleMetaGrid)
         wx.EVT_TOOL(self, 88, self.ToggleChartWindow)
         wx.EVT_TOOL(self, 89, self.ImportCSVWindow)
+        wx.EVT_TOOL(self, 891, self.ImportSSWindow)
         wx.EVT_MENU(self, ID_PREPARATION_DESCRIPTIVES, self.GoContinuousDescriptives)
         wx.EVT_MENU(self, ID_PREPARATION_TRANSFORM, self.GoTransformData)
         wx.EVT_MENU(self, ID_PREPARATION_OUTLIERS, self.GoCheckOutliers)
@@ -3163,8 +3100,7 @@ class DataFrame(wx.Frame):
         wx.EVT_MENU(self, ID_ANALYSE_CORRELATION, self.GetCorrelationsTest)
         #wx.EVT_MENU(self, ID_ANALYSE_2FACT, self.GoMFanovaFrame)
         wx.EVT_MENU(self, ID_ANALYSE_SCRIPT, self.GoScriptWindow)
-        wx.EVT_MENU(self, ID_CHART_DRAW, self.GoChartWindow)
-        wx.EVT_MENU(self, ID_BARCHART_DRAW, self.GoBarChartWindow)
+        wx.EVT_MENU(self, ID_CHART_DRAW, self.ToggleChartWindow)
         wx.EVT_MENU(self, wx.ID_ABOUT, self.GoHelpAboutFrame)
         wx.EVT_MENU(self, ID_HELP_WIZARD, self.GoHelpWizardFrame)
         wx.EVT_MENU(self, ID_HELP_TOPICS, self.GoHelpTopicsFrame)
@@ -3180,7 +3116,11 @@ class DataFrame(wx.Frame):
             frameTitle = filename
             self.grid.LoadFile(filename)
 
+    def ImportSSWindow(self, event):
+        res = ImportSS.ImportSS(self, '/Users/alansalmoni')
+
     def ImportCSVWindow(self, event):
+        # TODO Check that data have been saved first!
         res = ImportCSV.ImportCSV(self, '/Users/alansalmoni/')
         if res != None:
             fname = res[0]
@@ -3192,6 +3132,8 @@ class DataFrame(wx.Frame):
                 if len(newdata[row]) > kCols:
                     kCols = len(newdata[row])
             # resize grid to accommodate data
+            self.grid.ResizeGrid(kCols, nRows)
+            """
             cols = self.grid.GetNumberCols()
             num_cols_to_append = kCols + 10 # 10 spare
             self.grid.DeleteCols(pos=0, numCols=cols)
@@ -3200,6 +3142,7 @@ class DataFrame(wx.Frame):
             num_rows_to_append = nRows + 10
             self.grid.DeleteRows(pos=0, numRows=rows)
             self.grid.AppendRows(numRows=num_rows_to_append)
+            """
             try:
                 for idxCol, colLabel in enumerate(varnames):
                     self.grid.SetColLabelValue(idxCol, colLabel)
@@ -3517,48 +3460,6 @@ class DataFrame(wx.Frame):
         # Shows the scripting window
         win = ScriptFrame(frame, -1)
         win.Show(True)
-
-    def GoChartWindow(self, event):
-        # Draws a line chart based on the means
-        ChartWindow = charter.ChartWindow(self)
-        ChartWindow.Show(True)
-        waste, colnums = self.grid.GetUsedCols()
-        if colnums != []:
-            nameslist = [0]*len(colnums)
-            meanlist = numpy.zeros(len(colnums)*2)
-            meanlist.shape = (len(colnums),2)
-            for i in range(len(colnums)):
-                d = salstat_stats.FullDescriptives(self.grid.CleanData(colnums[i]))
-                meanlist[i,1] = d.mean
-                nameslist[i] = frame.grid.GetColLabelValue(i)
-            meanlist[:,0] = numpy.arange(len(colnums))
-            lines = wx.PyPlot.PolyLine(meanlist, legend="Red Line", colour='red')
-            #lines2 = wx.PyPlot.PolyBars(meanlist)
-            self.win = PlotFrame(self, -1)
-            self.win.Show(True)
-            self.win.client.Draw(wx.PyPlot.PlotGraphics([lines],"Graph","X","Y"))
-            #self.win.client.draw(lines2,'automatic','automatic',None, nameslist)
-        else:
-            self.SetStatusText('You need some data to draw a graph!')
-
-    def GoBarChartWindow(self, event):
-        # Draws a bar chart based on the means
-        waste, colnums = self.grid.GetUsedCols()
-        if colnums != []:
-            nameslist = [0]*len(colnums)
-            meanlist = numpy.zeros(len(colnums)*2)
-            meanlist.shape = (len(colnums),2)
-            for i in range(len(colnums)):
-                d = salstat_stats.FullDescriptives(self.grid.CleanData(colnums[i]))
-                meanlist[i,1] = d.mean
-                nameslist[i] = frame.grid.GetColLabelValue(i)
-            meanlist[:,0] = numpy.arange(len(colnums))
-            lines = PolyBars(meanlist)
-            self.win = PlotFrame(self, -1)
-            self.win.Show(True)
-            self.win.client.draw(lines,'automatic','automatic',None, nameslist)
-        else:
-            self.SetStatusText('You need some data to draw a graph!')
 
     def GoHelpWizardFrame(self, event):
         # shows the "wizard" in the help box

@@ -31,10 +31,11 @@ OR
 
 """
 
+
+
 from __future__ import unicode_literals
-import os, os.path, csv, sys, shlex
+import os, os.path 
 import wx
-from wx.stc import *
 import wx.grid as gridlib
 
 ################################################
@@ -55,6 +56,18 @@ class GetFilename(object):
                 self.fileName = None
         else:
             self.fileName = None
+
+################################################
+# Panel for spreadsheets
+
+class PanelSpreadsheet(wx.Panel):
+    def __init__(self, parent, fileName):
+        wx.Panel.__init__(self, parent, -1)
+        self.parent = parent
+        help_text = "Salstat can load files from Excel and LibreOffice/OpenOffice. "
+        t1 = wx.StaticText(self, -1, label=help_text, pos=(10,10))
+        t1.Wrap(545)
+
 
 ################################################
 # Panel for delimited files
@@ -251,45 +264,6 @@ class ImportDialog(wx.Dialog):
         if len(token) > 0: # Check if last item is worth recording (len > 0)
             tokens.append(token) # add to list of tokens
         return tokens # return list of tokens
-
-    def ParseLine2(self, line, delims, quotes):
-        """
-        Parses a line of text into components. This attempts to 
-        be a proper parser that can cope with multiple delimiters.
-        """
-        inQuote = False
-        try:
-            inQuoteChar = quotes[0]
-        except IndexError:
-            inQuoteChar = ''
-        token = ''
-        tokens = []
-        n = len(line)
-        for idx in range(n):
-            char = line[idx]
-            if char in quotes:
-                if inQuote:
-                    if char in inQuoteChar:
-                        inQuote = False
-                        tokens.append(token)
-                        token = ''
-                    else:
-                        token += char
-                else:
-                    inQuote = True
-                    inQuoteChar = char
-            else:
-                if char in delims:
-                    if len(token) > 0:
-                        tokens.append(token)
-                        token = ''
-                    else:
-                        pass
-                else:
-                    token += char
-        if len(token) > 0:
-            tokens.append(token)
-        return tokens
 
     def GetMax(self, data, lineEnd):
         # help method to find the maximum of each line ending
