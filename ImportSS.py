@@ -40,10 +40,8 @@ def GetFileSizes(filename):
         pass # seriously, what?
     nsheets = workbook.nsheets
     sheet_names = workbook.sheet_names()
-    print nsheets
     for idx_sheet in range(nsheets):
         sheet = workbook.sheet_by_index(idx_sheet)
-        print sheet_names[idx_sheet], sheet.nrows, sheet.ncols
 
 def GetCells(workbook, sheet_number):
     worksheet = workbook.sheet_by_index(sheet_number)
@@ -81,7 +79,7 @@ class PanelSpreadsheet(wx.Panel):
     def __init__(self, parent, fileName, pos, size):
         wx.Panel.__init__(self, parent, -1, pos=pos, size=size)
         self.parent = parent
-        help_text = "Salstat can load files from Excel and LibreOffice/OpenOffice. "
+        help_text = "Salstat can load files from Excel and LibreOffice/OpenOffice Calc. "
         t1 = wx.StaticText(self, -1, label=help_text, pos=(10,10))
         t1.Wrap(545)
 
@@ -124,10 +122,10 @@ class ImportDialog(wx.Dialog):
         self.gridFont = wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL)
         if self.ftype == "excel":
             self.workbook = xlrd.open_workbook(self.FileName.fileName)
-            sheets = workbook.sheets()
+            sheets = self.workbook.sheets()
         elif self.ftype == "libre":
             self.workbook = ezodf.opendoc(self.FileName.fileName)
-            sheets = workbook.sheets
+            sheets = self.workbook.sheets
         self.grids = []
         for idx, sheet in enumerate(sheets):
             self.grids.append(Grid(self.worksheets, -1))
@@ -157,33 +155,98 @@ class ImportDialog(wx.Dialog):
                         val = unicode(sheet[idx_row, idx_col].value)
                     self.grids[idx].SetCellValue(idx_row, idx_col, val)
         # It seems odd but it seems better for all events to be routed to the same method
-        wx.EVT_CHECKBOX(self, 760, self.AttemptPreview)
-        wx.EVT_TEXT(self, 761, self.AttemptPreview)
-        wx.EVT_TEXT(self, 762, self.AttemptPreview)
+        wx.EVT_CHECKBOX(self, 760, self.AdjustGrid)
+        wx.EVT_SPINCTRL(self, 766, self.AdjustGrid)
         wx.EVT_BUTTON(self, 764, self.CancelButton)
         wx.EVT_BUTTON(self, 763, self.ImportButton)
-        wx.EVT_CHOICE(self, 765, self.AttemptPreview)
-        wx.EVT_SPINCTRL(self, 766, self.AttemptPreview)
 
     def AttemptPreview(self, event=None):
-        return
-        # check we have filename first
-        if self.FileName.fileName == None:
-            return
-        else:
-            # discover format & populate preview
-            extension = os.path.splitext(self.FileName.fileName)[1]
-            if extension.lower() in self.excel:
-                self.FillGridExcel(self.FileName.fileName)
-            elif extension.lower() in self.loo:
-                self.FillGridLOO(self.FileName.fileName)
+        beginRow = self.dataRow.GetValue()
+        if self.headerRow.IsChecked():
+            pass
 
     def CancelButton(self, event):
         # let's get out!
         self.FileName.fileName = None
         self.Close()
 
+    def AdjustGrid(self, event):
+        if self.ftype == "excel":
+            sheets = self.workbook.sheets()
+        elif self.ftype == "libre":
+            sheets = self.workbook.sheets
+        sheetIdx = self.worksheets.GetSelection()
+        sheet = sheets[sheetIdx]
+        self.grids[sheetIdx].ClearGrid()
+        # beginData = # get row where data begins
+        if self.ftype == 'excel':
+            nrows = sheet.nrows
+            ncols = sheet.ncols
+        elif self.ftype == 'libre':
+            nrows = sheet.nrows()
+            ncols = sheet.ncols()
+        self.grids[sheetIdx].ClearGrid()
+        # get headers
+        beginRow = self.dataRow.GetValue()-1
+        if self.headerRow.IsChecked():
+            for idxCol in range(ncols):
+                if self.ftype == 'excel':
+                    val = unicode(sheet.cell(beginRow, idxCol).value)
+                elif self.ftype == 'libre':
+                    val = unicode(sheet[beginRow, idxCol].value)
+                #print idxCol, val
+                self.grids[sheetIdx].SetColLabelValue(idxCol, val)
+            bonus = 1
+        else:
+            self.headers = []
+            bonus = 0
+        for idx_row in range(beginRow+bonus,nrows):
+            for idx_col in range(ncols):
+                if self.ftype == 'excel':
+                    val = unicode(sheet.cell(idx_row, idx_col).value)
+                elif self.ftype == 'libre':
+                    val = unicode(sheet[idx_row, idx_col].value)
+                self.grids[sheetIdx].SetCellValue(idx_row-beginRow-bonus, idx_col, val)
+
     def ImportButton(self, event):
+        if self.ftype == "excel":
+            sheets = self.workbook.sheets()
+        elif self.ftype == "libre":
+            sheets = self.workbook.sheets
+        self.varnames = []
+        self. data = []
+        sheetIdx = self.worksheets.GetSelection()
+        sheet = sheets[sheetIdx]
+        # beginData = # get row where data begins
+        if self.ftype == 'excel':
+            nrows = sheet.nrows
+            ncols = sheet.ncols
+        elif self.ftype == 'libre':
+            nrows = sheet.nrows()
+            ncols = sheet.ncols()
+        # get headers
+        beginRow = self.dataRow.GetValue()-1
+        if self.headerRow.IsChecked():
+            self.headers = []
+            for idxCol in range(ncols):
+                if self.ftype == 'excel':
+                    val = unicode(sheet.cell(beginRow, idxCol).value)
+                elif self.ftype == 'libre':
+                    val = unicode(sheet[beginRow, idxCol].value)
+                self.headers.append(val)
+            bonus = 1
+        else:
+            self.headers = []
+            bonus = 0
+        for idx_row in range(beginRow+bonus, nrows):
+            line = []
+            for idx_col in range(ncols):
+                if self.ftype == 'excel':
+                    val = unicode(sheet.cell(idx_row, idx_col).value)
+                elif self.ftype == 'libre':
+                    val = unicode(sheet[idx_row, idx_col].value)
+                line.append(val)
+            self.data.append(line)
         self.Close()
 
 
@@ -210,7 +273,7 @@ def ImportSS(frame, startDir):
         else:
             fileName = dlg.FileName.fileName
             variableNames = dlg.headers
-            data = dlg.gridData
+            data = dlg.data
             dlg.Destroy()
             return fileName, variableNames, data
     else:

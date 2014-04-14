@@ -3117,11 +3117,16 @@ class DataFrame(wx.Frame):
             self.grid.LoadFile(filename)
 
     def ImportSSWindow(self, event):
+        # TODO Check that data have been saved first!
         res = ImportSS.ImportSS(self, '/Users/alansalmoni')
+        self.FillGrid(res)
 
     def ImportCSVWindow(self, event):
         # TODO Check that data have been saved first!
         res = ImportCSV.ImportCSV(self, '/Users/alansalmoni/')
+        self.FillGrid(res)
+
+    def FillGrid(self, res):
         if res != None:
             fname = res[0]
             varnames = res[1]
@@ -3133,16 +3138,6 @@ class DataFrame(wx.Frame):
                     kCols = len(newdata[row])
             # resize grid to accommodate data
             self.grid.ResizeGrid(kCols, nRows)
-            """
-            cols = self.grid.GetNumberCols()
-            num_cols_to_append = kCols + 10 # 10 spare
-            self.grid.DeleteCols(pos=0, numCols=cols)
-            self.grid.AppendCols(numCols=num_cols_to_append)
-            rows = self.grid.GetNumberRows()
-            num_rows_to_append = nRows + 10
-            self.grid.DeleteRows(pos=0, numRows=rows)
-            self.grid.AppendRows(numRows=num_rows_to_append)
-            """
             try:
                 for idxCol, colLabel in enumerate(varnames):
                     self.grid.SetColLabelValue(idxCol, colLabel)
