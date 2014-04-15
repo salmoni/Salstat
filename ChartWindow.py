@@ -506,7 +506,7 @@ class ChartObject(object):
     def subtitle(self):
         subtitlebit = '\tsubtitle: {\n'
         if self.subtitle_text != "":
-            subtitlebit += '\t\ttext: "%s,"\n'%(self.subtitle_text)
+            subtitlebit += '\t\ttext: "%s"\n'%(self.subtitle_text)
         subtitlebit += '\t},\n'
         return subtitlebit
 
