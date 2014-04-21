@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/local/bin/python
 
 """SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed 
 under the GNU General Public License (GPL). See the file COPYING for full
@@ -11,15 +11,16 @@ from wx.stc import *
 import wx.grid as gridlib
 import wx.html as htmllib
 import wx.html2 as html2lib
-import xlrd, xlwt # import xls format
+#import xlrd, xlwt # import xls format
 import string, os, os.path, pickle, csv, sys
 import urlparse, urllib
 
 # import SalStat specific modules
-import salstat_stats, images, xlrd, tabler, charter, ChartWindow
+import salstat_stats, images, tabler, charter, ChartWindow
 import DescriptivesFrame, PrefsFrame
-import MetaGrid, AllRoutines, ImportCSV, ImportSS
+import MetaGrid, AllRoutines, ImportCSV, ImportSS, Inferentials
 import numpy, math
+import numpy.ma as ma
 
 # and for plots!
 #from wx.Python.lib.wx.PlotCanvas import *
@@ -251,6 +252,26 @@ class SaveDialog(wx.Dialog):
         self.res = "Cancel"
         self.Close(True)
 
+################################################
+# wx.FileDialog to retrieve file name. Needed before we can do anything
+
+class GetFilename(object):
+    def __init__(self, parent, startDir):
+        dlg = wx.FileDialog(parent, message="Open a CSV file", defaultDir=startDir, \
+                wildcard="CSV text (*.csv)|*.csv|Plain text (*.txt)|*.txt|\
+                Data file (*.dat)|*.dat|Any file (*.*)|*.*")
+        ico = wx.Icon('icons/PurpleIcon05_32.png',wx.BITMAP_TYPE_PNG)
+        dlg.SetIcon(ico)
+        if dlg.ShowModal() == wx.ID_OK:
+            self.fileName = dlg.GetPath()
+            if os.path.exists(self.fileName):
+                self.fileName
+            else:
+                self.fileName = None
+        else:
+            self.fileName = None
+
+
 #---------------------------------------------------------------------------
 # creates an init file in the home directory of the user
 class GetInits:
@@ -326,16 +347,28 @@ def GetGroups(groupingvars):
         row = [var[idx] for var in groupingvars]
         if row not in groups:
             groups.append(row)
+    groups.sort()
     return groups
 
 def ExtractGroupsData(group, groupingvars, variable):
     N = len(variable)
-    data = []
-    for idx in range(N):
-        row = [element[idx] for element in groupingvars]
-        if group == row:
-            data.append(variable[idx])
-    return data
+    if isinstance(variable, list):
+        data = []
+        for idx in range(N):
+            row = [element[idx] for element in groupingvars]
+            if group == row:
+                data.append(variable[idx])
+        return data
+    else:
+        indices = []
+        for idx in range(N):
+            row = [element[idx] for element in groupingvars]
+            if group == row:
+                indices.append(True)
+            else:
+                indices.append(False)
+        indices = ma.array(indices)
+        return variable[indices]
 
 def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varnames,alpha):
     notests = ['Frequencies','Proportions','Percentages', 'Relative frequency of the mode', \
@@ -347,6 +380,8 @@ def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varn
     for stat in stats:
         if stat not in notests:
             table += '<th>%s</th>'%(stat)
+            if stat == "Count":
+                table += '<th>%s</th>'%("Missing")
     table += '</tr>\n'
     k = len(groups)
     for idx, var in enumerate(variables):
@@ -356,9 +391,12 @@ def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varn
         for group in groups:
             for element in group:
                 table += '<td>%s</td>'%element
-            data = numpy.array(ExtractGroupsData(group, groupingvars, var))
+            data = ExtractGroupsData(group, groupingvars, var)
             if "Count" in stats:
                 val = AllRoutines.Count(data)
+                table += '<td>%s</td>'%str(val)
+            if "Count" in stats:
+                val = AllRoutines.NumberMissing(data)
                 table += '<td>%s</td>'%str(val)
             if "Sum" in stats:
                 val = AllRoutines.Sum(data)
@@ -490,8 +528,8 @@ def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varn
 
 #---------------------------------------------------------------------------
 # class to output the results of several "descriptives" in one table
-class ManyDescriptives2:
-    def __init__(self, source, vars, names,alpha):
+class ManyDescriptives:
+    def __init__(self, source, variables, names,alpha):
         #__x__ = len(ds)
         str2 = '<table class="table table-striped">'
         outlist = ['Statistic']
@@ -502,162 +540,167 @@ class ManyDescriptives2:
 
         if "Count" in source.stats:
             outlist = ['N']
-            for var in vars:
+            for var in variables:
                 #outlist.append(i.N)
                 outlist.append(AllRoutines.Count(var))
+            ln = tabler.vtable(outlist)
+            str2 = str2 + ln
+            outlist = ["Missing"]
+            for var in variables:
+                outlist.append(AllRoutines.NumberMissing(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Sum" in source.stats:
             outlist = ['Sum']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Sum(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Minimum" in source.stats:
             outlist = ['Minimum']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Minimum(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Maximum" in source.stats:
             outlist = ['Maximum']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Maximum(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Range" in source.stats:
             outlist = ['Range']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Range(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Midrange" in source.stats:
             outlist = ['Midrange']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Midrange(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Relative frequency of the mode" in source.stats:
             outlist = ['RelFreqMode']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.RelFreqMode(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Cumulative sum" in source.stats:
             outlist = ['CumSum']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.CumSum(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Cumulative product" in source.stats:
             outlist = ['CumProduct']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.CumProduct(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Cumulative percent" in source.stats:
             outlist = ['CumPercent']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.CumPercent(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Mean" in source.stats:
             outlist = ['Mean']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Mean(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Median" in source.stats:
             outlist = ['Median']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Median(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Tukey's hinges" in source.stats:
             outlist = ["Tukey's hinges"]
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.TukeyQuartiles(var))
             ln = tabler.tableHinges(outlist)
             str2 = str2 + ln
 
         if "Moore & McCabe's hinges" in source.stats:
             outlist = ["Moore & McCabe's hinges"]
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.MooreQuartiles(var))
             ln = tabler.tableHinges(outlist)
             str2 = str2 + ln
 
         if "Interquartile range" in source.stats:
             outlist = ["Interquartile range"]
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.InterquartileRange(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Sum of squares" in source.stats:
             outlist = ["Sum of squares"]
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.SS(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Sum of squared deviations" in source.stats:
             outlist = ["Sum of squared deviations"]
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.SSDevs(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Variance (sample)" in source.stats:
             outlist = ['Variance (sample)']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.SampVar(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Variance (population)" in source.stats:
             outlist = ['Variance (population)']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.PopVar(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Standard deviation (sample)" in source.stats:
             outlist = ['Standard Deviation (sample)']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.SampStdDev(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Standard deviation (population)" in source.stats:
             outlist = ['Standard deviation (population)']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.PopStdDev(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Standard error" in source.stats:
             outlist = ['Standard error']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.StdErr(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Quartiles" in source.stats:
             outlist = ['Quartiles']
-            for var in vars:
+            for var in variables:
                 val = AllRoutines.Quartiles(var)
                 outlist.append((val[0], val[2]))
             ln = tabler.tableHinges(outlist)
@@ -665,129 +708,129 @@ class ManyDescriptives2:
 
         if "Coefficient of variation" in source.stats:
             outlist = ['Coefficient of variation']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.CoeffVar(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Median absolute deviation" in source.stats:
             outlist = ['Median absolute deviation']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.MAD(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Trimmed mean" in source.stats:
             outlist = ['Trimmed mean']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.TrimmedMean(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Geometric mean" in source.stats:
             outlist = ['Geometric mean']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.GeometricMean(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Harmonic mean" in source.stats:
             outlist = ['Harmonic mean']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.HarmonicMean(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Mean of subsequent squared differences" in source.stats:
             outlist = ['Mean of subsequent squared differences']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.MSSD(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Skewness" in source.stats:
             outlist = ['Skewness']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Skewness(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "Kurtosis" in source.stats:
             outlist = ['Kurtosis']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Kurtosis(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
         if "S-Plus quantiles" in source.stats:
             outlist = ['S-Plus quantiles']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.SPQuantile(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
         if "SPSS quantiles" in source.stats:
             outlist = ['SPSS quantiles']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.TradQuantile(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
         if "Mid-step quantiles" in source.stats:
             outlist = ['Mid-step quantiles']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.MidstepQuantiles(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
         if "Quantile 1 (Hyndman & Fan)" in source.stats:
             outlist = ['Quantile 1 (Hyndman & Fan)']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Q1(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
         if "Quantile 2 (Hyndman & Fan)" in source.stats:
             outlist = ['Quantile 2 (Hyndman & Fan)']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Q2(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
         if "Quantile 3 (Hyndman & Fan)" in source.stats:
             outlist = ['Quantile 3 (Hyndman & Fan)']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Q3(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
         if "Quantile 4 (Hyndman & Fan)" in source.stats:
             outlist = ['Quantile 4 (Hyndman & Fan)']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Q4(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
         if "Quantile 5 (Hyndman & Fan)" in source.stats:
             outlist = ['Quantile 5 (Hyndman & Fan)']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Q5(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
         if "Quantile 6 (Hyndman & Fan)" in source.stats:
             outlist = ['Quantile 6 (Hyndman & Fan)']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Q6(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
         if "Quantile 7 (Hyndman & Fan)" in source.stats:
             outlist = ['Quantile 7 (Hyndman & Fan)']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Q7(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
         if "Quantile 8 (Hyndman & Fan)" in source.stats:
             outlist = ['Quantile 8 (Hyndman & Fan)']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Q8(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
         if "Quantile 9 (Hyndman & Fan)" in source.stats:
             outlist = ['Quantile 9 (Hyndman & Fan)']
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Q9(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
@@ -855,6 +898,7 @@ class SimpleGrid(gridlib.Grid):
                         "ASCII data format (*.dat)|*.dat|" \
                         "SalStat Format (*.xml)|*.xml"
         self.BeginMeta()
+        #print self.meta
 
     def BeginMeta(self):
         self.meta = {}
@@ -1174,116 +1218,6 @@ class SimpleGrid(gridlib.Grid):
         else:
             self.SaveAsDataASCII(None)
 
-    def LoadFile(self, filename):
-        # Loads a filename. This is a generic routine to handle
-        # command-line arguments
-        ext = os.path.splitext(filename)[1]
-        if ext == '.xml':
-            self.LoadNativeXML(filename)
-        if ext == ".xls" or ext == ".xlsx":
-            self.LoadExcel(filename)
-        elif ext == ".txt" or ext == ".csv":
-            inits.update({'opendir': dlg.GetDirectory()})
-            self.ClearGrid()
-            # exception handler here!
-            try:
-                fin = open(filename, "r")
-                self.Freeze()
-                sniffer = csv.Sniffer()
-                sample = ''
-                for i in range(5):
-                    sample += fin.readline()
-                dialect = sniffer.sniff(sample, delimiters=',\t')
-                fin.seek(0)
-                try:
-                    reader = csv.reader(fin, dialect=dialect)
-                except TypeError:
-                    reader = csv.reader(fin)
-                for idxrow, row in enumerate(reader):
-                    for idxcol, item in enumerate(row):
-                        self.SetCellValue(idxrow, idxcol, item)
-            except IOError:
-                pass # what to do if they filename isn't visible? Messagebox?
-            finally:
-                fin.close()
-                self.Thaw()
-        else:
-            pass # unknown file extension?! Maybe try MIME type?
-        self.ForceRefresh()
-        self.Saved = False
-        self.named = True
-        path, self.filename = os.path.split(filename)
-        self.parent.SetTitle(self.filename)
-        
-
-    # Loads an ASCII data file - only with all datapoints filled though!
-    # also does csv values as well
-    def LoadDataASCII(self, event):
-        default = inits.get('opendir')
-        dlg = wx.FileDialog(self, "Open Data File", "","",\
-                                #self.wildcard, wx.OPEN) \
-                                "All files (*.*)|*.*", wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
-        dlg.SetIcon(ico)
-        if dlg.ShowModal() == wx.ID_OK:
-            filename = dlg.GetPath()
-            ext = os.path.splitext(filename)[1]
-            if ext == '.xml':
-                self.LoadNativeXML(filename)
-            if ext == ".xls" or ext == ".xlsx":
-                self.LoadExcel(filename)
-            elif ext == ".txt" or ext == ".csv":
-                inits.update({'opendir': dlg.GetDirectory()})
-                self.ClearGrid()
-                # exception handler here!
-                try:
-                    fin = open(filename, "r")
-                    self.Freeze()
-                    sniffer = csv.Sniffer()
-                    sample = ''
-                    for i in range(5):
-                        sample += fin.readline()
-                    dialect = sniffer.sniff(sample, delimiters=',\t')
-                    fin.seek(0)
-                    try:
-                        reader = csv.reader(fin, dialect=dialect)
-                    except TypeError:
-                        reader = csv.reader(fin)
-                    for idxrow, row in enumerate(reader):
-                        for idxcol, item in enumerate(row):
-                            self.SetCellValue(idxrow, idxcol, item)
-                except IOError:
-                    pass # what to do if they filename isn't visible? Messagebox?
-                finally:
-                    fin.close()
-                    self.Thaw()
-            else:
-                pass # unknown file extension?! Maybe try MIME type?
-            self.ForceRefresh()
-            self.Saved = False
-            self.named = True
-            path, self.filename = os.path.split(filename)
-            self.parent.SetTitle(self.filename)
-
-    def LoadExcel(self, filename):
-        try:
-            workbook = xlrd.open_workbook(filename)
-        except: # get proper exception
-            pass # could not open file
-        try:
-            # numsheets = workbook.nsheets
-            # user should decide here which sheet.
-            # temp code: Default to first
-            worksheet = workbook.sheet_by_index(0)
-            nrows = worksheet.nrows
-            ncols = worksheet.ncols
-            self.ResizeGrid(ncols, nrows)
-            for idx_row in range(nrows):
-                for idx_col in range(ncols):
-                    val = unicode(worksheet.cell(idx_row, idx_col).value)
-                    self.SetCellValue(idx_row, idx_col, val)
-        except:
-            pass
-
     def getData(self, x):
         for i in range(len(x)):
             try:
@@ -1375,6 +1309,71 @@ class SimpleGrid(gridlib.Grid):
                     indata.append(value)
         return indata
 
+    #########################################
+    # New routines to retrieve data from grid
+    def CheckBlank(self, cell):
+        if len(cell) > 0:
+            val = cell.isspace()
+            return val
+        else:
+            return True
+
+    def GetVariableData(self, col, vtype = None):
+        """
+        This is an important method. It returns the data for a single variable.
+        Empty variable returns None
+        Blanks after data are not returned
+        Variable type can be specified as string (or None), int or float
+        For string or None, all raw values are returned.
+        For int, all figures are rounded to nearest decimal place and values that 
+        cannot be converted are masked.
+        For float, all values that cannot be converted to float are masked.
+        All values matching the variable's 'missingvalue' are masked.
+        It's inefficient and requires 2 passes but it should be reliable.
+        """
+        maxRow = self.GetNumberRows()
+        meta = self.meta[col]
+        missing = meta["missingvalues"]
+        if col > self.GetNumberCols():
+            return None
+        maxIdx = -1
+        for idx in range(maxRow):
+            if not self.CheckBlank(self.GetCellValue(idx, col)):
+                maxIdx = idx
+        if maxIdx < 0:
+            return None
+        maxIdx = maxIdx + 1
+        data = []
+        if (vtype == None) or (vtype.lower() == "str"):
+            for row in range(maxIdx):
+                val = self.GetCellValue(row, col)
+                if self.CheckBlank(val):
+                    val = ""
+                data.append(val)
+        elif vtype.lower() == "int":
+            data = ma.zeros(maxIdx,dtype='int')
+            for row in range(maxIdx):
+                val = self.GetCellValue(row, col)
+                if (val == missing) or (self.CheckBlank(val)):
+                    data[row] = ma.masked
+                else:
+                    try:
+                        data[row] = int(round(float(val)))
+                    except ValueError:
+                        data[row] = ma.masked
+        elif vtype.lower() == "float":
+            data = ma.zeros(maxIdx,dtype='float')
+            for row in range(maxIdx):
+                val = self.GetCellValue(row, col)
+                if (val == missing) or (self.CheckBlank(val)):
+                    data[row] = ma.masked
+                else:
+                    try:
+                        data[row] = float(val)
+                    except ValueError:
+                        data[row] = ma.masked
+        return data
+
     # Routine to return a "clean" list of data from one column
     def GetColumnData(self, col):
         indata = []
@@ -1399,7 +1398,8 @@ class SimpleGrid(gridlib.Grid):
             datapoint = self.GetCellValue(i, col)
             if datapoint != '':
                 if datapoint != missingvalue:
-                    indata.append(datapoint)
+                    if datapoint.isspace() == False:
+                        indata.append(datapoint)
                 else:
                     self.missing += 1
         return indata
@@ -1427,7 +1427,7 @@ class SimpleGrid(gridlib.Grid):
         array"""
         biglist = []
         for i in range(len(numcols)):
-            smalllist = frame.grid.CleanData(numcols[i])
+            smalllist = frame.grid.GetVariableData(numcols[i])
             biglist.append(smalllist)
         return numpy.array((biglist), numpy.Float)
 
@@ -1435,8 +1435,9 @@ class SimpleGrid(gridlib.Grid):
 # DescChoice-wx.CheckListBox with list of descriptive stats in it
 class DescChoiceBox(wx.CheckListBox):
     def __init__(self, parent, id):
+        test_list = AllRoutines.GetMostUsedTests()
         wx.CheckListBox.__init__(self, parent, -1, pos=(250,30), \
-                                    size=(240,310), choices=DescList)
+                                    size=(240,310), choices=test_list)
 
     def SelectAllDescriptives(self, event):
         for i in range(len(DescList)):
@@ -1489,7 +1490,7 @@ class ScriptFrame(wx.Frame):
                                     size=(dimx, dimy), pos=(posx,posy))
         #set icon for frame (needs x-platform separator!
         self.SetIcon(ico)
-        self.scripted = wx.Editor(self,-1)
+        #self.scripted = wx.Editor(self,-1)
         GoIcon = images.getApplyBitmap()
         OpenIcon = images.getOpenBitmap()
         SaveIcon = images.getSaveBitmap()
@@ -1501,19 +1502,30 @@ class ScriptFrame(wx.Frame):
         HelpIcon = images.getHelpBitmap()
         toolBar = self.CreateToolBar(wx.TB_HORIZONTAL|wx.NO_BORDER| \
                                     wx.TB_3DBUTTONS|wx.TB_TEXT)
-        toolBar.AddSimpleTool(710, GoIcon,"Run Script","Run the Script")
-        toolBar.AddSimpleTool(711, OpenIcon,"Open","Open Script from a File")
-        toolBar.AddSimpleTool(712, SaveIcon,"Save","Save Script to a file")
-        toolBar.AddSimpleTool(713, SaveAsIcon,"Save As","Save Script under \
+        toolBar.AddLabelTool(710, "Run script", wx.Bitmap("icons/IconNew.png"), shortHelp="Run this script now")
+        toolBar.AddLabelTool(711, "Open", wx.Bitmap("icons/IconOpen.png"), shortHelp="Open a script from a file")
+        toolBar.AddLabelTool(712, "Save", wx.Bitmap("icons/IconSave.png"), shortHelp="Save this script to file")
+        toolBar.AddLabelTool(713, "Save As", wx.Bitmap("icons/IconSaveAs.png"), shortHelp="Save this script to a file")
+        toolBar.AddLabelTool(714, "Print", wx.Bitmap("icons/IconPrint.png"), shortHelp="Print out this script")
+        toolBar.AddLabelTool(715, "Cut", wx.Bitmap("icons/IconCut.png"), shortHelp="Cut selection to clipboard")
+        toolBar.AddLabelTool(716, "Copy", wx.Bitmap("icons/IconCopy.png"), shortHelp="Copy selection to clipboard")
+        toolBar.AddLabelTool(717, "Paste", wx.Bitmap("icons/IconPaste.png"), shortHelp="Paste selection from clipboard")
+        toolBar.AddLabelTool(718, "Help", wx.Bitmap("icons/IconHelp.png"), shortHelp="See the help documents")
+        """
+        toolBar.AddLabelTool(710, "Run Script",GoIcon,"Run the Script")
+        toolBar.AddLabelTool(711, OpenIcon,"Open","Open Script from a File")
+        toolBar.AddLabelTool(712, SaveIcon,"Save","Save Script to a file")
+        toolBar.AddLabelTool(713, SaveAsIcon,"Save As","Save Script under \
                                     a new filename")
-        toolBar.AddSimpleTool(714, PrintIcon,"Print","Print Out Script")
-        toolBar.AddSimpleTool(715, CutIcon, "Cut", "Cut selection to \
+        toolBar.AddLabelTool(714, PrintIcon,"Print","Print Out Script")
+        toolBar.AddLabelTool(715, CutIcon, "Cut", "Cut selection to \
                                     clipboard")
-        toolBar.AddSimpleTool(716, CopyIcon, "Copy", "Copy selection to \
+        toolBar.AddLabelTool(716, CopyIcon, "Copy", "Copy selection to \
                                     clipboard")
-        toolBar.AddSimpleTool(717, PasteIcon, "Paste", "Paste selection \
+        toolBar.AddLabelTool(717, PasteIcon, "Paste", "Paste selection \
                                     from clipboard")
-        toolBar.AddSimpleTool(718, HelpIcon, "Help", "Get some help!")
+        toolBar.AddLabelTool(718, HelpIcon, "Help", "Get some help!")
+        """
         toolBar.SetToolBitmapSize((24,24))
         toolBar.Realize()
         wx.EVT_TOOL(self, 710, self.ExecuteScript)
@@ -1538,7 +1550,6 @@ class ScriptFrame(wx.Frame):
     def PasteSelection(self, event):
         self.scripted.OnPaste(event)
 
-        wx.EVT_TOOL(self, 210, self.GoBackPressed)
     def ShowHelp(self, event):
         win = AboutFrame(frame, -1, 2)
         win.Show(True)
@@ -1788,14 +1799,12 @@ class OutputSheet(wx.Frame):
         PrintIcon = images.getPrintBitmap()
         HelpIcon = images.getHelpBitmap()
         toolBar = self.CreateToolBar(wx.TB_HORIZONTAL|wx.NO_BORDER| \
-                                    wx.TB_3DBUTTONS|wx.TB_TEXT)
-        toolBar.AddSimpleTool(401, NewIcon,"New","New Data Sheet in \
-                                    separate window")
-        toolBar.AddSimpleTool(402, OpenIcon,"Open","Open Data from a File")
-        toolBar.AddSimpleTool(403, SaveAsIcon,"Save As","Save Data under \
-                                    a new filename")
-        toolBar.AddSimpleTool(404, PrintIcon,"Print","Print Out Results")
-        toolBar.AddSimpleTool(405, HelpIcon, "Help", "Get some help!")
+                                    wx.TB_FLAT|wx.TB_TEXT)
+        toolBar.AddLabelTool(401, "New", wx.Bitmap("icons/IconNew.png"), shortHelp="Create a new data sheet")
+        toolBar.AddLabelTool(402, "Open", wx.Bitmap("icons/IconOpen.png"), shortHelp="Open a data file")
+        toolBar.AddLabelTool(403, "Save As", wx.Bitmap("icons/IconSaveAs.png"), shortHelp="Save these data to a new filename")
+        toolBar.AddLabelTool(404, "Print", wx.Bitmap("icons/IconPrint.png"), shortHelp="Print this sheet")
+        toolBar.AddLabelTool(405, "Help", wx.Bitmap("icons/IconHelp.png"), shortHelp="See help documentation")
         toolBar.SetToolBitmapSize((24,24))
         # more toolbuttons are needed: New Output, Save, Print, Cut, \
         # Variables, and Wizard creates the toolbar
@@ -1909,58 +1918,6 @@ class OutputSheet(wx.Frame):
         #self.htmlpage.Reload()
 
 #---------------------------------------------------------------------------
-# user selects which cols to analyse, and what stats to have
-class DescriptivesFrame2(wx.Dialog):
-    def __init__(self, parent, id):
-        wx.Dialog.__init__(self, parent, id, \
-                                    "Descriptive Statistics", \
-                                    size=(500,400+wind))
-        x = self.GetClientSize()
-        winheight = x[1]
-        self.SetIcon(ico)
-        ColumnList, self.colnums  = frame.grid.GetUsedCols()
-        # ColumnList is the col headings, colnums is the column numbers
-        l0 = wx.StaticText(self,-1,"Select Column(s) to Analyse",pos=(10,10))
-        l4 = wx.StaticText(self,-1,"Select Descriptive Statistics",pos=(250,10))
-        self.DescChoice = DescChoiceBox(self, 1107)
-        self.ColChoice = wx.CheckListBox(self,1102, wx.Point(10,30), \
-                                    wx.Size(230,(winheight * 0.8)), ColumnList)
-        okaybutton = wx.Button(self,1103,"Okay",wx.Point(10,winheight-35),\
-                                    wx.Size(BWidth, BHeight))
-        cancelbutton = wx.Button(self,1104,"Cancel",wx.Point(100,winheight-35),\
-                                    wx.Size(BWidth, BHeight))
-        if wx.Platform == '__WXMSW__':
-            # Darn! Some cross-platform voodoo needed...
-            allbutton = wx.Button(self, 105, "Select All", wx.Point(250,winheight-70),\
-                                    wx.Size(BWidth, BHeight))
-            nonebutton = wx.Button(self, 106, "Select None", wx.Point(360,winheight-70),\
-                                    wx.Size(BWidth, BHeight))
-        else:
-            allbutton = wx.Button(self, 105, "Select All", wx.Point(250,winheight-50),\
-                                    wx.Size(BWidth, BHeight))
-            nonebutton = wx.Button(self, 106, "Select None", wx.Point(360,winheight-50),\
-                                    wx.Size(BWidth, BHeight))
-        wx.EVT_BUTTON(okaybutton, 1103, self.OnOkayButton)
-        wx.EVT_BUTTON(cancelbutton, 1104, self.OnCloseContDesc)
-        wx.EVT_BUTTON(allbutton, 105, self.DescChoice.SelectAllDescriptives)
-        wx.EVT_BUTTON(nonebutton, 106, self.DescChoice.SelectNoDescriptives)
-
-    def OnOkayButton(self, event):
-        descs = []
-        for i in range(len(self.colnums)):
-            if self.ColChoice.IsChecked(i):
-                colnum = self.colnums[i]
-                name = frame.grid.GetColLabelValue(colnum)
-                descs.append(salstat_stats.FullDescriptives( \
-                                    frame.grid.CleanData(colnum), name, \
-                                    frame.grid.missing))
-        ManyDescriptives(self, descs)
-        self.Close(True)
-
-    def OnCloseContDesc(self, event):
-        self.Close(True)
-
-#---------------------------------------------------------------------------
 # Same as DescriptivesContinuousFrame, but for nominal descriptives
 class OneConditionTestFrame(wx.Dialog):
     def __init__(self, parent, id, ColumnList):
@@ -2004,6 +1961,7 @@ class OneConditionTestFrame(wx.Dialog):
         cancelbutton = wx.Button(self,104,"Cancel",wx.Point(100,winheight-35),\
                                     wx.Size(BWidth, BHeight))
         self.DescChoice = DescChoiceBox(self, 104)
+        self.stats = []
         wx.EVT_BUTTON(self.okaybutton, 103, self.OnOkayButton)
         wx.EVT_BUTTON(cancelbutton, 104, self.OnCloseOneCond)
         wx.EVT_BUTTON(allbutton, 105, self.DescChoice.SelectAllDescriptives)
@@ -2016,9 +1974,9 @@ class OneConditionTestFrame(wx.Dialog):
         self.okaybutton.Enable(True)
 
     def OnOkayButton(self, event):
-        x1 = self.ColBox.GetSelection()
-        name = frame.grid.GetColLabelValue(x1)
-        if (x1 < 0): # add top limits of grid to this
+        colNum = self.ColBox.GetSelection()
+        name = frame.grid.GetColLabelValue(colNum)
+        if (colNum < 0): # add top limits of grid to this
             self.Close(True)
             return
         try:
@@ -2028,68 +1986,78 @@ class OneConditionTestFrame(wx.Dialog):
                                     hypothesised mean specified')
             self.Close(True)
             return
-        x = frame.grid.CleanData(x1)
-        TBase = salstat_stats.OneSampleTests(frame.grid.CleanData(x1), name, \
-                                    frame.grid.missing)
-        d=[0]
-        d[0] = TBase.d1
-        x2=ManyDescriptives(self, d)
+        #x = frame.grid.GetVariableData(x1,'float')
+        data = frame.grid.GetVariableData(colNum,'float')
+        self.stats = self.DescChoice.GetCheckedStrings()
+        ManyDescriptives(self, [data], [name], None)
         # One sample t-test
         if self.TestChoice.IsChecked(0):
             output.Addhtml('<h3>One sample t-test</h3>')
-            TBase.OneSampleTTest(umean)
-            if (TBase.prob == -1.0):
+            df, t, prob, d = Inferentials.OneSampleTTest(data, umean)
+            if (prob == -1.0):
                 output.Addhtml('<p class="text-warning">All elements are the same, \
                                     test not possible</p>')
             else:
                 if (self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                vars = [['Variable', name1],
-                        ['df', TBase.df],
-                        ['t',TBase.t],
-                        ['p',TBase.prob]]
-                ln = tabler.table(vars)
+                    prob = prob / 2
+                variables = [['Variable', name],
+                        ['Hypothetic mean', umean],
+                        ['df', df],
+                        ['t',t],
+                        ['p',prob],
+                        ["Cohen's d",d]]
+                quote = "<b>Quote:</b> <i>t</i>(%d)=%2.3f, <i>p</i>=%1.3f, <i>d</i>=%1.3f<br />"%\
+                        (df, t, prob, d)
+                ln = quote + tabler.table(variables)
                 output.Addhtml(ln)
                 #now draw up the xml history stuff
-                xmlevt = '<analyse test="one sample t-test" column = "'+str(x1)
+                xmlevt = '<analyse test="one sample t-test" column = "'+str(colNum)
                 xmlevt = xmlevt+' hyp_value = "'+str(umean)+'" tail="'
                 if (self.hypchoice.GetSelection() == 0):
                     xmlevt = xmlevt+'1">'
                 else:
                     xmlevt = xmlevt+'2">'
-                xmlevt = xmlevt+'t ('+str(TBase.df)+') = '+str(TBase.t)+', p = '+str(TBase.prob)
+                xmlevt = xmlevt+'t ('+str(df)+') = '+str(t)+', p = '+str(prob)
                 xmlevt = xmlevt+'</analyse>'
                 hist.AppendEvent(xmlevt)
         # One sample sign test
         if self.TestChoice.IsChecked(1):
             output.Addhtml('<H3>One sample sign test</H3>')
-            TBase.OneSampleSignTest(x, umean)
-            if (TBase.prob == -1.0):
+            nplus, nminus, nequal, z, prob = Inferentials.OneSampleSignTest(data, umean)
+            if (prob == -1.0):
                 output.Addhtml('<p class="text-warning">All data are the same - no \
                                     analysis is possible</p>')
             else:
                 if (self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                vars = [['Variable', name1],
-                        ['Total N', TBase.ntotal],
-                        ['Z',TBase.z],
-                        ['p',TBase.prob]]
-                ln = tabler.table(vars)
+                    prob = prob / 2
+                variables = [['Variable', name],
+                        ['Hypothetic mean', umean],
+                        ['Positive',nplus],
+                        ['Negative',nminus],
+                        ['Equal',nequal],
+                        ['Total N', nplus+nminus+nequal],
+                        ['Z',z],
+                        ['p',prob]]
+                quote = "<i>Z</i>=%1.3f, <i>p</i>=%1.3f<br />"%(z, prob)
+                ln = quote + tabler.table(variables)
                 output.Addhtml(ln)
         # chi square test for variance
         if self.TestChoice.IsChecked(2):
             output.Addhtml('<H3>One sample chi square</H3>')
-            TBase.ChiSquareVariance(umean)
+            df, chisquare, prob = Inferentials.ChiSquareVariance(data, umean)
             if (self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-            if (TBase.prob == None):
-                TBase.prob = 1.0
-                vars = [['Variable', name1],
-                        ['df', TBase.df],
-                        ['Chi',TBase.chisquare],
-                        ['p',TBase.prob]]
-                ln = tabler.table(vars)
-                output.Addhtml(ln)
+                prob = prob / 2
+            if (prob == None):
+                prob = 1.0
+                df = 0
+                chisquare = 0.0
+            variables = [['Variable', name],
+                    ['Hypothetic mean', umean],
+                    ['df', df],
+                    ['Chi',chisquare],
+                    ['p',prob]]
+            ln = tabler.table(variables)
+            output.Addhtml(ln)
 
         self.Close(True)
             
@@ -2200,15 +2168,12 @@ class TwoConditionTestFrame(wx.Dialog):
         if (x1 < 0) or (y1 < 0):
             self.Close(True)
             return
-        x = frame.grid.CleanData(x1)
-        xmiss = frame.grid.missing
-        y = frame.grid.CleanData(y1)
-        ymiss = frame.grid.missing
-        TBase = salstat_stats.TwoSampleTests(x, y, name1, name2,xmiss,ymiss)
-        d = [0,0]
-        d[0] = TBase.d1
-        d[1] = TBase.d2
-        x2 = ManyDescriptives(self, d)
+        x = frame.grid.GetVariableData(x1, 'float')
+        #xmiss = frame.grid.missing
+        y = frame.grid.GetVariableData(y1,'float')
+        #ymiss = frame.grid.missing
+        self.stats = self.DescChoice.GetCheckedStrings()
+        ManyDescriptives(self, [x,y], [name1,name2], None)
 
         # chi square test
         if self.paratests.IsChecked(0):
@@ -2234,68 +2199,69 @@ class TwoConditionTestFrame(wx.Dialog):
                 output.Addhtml('<p class="text-warning">Cannot do test - no user \
                                     hypothesised mean specified')
             else:
-                TBase.FTest(umean)
+                df1, df2, f, prob = Inferentials.FTest(x, y, umean)
                 if (self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                vars = [['Variable 1', name1],
+                    prob = prob / 2
+                variables = [['Variable 1', name1],
                         ['Variable 2', name2],
-                        ['df', '%d, %d'%(TBase.df1, TBase.df2)],
-                        ['F',TBase.f],
-                        ['p',TBase.prob]]
-                ln = tabler.table(vars)
+                        ['df', '%d, %d'%(df1, df2)],
+                        ['F',f],
+                        ['p',prob]]
+                quote = ""
+                ln = quote + tabler.table(variables)
                 output.Addhtml(ln)
 
         # Kolmorogov-Smirnov 2 sample test
         if self.paratests.IsChecked(2):
             output.Addhtml('<h3>Kolmogorov-Smirnov test (unpaired)</h3>')
-            TBase.KolmogorovSmirnov()
+            d, prob = Inferentials.KolmogorovSmirnov(x, y)
             if (self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-            vars = [['Variable 1', name1],
+                prob = prob / 2
+            variables = [['Variable 1', name1],
                     ['Variable 2', name2],
-                    ['d', TBase.d],
-                    ['p',TBase.prob]]
-            ln = tabler.table(vars)
+                    ['d', d],
+                    ['p',prob]]
+            quote = ""
+            ln = quote + tabler.table(variables)
             output.Addhtml(ln)
 
         # Linear Regression
         if self.paratests.IsChecked(3):
             output.Addhtml('<h3>Linear Regression</h3>')
-            TBase.LinearRegression(x,y)
+            slope, intercept, r, prob, st = Inferentials.linregress(x,y)
             #s, i, r, prob, st = salstat_stats.llinregress(x, y)
-            if (TBase.prob == -1.0):
+            if (prob == -1.0):
                 output.Addhtml('<h3>Cannot do linear regression - unequal data sizes</p>')
             else:
                 if (self.hypchoice.GetSelection() == 0):
-                    self.prob = self.prob / 2
-                vars = [['Variable 1 on', name1],
+                    prob = prob / 2
+                variables = [['Variable 1 on', name1],
                         ['Variable 2', name2],
-                        ['Slope', TBase.slope],
-                        ['Intercept',TBase.intercept],
-                        ['R', TBase.r],
-                        ['Est. Standard Error',TBase.sterrest],
-                        ['df', TBase.df],
-                        ['t',TBase.t],
-                        ['p',TBase.prob]]
-                ln = tabler.table(vars)
+                        ['Slope', slope],
+                        ['Intercept',intercept],
+                        ['R', r],
+                        ['Est. Standard Error',st],
+                        ['p',prob]]
+                quote = ""
+                ln = quote + tabler.table(variables)
                 output.Addhtml(ln)
 
         # Mann-Whitney U
         if self.paratests.IsChecked(4):
             output.Addhtml('<h3>Mann-Whitney U test (unpaired samples)</h3>')
-            TBase.MannWhitneyU(x, y)
-            if (TBase.prob == -1.0):
+            u, prob = Inferentials.MannWhitneyU(x, y)
+            if (prob == -1.0):
                 output.Addhtml('<p class="text-warning">Cannot do Mann-Whitney U test - all numbers are identical<p>')
             else:
                 if (self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                vars = [['Variable 1', name1],
+                    prob = prob / 2
+                variables = [['Variable 1', name1],
                         ['Variable 2', name2],
-                        ['df', TBase.z],
-                        ['Small U',TBase.smallu],
-                        ['Big U',TBase.bigu],
-                        ['p',TBase.prob]]
-                ln = tabler.table(vars)
+                        ['U',u],
+                        ['p',prob]]
+                quote = "<b>Quote:</b> <i>U</i>=%2.3f, <i>p</i>=%1.3f<br />"%\
+                        (u, prob)
+                ln = quote + tabler.table(variables)
                 output.Addhtml(ln)
 
         # Paired permutation test
@@ -2315,49 +2281,53 @@ class TwoConditionTestFrame(wx.Dialog):
         # Paired sign test
         if self.paratests.IsChecked(5):
             output.Addhtml('<h3>Paired sign test</h3>')
-            TBase.TwoSampleSignTest(x, y)
-            if (TBase.prob == -1.0):
+            nplus, nminus, ntotal, z, prob = Inferentials.TwoSampleSignTest(x, y)
+            if prob == -1.0:
                 output.Addhtml('<p class="text-warning">Cannot do test - not paired samples</p>')
             else:
                 if (self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                vars = [['Variable 1', name1],
+                    prob = prob / 2
+                variables = [['Variable 1', name1],
                         ['Variable 2', name2],
-                        ['N (total)', TBase.ntotal],
-                        ['Z',TBase.z],
-                        ['p',TBase.prob]]
-                ln = tabler.table(vars)
+                        ['N (total)', ntotal],
+                        ['Z',z],
+                        ['p',prob]]
+                ln = tabler.table(variables)
                 output.Addhtml(ln)
 
         # Paired t-test
         if self.paratests.IsChecked(6):
             output.Addhtml('<h3>t-test paired</h3>')
-            TBase.TTestPaired(x, y)
-            if (TBase.prob == -1.0):
+            df, t, prob, d = Inferentials.TTestPaired(x, y)
+            if (prob == -1.0):
                 output.Addhtml('<p class="text-warning">Cannot do paired t test - unequal data sizes</p>')
             else:
                 if self.hypchoice.GetSelection() == 0:
-                    TBase.prob = TBase.prob / 2
-                vars = [['Variable 1', name1],
-                        ['Variable 2', name2],
-                        ['df', TBase.df],
-                        ['t',TBase.t],
-                        ['p',TBase.prob]]
-                ln = tabler.table(vars)
+                    prob = TBase.prob / 2
+                variables = [['Variable', "%s, %s"%(name1,name2)],
+                        ['df', df],
+                        ['t',t],
+                        ['p',prob],
+                        ["Cohen's d",d]]
+                quote = "<b>Quote:</b> <i>t</i>(%d)=%2.3f, <i>p</i>=%1.3f, <i>d</i>=%1.3f<br />"%\
+                        (df, t, prob, d)
+                ln = quote + tabler.table(variables)
                 output.Addhtml(ln)
 
         # unpaired t-test
         if self.paratests.IsChecked(7):
             output.Addhtml('<h3>t-test unpaired</h3>')
-            TBase.TTestUnpaired()
+            df, t, prob, d = Inferentials.TTestUnpaired(x, y)
             if (self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-            vars = [['Variable 1', name1],
-                    ['Variable 2', name2],
-                    ['df', TBase.df],
-                    ['t',TBase.t],
-                    ['p',TBase.prob]]
-            ln = tabler.table(vars)
+                prob = prob / 2
+            variables = [['Variable', "%s, %s"%(name1,name2)],
+                    ['df', df],
+                    ['t',t],
+                    ['p',prob],
+                    ["Cohen's d",d]]
+            quote = "<b>Quote:</b> <i>t</i>(%d)=%2.3f, <i>p</i>=%1.3f, <i>d</i>=%1.3f<br />"%\
+                    (df, t, prob, d)
+            ln = quote + tabler.table(variables)
             output.Addhtml(ln)
 
         # Wald-Wolfowitz runs test (no yet coded)
@@ -2366,34 +2336,35 @@ class TwoConditionTestFrame(wx.Dialog):
 
         # Wilcoxon Rank Sums
         if self.paratests.IsChecked(9):
-            output.Addhtml('<h3>Rank Sums test (unpaired samples)</h3>')
-            TBase.RankSums(x, y)
+            output.Addhtml('<h3>Wilcoxon Rank Sums test (unpaired samples)</h3>')
+            z, prob = Inferentials.RankSums(x, y)
             if (self.hypchoice.GetSelection() == 0):
-                TBase.prob = TBase.prob / 2
-            vars = [['Variable 1', name1],
+                prob = prob / 2
+            variables = [['Variable 1', name1],
                     ['Variable 2', name2],
-                    ['z', TBase.z],
-                    ['p',TBase.prob]]
-            ln = tabler.table(vars)
+                    ['z', z],
+                    ['p',prob]]
+            quote = "<b>Quote:</b> <i>z</i>=%2.3f, <i>p</i>=%1.3f<br />"%\
+                    (z, prob)
+            ln = quote + tabler.table(variables)
             output.Addhtml(ln)
-            output.Addhtml('<BR>t = %5.3f, p = %1.6f'%(TBase.z, \
-                                    TBase.prob))
 
         # Wilcoxon Signed Ranks
         if self.paratests.IsChecked(10):
-            output.Addhtml('<h3>Wilcoxon t (paired samples)</h3>')
-            TBase.SignedRanks(x, y)
-            if (TBase.prob == -1.0):
+            output.Addhtml('<h3>Wilcoxon t (signed-ranks / paired samples)</h3>')
+            T, prob = Inferentials.SignedRanks(x, y)
+            if (prob == -1.0):
                 output.Addhtml('<p class="text-warning">Cannot do Wilcoxon t test - unequal data sizes</p>')
             else:
                 if (self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                vars = [['Variable 1', name1],
+                    prob = prob / 2
+                variables = [['Variable 1', name1],
                         ['Variable 2', name2],
-                        ['z', TBase.z],
-                        ['wt',TBase.wt],
-                        ['p',TBase.prob]]
-                ln = tabler.table(vars)
+                        ['T',T],
+                        ['p',prob]]
+                quote = "<b>Quote:</b> <i>U</i>=%2.3f, <i>p</i>=%1.3f<br />"%\
+                        (T, prob)
+                ln = quote + tabler.table(variables)
                 output.Addhtml(ln)
         self.Close(True)
 
@@ -3042,9 +3013,7 @@ class DataFrame(wx.Frame):
         toolBar.AddLabelTool(80, "Paste", wx.Bitmap("icons/IconPaste.png"), shortHelp="Paste selection from clipboard")
         toolBar.AddLabelTool(85, "Preferences", wx.Bitmap("icons/IconPrefs.png"), shortHelp="Set your preferences")
         toolBar.AddLabelTool(87, "Meta", wx.Bitmap("icons/IconHelp.png"), shortHelp="Set variables")
-        toolBar.AddLabelTool(88, "Chart", wx.Bitmap("icons/IconHelp.png"), shortHelp="View the chart window")
-        toolBar.AddLabelTool(89, "Import CSV",wx.Bitmap("icons/IconHelp.png"), shortHelp="Import a CSV file")
-        toolBar.AddLabelTool(891, "Import Spreadsheet",wx.Bitmap("icons/IconHelp.png"), shortHelp="Import spreadsheet")
+        toolBar.AddLabelTool(88, "Chart", wx.Bitmap("icons/IconChart.png"), shortHelp="View the chart window")
         toolBar.AddLabelTool(90, "Help", wx.Bitmap("icons/IconHelp.png"), shortHelp="Get help")
         toolBar.SetToolBitmapSize((24,24))
         # more toolbuttons are needed: New Output, Save, Print, Cut, \
@@ -3070,9 +3039,9 @@ class DataFrame(wx.Frame):
         wx.EVT_TOOL(self, 30, self.grid.SaveDataASCII)
         wx.EVT_MENU(self, ID_FILE_SAVEAS, self.grid.SaveAsDataASCII)
         wx.EVT_TOOL(self, 40, self.grid.SaveAsDataASCII)
-        wx.EVT_MENU(self, ID_FILE_OPEN, self.grid.LoadDataASCII)
+        wx.EVT_MENU(self, ID_FILE_OPEN, self.OpenFile)
         #EVT_MENU(self, ID_FILE_OPEN, self.grid.LoadNumericData)
-        wx.EVT_TOOL(self, 20, self.grid.LoadDataASCII)
+        wx.EVT_TOOL(self, 20, self.OpenFile)
         #EVT_TOOL(self, 20, self.grid.LoadNumericData)
         wx.EVT_MENU(self, ID_EDIT_CUT, self.grid.CutData)
         wx.EVT_TOOL(self, 60, self.grid.CutData)
@@ -3089,8 +3058,6 @@ class DataFrame(wx.Frame):
         wx.EVT_TOOL(self, 85, self.GoVariablesFrame)
         wx.EVT_TOOL(self, 87, self.ToggleMetaGrid)
         wx.EVT_TOOL(self, 88, self.ToggleChartWindow)
-        wx.EVT_TOOL(self, 89, self.ImportCSVWindow)
-        wx.EVT_TOOL(self, 891, self.ImportSSWindow)
         wx.EVT_MENU(self, ID_PREPARATION_DESCRIPTIVES, self.GoContinuousDescriptives)
         wx.EVT_MENU(self, ID_PREPARATION_TRANSFORM, self.GoTransformData)
         wx.EVT_MENU(self, ID_PREPARATION_OUTLIERS, self.GoCheckOutliers)
@@ -3116,6 +3083,64 @@ class DataFrame(wx.Frame):
             frameTitle = filename
             self.grid.LoadFile(filename)
 
+    def OpenFile(self, event):
+        startDir = inits.get('opendir')
+        FileName = GetFilename(frame, startDir)
+        if FileName.fileName == None:
+            return None
+        extension = os.path.splitext(FileName.fileName)[1].lower()
+        spreads = ['.xls','.xlsx','.ods']
+        csvs    = ['.csv','.txt','.prn','.dat']
+        htmls   = ['.htm','.html','.xhtml','.dhtml']
+        xmls    = ['.xml']
+        sass    = ['.sas7bdat']
+        spsss   = ['.sav']
+        if extension in spreads: # file extension is for spreadsheet
+            dlg = ImportSS.ImportDialog(FileName)
+        elif extension in csvs: # csv / txt format
+            dlg = ImportCSV.ImportDialog(FileName)
+        elif extension in htmls: # HTML table
+            dlg = None
+        elif extension in xmls: # xml - unsure how to handle this
+            dlg = None
+        elif extension == '.salstat': # Salsat native
+            dlg = None
+        elif extension in sass: # SAS 8 and later
+            import sas7bdat as sas
+            allData = sas.SAS7BDAT(FileName.fileName)
+            #print dir(allData)
+            #print allData.header
+            gridData = []
+            for line in allData.readData():
+                lineStr = [str(idx) for idx in line]
+                gridData.append(lineStr)
+            variableNames = gridData.pop(0)
+            dlg = None
+            self.FillGrid((FileName.fileName, variableNames, gridData))
+        elif extension in spsss: # SPSS
+            dlg = None
+        else:
+            dlg = None
+        if dlg:
+            if dlg.ShowModal():
+                if dlg.FileName.fileName == None:
+                    dlg.Destroy()
+                    return None
+                else:
+                    fileName = dlg.FileName.fileName
+                    variableNames = dlg.headers
+                    gridData = dlg.gridData
+                    dlg.Destroy()
+                    self.FillGrid((fileName, variableNames, gridData))
+            else:
+                dlg.Destroy()
+                return None
+        self.grid.ForceRefresh()
+        self.grid.Saved = False
+        self.grid.named = True
+        path, self.filename = os.path.split(filename)
+        self.SetTitle(self.filename)
+
     def ImportSSWindow(self, event):
         # TODO Check that data have been saved first!
         res = ImportSS.ImportSS(self, '/Users/alansalmoni')
@@ -3123,8 +3148,10 @@ class DataFrame(wx.Frame):
 
     def ImportCSVWindow(self, event):
         # TODO Check that data have been saved first!
-        res = ImportCSV.ImportCSV(self, '/Users/alansalmoni/')
-        self.FillGrid(res)
+        col = self.grid.GetGridCursorCol()
+        val = self.grid.GetVariableData(col, vtype='float')
+        print val
+        print AllRoutines.Mean(val)
 
     def FillGrid(self, res):
         if res != None:
@@ -3146,9 +3173,8 @@ class DataFrame(wx.Frame):
             for idxRow, dataRow in enumerate(newdata):
                 n = len(dataRow)
                 for idxCol, colValue in enumerate(dataRow):
-                    self.grid.SetCellValue(idxRow, idxCol, colValue)
-            self.grid.Saved = False
-            self.grid.named = False
+                    if colValue.isspace() == False:
+                        self.grid.SetCellValue(idxRow, idxCol, colValue)
         else:
             pass
 
@@ -3380,9 +3406,9 @@ class DataFrame(wx.Frame):
                 win.stats
                 win.IVs
                 if len(win.GRPs) > 0: # user's selected grouping variables
-                    groupedVars = [self.grid.CleanData(col) for col in win.GRPs]
+                    groupedVars = [self.grid.GetVariableData(col,'float') for col in win.GRPs]
                     groups = GetGroups(groupedVars)
-                    IVs = [self.grid.CleanData(col) for col in win.IVs]
+                    IVs = [self.grid.GetVariableData(col,'float') for col in win.IVs]
                     groupnames = win.varListGRP.GetCheckedStrings()
                     varnames = win.varListIV.GetCheckedStrings()
                     alpha = win.alpha
@@ -3390,7 +3416,7 @@ class DataFrame(wx.Frame):
                 else:
                     for i in win.IVs:
                         colnum = win.ColNums[i]
-                        data.append(numpy.array(self.grid.CleanData(colnum)))
+                        data.append(self.grid.GetVariableData(colnum,'float'))
                         names.append(self.grid.GetColLabelValue(colnum))
                         alpha = win.alpha
                         """
@@ -3399,7 +3425,7 @@ class DataFrame(wx.Frame):
                                             self.grid.CleanData(colnum), name, \
                                             self.grid.missing))
                         """
-                    ManyDescriptives2(win, data, names,alpha)
+                    ManyDescriptives(win, data, names,alpha)
             except NameError:
                 pass
         win.Destroy()

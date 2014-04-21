@@ -158,6 +158,7 @@ def UniqueVals(data):
     except TypeError:
         data = [data]
         uniques = data
+    uniques.sort()
     length = len(uniques)
     freqs = []
     # now find frequencies
@@ -203,7 +204,11 @@ def Count(data):
     Count
     """
     data = numpy.ma.array(data)
-    return int(numpy.ma.count(data))
+    val = int(numpy.ma.count(data))
+    return val
+
+def NumberMissing(data):
+    return data.size - data.count()
 
 def Sum(data):
     """
@@ -761,6 +766,7 @@ def ConfidenceIntervals(data, p=0.95):
     n = numpy.ma.count(data)
     m = numpy.ma.average(data)
     sd = SampStdDev(data)
+    #diff = (probabilities.inversef(p
     diff = (pstats.inverset(p, n-1) * sd) / numpy.math.sqrt(n)
     lb = m - diff
     ub = m + diff

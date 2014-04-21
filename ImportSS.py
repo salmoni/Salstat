@@ -214,7 +214,7 @@ class ImportDialog(wx.Dialog):
         elif self.ftype == "libre":
             sheets = self.workbook.sheets
         self.varnames = []
-        self. data = []
+        self.gridData = []
         sheetIdx = self.worksheets.GetSelection()
         sheet = sheets[sheetIdx]
         # beginData = # get row where data begins
@@ -246,7 +246,7 @@ class ImportDialog(wx.Dialog):
                 elif self.ftype == 'libre':
                     val = unicode(sheet[idx_row, idx_col].value)
                 line.append(val)
-            self.data.append(line)
+            self.gridData.append(line)
         self.Close()
 
 
@@ -273,9 +273,9 @@ def ImportSS(frame, startDir):
         else:
             fileName = dlg.FileName.fileName
             variableNames = dlg.headers
-            data = dlg.data
+            gridData = dlg.data
             dlg.Destroy()
-            return fileName, variableNames, data
+            return fileName, variableNames, gridData
     else:
         dlg.Destroy()
         return None

@@ -28,7 +28,8 @@ def table(ListofLists):
             foothtml = '<td>%d</td>'%val
         elif (type(val) is str) or (type(val) is unicode):
             foothtml = '<td>%s</td>'%val
-        elif type(val) is float:
+        #elif type(val) is float:
+        else:
             fltstr = str(val)
             foothtml = '<td>%s</td>'%fltstr
             # really need to figure out what parameters make a good display for each number

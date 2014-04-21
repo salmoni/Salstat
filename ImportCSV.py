@@ -230,13 +230,13 @@ class ImportDialog(wx.Dialog):
                     try:
                         self.grid.SetCellValue(row,idxy,tokens[idxy])
                     except IndexError:
-                        self.grid.SetCellValue(row,idxy," ")
+                        self.grid.SetCellValue(row,idxy,"")
             except IndexError:
                 break
 
     def ParseLine(self, line, delims, quotes):
         """
-        Parses a line of text into components. This attempts to 
+        Parses a line of CSV text into components. This attempts to 
         be a proper parser that can cope with multiple delimiters.
         """
         inQuote = False # flag for being 'within' quotes

@@ -773,7 +773,7 @@ class TwoSampleTests:
 
     def FTest(self, uservar):
         """
-        This method performs a F test for variance ratio and needs a user 
+        This method performs a F test for variance and needs a user 
         hypothesised variance to be supplied.
         Usage: FTest(uservar)
         Returns: f, df1, df2, prob

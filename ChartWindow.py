@@ -22,6 +22,7 @@ def GetGroups(groupingvars):
         row = [var[idx] for var in groupingvars]
         if row not in groups:
             groups.append(row)
+    groups.sort()
     return groups
 
 def ExtractGroupsData(group, groupingvars, variable):
@@ -60,11 +61,18 @@ class ChartWindow(wx.Frame):
                                     wx.TB_3DBUTTONS | wx.TB_TEXT)
         #ToolNew = wx.ToolBarToolBase(toolBar)
         #toolBar.AddTool(10, NewIcon,"New")
+        toolBar.AddLabelTool(10, "New", wx.Bitmap("icons/IconNew.png"), shortHelp="Create a new chart")
+        toolBar.AddLabelTool(20, "Open", wx.Bitmap("icons/IconOpen.png"), shortHelp="Open a data file")
+        toolBar.AddLabelTool(30, "Save", wx.Bitmap("icons/IconSave.png"), shortHelp="Save these data to file")
+        toolBar.AddLabelTool(50, "Print", wx.Bitmap("icons/IconPrint.png"), shortHelp="Print this sheet")
+        toolBar.AddLabelTool(70, "Embed", wx.Bitmap("icons/IconEmbed.png"), shortHelp="Embed this chart with the rest of your results")
+        """
         toolBar.AddSimpleTool(10, NewIcon,"New")
         toolBar.AddSimpleTool(20, OpenIcon,"Open")
         toolBar.AddSimpleTool(30, SaveIcon,"Save")
         toolBar.AddSimpleTool(50, PrintIcon,"Print")
         toolBar.AddSimpleTool(70, EmbedIcon, "Embed")
+        """
         toolBar.SetToolBitmapSize((24,24))
         toolBar.Realize()
         self.SetToolBar(toolBar)
@@ -75,9 +83,9 @@ class ChartWindow(wx.Frame):
         self.control = ControlPanel(self, -1, self.chartObject, self.preview)
         # Windows crash not before here...
         if self.grid:
-            self.variables = VarPanel2(self, -1, self.grid, self.chartObject)
+            self.variables = VarPanel(self, -1, self.grid, self.chartObject)
         else:
-            self.variables = VarPanel2(self, -1, None, self.chartObject)
+            self.variables = VarPanel(self, -1, None, self.chartObject)
         # ...but IS before here!
         self.box = wx.BoxSizer(wx.HORIZONTAL)
         self.box.Add(self.variables, 0, wx.EXPAND)
@@ -150,132 +158,6 @@ class ControlPanel(wx.Panel):
         pass
 
 class VarPanel(wx.Panel):
-    def __init__(self, parent, id, grid, chartObject):
-        wx.Panel.__init__(self, parent, -1, size=(250, -1))
-        self.grid = grid
-        self.parent = parent
-        self.chartObject = chartObject
-        self.stats=["Frequencies","Sum","Mean","Median","Minimum","Maximum",\
-                "Range","Variance","Standard deviation","Standard error"]
-        if not grid:
-            variables = ['Var 001 (IV)', 'Var 002 (IV)', 'Var 003 (DV)']
-        else:
-            ColsUsed, self.ColNums = self.grid.GetUsedCols()
-            variables = ['None'] + ColsUsed
-        wx.StaticText(self, -1, "Variables", pos=(20,20))
-        wx.StaticText(self, -1, "Chart this variable:", pos=(20,50))
-        self.DV = wx.ComboBox(self, -1, size=(190,-1),pos=(20,70), choices = variables)
-        wx.StaticText(self, -1, "by:", pos=(20,110))
-        self.stat = wx.ComboBox(self, -1, size=(190,-1), pos=(20,130),choices=self.stats)
-        wx.StaticText(self, -1, "Organised by:",pos=(20,170))
-        self.IV = wx.ComboBox(self, -1, size=(190,-1), pos=(20,190),choices=variables)
-
-        acceptbutton = wx.Button(self, 711, "Draw this graph", pos=(15,250))
-        self.SetAutoLayout(True)
-        self.Layout()
-        wx.EVT_BUTTON(acceptbutton, 711, self.ChangeVars)
-        self.ChangeVars(None)
-
-    def GetSetDV(self, col_DV, col_IV):
-        if col_DV < 1:
-            self.valid_content = False
-        else:
-            self.valid_content = True
-            name_DV = self.grid.GetColLabelValue(col_DV - 1)
-            self.chartObject.yAxis_title = name_DV
-            test = self.stat.GetStringSelection()
-            if col_IV < 1: # no grouping
-                data = self.grid.GetColumnData(col_DV-1)
-                values, freqs = AllRoutines.UniqueVals(data)
-            else: # is grouping
-                data_IV = self.grid.GetColumnRawData(col_IV-1)
-                data_DV = self.grid.GetColumnData(col_DV-1)
-                groups = GetGroups([data_IV])
-                data = []
-                for group in groups:
-                    data_section = numpy.array(ExtractGroupsData(group, [data_IV], data_DV))
-                    if test == "":
-                        pass
-                    elif test == "Frequencies":
-                        data.append(AllRoutines.Count(data_section))
-                    elif test == "Sum":
-                        data.append(AllRoutines.Sum(data_section))
-                    elif test == "Mean":
-                        data.append(AllRoutines.Mean(data_section))
-                    elif test == "Median":
-                        data.append(AllRoutines.Median(data_section))
-                    elif test == "Minimum":
-                        data.append(AllRoutines.Minimum(data_section))
-                    elif test == "Maximum":
-                        data.append(AllRoutines.Maximum(data_section))
-                    elif test == "Range":
-                        data.append(AllRoutines.Range(data_section))
-                    elif test == "Variance":
-                        data.append(AllRoutines.SampVar(data_section))
-                    elif test == "Standard deviation":
-                        data.append(AllRoutines.SampStdDev(data_section))
-                    elif test == "Standard error":
-                        data.append(AllRoutines.StdErr(data_section))
-            self.chartObject.data = [data]
-            yAxisText = '%s of %s'%(test, name_DV)
-            self.chartObject.yAxis_title = yAxisText
-
-    def GetSetIV(self, col_IV):
-        if col_IV < 1:
-            # remove x-axis details or specify no x-axis details
-            self.chartObject.xAxis_categories = None
-            self.chartObject.xAxis_min = None
-            self.chartObject.xAxis_max = None
-            self.chartObject.xAxis_minTickInterval = None
-            self.chartObject.zAxis_TickInterval = None
-            test = self.stat.GetStringSelection()
-            yAxisText = '%s'%(test)
-            self.chartObject.yAxis_title = yAxisText
-        else:
-            name_IV = self.grid.GetColLabelValue(col_IV - 1)
-            data_IV = self.grid.GetColumnRawData(col_IV - 1)
-            values, freqs = AllRoutines.UniqueVals(data_IV)
-            self.chartObject.xAxis_title = name_IV
-            self.chartObject.xAxis_categories = values
-            self.chartObject.xAxis_min = None
-            self.chartObject.xAxis_max = None
-            self.chartObject.xAxis_minTickInterval = None
-            self.chartObject.zAxis_TickInterval = None
-            test = self.stat.GetStringSelection()
-            yAxisText = '%s'%(test)
-            self.chartObject.yAxis_title = yAxisText
-
-    def ChangeVars(self, event):
-        col_IV = self.IV.GetSelection()
-        self.GetSetIV(col_IV)
-        col_DV = self.DV.GetSelection()
-        self.GetSetDV(col_DV, col_IV)
-        if self.valid_content:
-            self.chartObject.ToString()
-            #self.parent.preview.SetPage(self.chartObject.page,"")
-            fout = open('tmp/chartput.html','w')
-            fout.write(self.chartObject.page)
-            fout.close()
-            file_loc = FileToURL(basedir+os.sep+'tmp/chartput.html')
-            self.parent.preview.LoadURL(file_loc)
-        else:
-            help_prompt = "<br /><br /><br /><p>To create a chart, simply select which variable you want to display (to the left of this message)"
-            #self.parent.preview.SetPage(help_prompt, "")
-            fout = open('tmp/chartput.html','w')
-            fout.write(help_prompt)
-            fout.close()
-            file_loc = FileToURL(basedir+os.sep+'tmp/chartput.html')
-            self.parent.preview.LoadURL(file_loc)
-        #print self.chartObject.page
-
-    def ToString(self, inData):
-        try:
-            outString = '","'.join([str(idx) for idx in inData])
-            return outString
-        except:
-            return inData
-
-class VarPanel2(wx.Panel):
     def __init__(self, parent, id, grid, chartObject):
         wx.Panel.__init__(self, parent, -1, size=(250, -1))
         self.grid = grid
