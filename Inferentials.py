@@ -102,7 +102,7 @@ def ChiSquareVariance(data, usermean):
     df = Count(data) - 1
     try:
         chisquare = (StdErr(data) / usermean) * df
-        prob = chisqprob(chisqure, df)
+        prob = chisqprob(chisquare, df)
     except ZeroDivisionError:
         chisquare = 0.0
         prob = 1.0
@@ -241,6 +241,18 @@ def SignedRanks(x, y):
 def RankSums(x, y):
     z, prob = scipy.stats.ranksums(x, y)
     return z, prob
+
+def KendallsTau(x, y):
+    tau, prob = stats.kendalltau(x,y)
+    return tau, prob
+
+def PearsonR(x, y):
+    r, prob = stats.pearsonr(x, y)
+    return r, prob
+
+def SpearmanR(x, y):
+    r, prob = stats.spearmanr(x, y)
+    return r, prob
 
 def ConfidenceIntervals(data, alpha=0.95):
     n  = Count(data)

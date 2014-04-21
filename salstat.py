@@ -2633,8 +2633,8 @@ class CorrelationTestFrame(wx.Dialog):
 
     def ChangeCol1(self, event):
         # check that len of 2 cols is equal, if not disable choices of test
-        x1 = len(frame.grid.CleanData(self.ColBox1.GetSelection()))
-        x2 = len(frame.grid.CleanData(self.ColBox2.GetSelection()))
+        x1 = len(frame.grid.GetVariableData(self.ColBox1.GetSelection(),'float'))
+        x2 = len(frame.grid.GetVariableData(self.ColBox2.GetSelection(),'float'))
         if (x1 != x2):
             print "unequal"
             # disable some tests in the listbox
@@ -2644,8 +2644,8 @@ class CorrelationTestFrame(wx.Dialog):
 
     def ChangeCol2(self, event):
         # check that len of 2 cols is equal, if not disable choices of test
-        x1 = len(frame.grid.CleanData(self.ColBox1.GetSelection()))
-        x2 = len(frame.grid.CleanData(self.ColBox2.GetSelection()))
+        x1 = len(frame.grid.GetVariableData(self.ColBox1.GetSelection(),'float'))
+        x2 = len(frame.grid.GetVariableData(self.ColBox2.GetSelection(),'float'))
         if (x1 != x2):
             print "unequal"
         else:
@@ -2659,51 +2659,46 @@ class CorrelationTestFrame(wx.Dialog):
         if (x1 < 0) or (y1 < 0):
             self.Close(True)
             return
-        x = frame.grid.CleanData(x1)
-        xmiss = frame.grid.missing
-        y = frame.grid.CleanData(y1)
-        ymiss = frame.grid.missing
-        TBase = salstat_stats.TwoSampleTests(x, y, name1, name2,xmiss,ymiss)
-        d = [0,0]
-        d[0] = TBase.d1
-        d[1] = TBase.d2
-        x2 = ManyDescriptives(self, d)
+        x = frame.grid.GetVariableData(x1, 'float')
+        y = frame.grid.GetVariableData(y1, 'float')
+        #TBase = salstat_stats.TwoSampleTests(x, y, name1, name2,xmiss,ymiss)
+        self.stats = self.DescChoice.GetCheckedStrings()
+        ManyDescriptives(self, [x,y], [name1,name2], None)
         
         # Kendalls tau correlation
         if self.paratests.IsChecked(0):
             output.Addhtml('<h3>Kendalls Tau correlation</h3>')
-            TBase.KendallsTau(x, y)
-            if (TBase.prob == -1.0):
+            tau, prob = Inferentials.KendallsTau(x, y)
+            if (prob == -1.0):
                 output.Addhtml('<p class="text-warning">Cannot do Kendall&#39;s tau correlation \
                                     - the data have unequal sizes')
             else:
                 if (self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                vars = [['Variable 1', name1],
+                    prob = prob / 2
+                variables = [['Variable 1', name1],
                         ['Variable 2', name2],
-                        ['Tau', TBase.tau],
-                        ['z',TBase.z],
-                        ['p',TBase.prob]]
-                ln = tabler.table(vars)
+                        ['Tau', tau],
+                        ['p',prob]]
+                quote = ""
+                ln = quote + tabler.table(variables)
                 output.Addhtml(ln)
 
         # Pearsons r correlation
         if self.paratests.IsChecked(1):
             output.Addhtml('<H3>Pearsons correlation</H3>')
-            TBase.PearsonsCorrelation(x, y)
-            if (TBase.prob == -1.0):
+            r, prob = Inferentials.PearsonR(x, y)
+            if (prob == -1.0):
                 output.Addhtml('<p class="text-warning">Cannot do Pearson&#39;s correlation \
                                     - the data have unequal sizes')
             else:
                 if (self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                vars = [['Variable 1', name1],
+                    prob = prob / 2
+                variables = [['Variable 1', name1],
                         ['Variable 2', name2],
-                        ['df', TBase.df],
-                        ['r',TBase.r],
-                        ['t',TBase.t],
-                        ['p',TBase.prob]]
-                ln = tabler.table(vars)
+                        ['r',r],
+                        ['p',prob]]
+                quote = ""
+                ln = quote + tabler.table(variables)
                 output.Addhtml(ln)
 
         # Point Biserial r
@@ -2712,19 +2707,19 @@ class CorrelationTestFrame(wx.Dialog):
         # Spearmans rho correlation
         if self.paratests.IsChecked(3):
             output.Addhtml('<H3>Spearmans rho correlation</H3>')
-            TBase.SpearmansCorrelation(x, y)
-            if (TBase.prob == -1.0):
+            r, prob = Inferentials.SpearmanR(x, y)
+            if (prob == -1.0):
                 output.Addhtml('<p class="text-warning">Cannot do Spearmans correlation \
                                     - the data have unequal sizes')
             else:
                 if (self.hypchoice.GetSelection() == 0):
-                    TBase.prob = TBase.prob / 2
-                vars = [['Variable 1', name1],
+                    prob = prob / 2
+                variables = [['Variable 1', name1],
                         ['Variable 2', name2],
-                        ['df', TBase.df],
-                        ['Rho',TBase.rho],
-                        ['p',TBase.prob]]
-                ln = tabler.table(vars)
+                        ['r',r],
+                        ['p',prob]]
+                quote = ""
+                ln = quote + tabler.table(variables)
                 output.Addhtml(ln)
 
         self.Close(True)
