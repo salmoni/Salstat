@@ -125,6 +125,7 @@ class ImportDialog(wx.Dialog):
         self.dataRow.SetValue(1)
         self.buttonImport = wx.Button(self,763,"Import", \
                 pos=(500,400),size=(70,-1))
+        self.buttonImport.SetDefault()
         self.buttonCancel = wx.Button(self,764,"Cancel", \
                 pos=(405,400),size=(70,-1))
         self.grid = gridlib.Grid(self, -1, size=(560,100),pos=(20,290))

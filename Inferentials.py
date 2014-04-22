@@ -244,15 +244,27 @@ def RankSums(x, y):
 
 def KendallsTau(x, y):
     tau, prob = stats.kendalltau(x,y)
-    return tau, prob
+    adj = PairwiseDeletion(x,y)
+    df = Count(adj[0])-1
+    return tau, df, prob
 
 def PearsonR(x, y):
     r, prob = stats.pearsonr(x, y)
-    return r, prob
+    adj = PairwiseDeletion(x,y)
+    df = Count(adj[0])-1
+    return r, df, prob
+
+def PointBiserial(x, y):
+    r, prob = stats.pointbiserialr(x, y)
+    adj = PairwiseDeletion(x,y)
+    df = Count(adj[0])-1
+    return r, df, prob
 
 def SpearmanR(x, y):
     r, prob = stats.spearmanr(x, y)
-    return r, prob
+    adj = PairwiseDeletion(x,y)
+    df = Count(adj[0])-1
+    return r, df, prob
 
 def ConfidenceIntervals(data, alpha=0.95):
     n  = Count(data)
@@ -264,10 +276,12 @@ def ConfidenceIntervals(data, alpha=0.95):
 
 
 if __name__ == '__main__':
-    d1 = ma.array(([1,2,3,4,3,2]))
-    d2 = ma.array(([5,4,5,6,7,6]))
-    print TTestPaired(d1, d2)
-    print TTestUnpaired(d1,d2)
+    d1 = ma.array([1,2,3,4,3,2], mask=[0,0,1,0,0,0])
+    d2 = ma.array([5,4,5,6,7,6])
+    print KendallsTau(d1, d2)
+    #print PearsonR(d1, d2)
+    #print SpearmanR(d1, d2)
+    #print TTestUnpaired(d1,d2)
     #print OneSampleTTest(d1, 1.8)
     #print ConfidenceIntervals(d1)
 

@@ -22,10 +22,6 @@ import MetaGrid, AllRoutines, ImportCSV, ImportSS, Inferentials
 import numpy, math
 import numpy.ma as ma
 
-# and for plots!
-#from wx.Python.lib.wx.PlotCanvas import *
-#from wx.Python.lib import wx.PlotCanvas
-# set ip the xml modules
 from xml.dom import minidom
 
 #---------------------------------------------------------------------------
@@ -1435,16 +1431,16 @@ class SimpleGrid(gridlib.Grid):
 # DescChoice-wx.CheckListBox with list of descriptive stats in it
 class DescChoiceBox(wx.CheckListBox):
     def __init__(self, parent, id):
-        test_list = AllRoutines.GetMostUsedTests()
+        self.test_list = AllRoutines.GetMostUsedTests()
         wx.CheckListBox.__init__(self, parent, -1, pos=(250,30), \
-                                    size=(240,310), choices=test_list)
+                                    size=(240,310), choices=self.test_list)
 
     def SelectAllDescriptives(self, event):
-        for i in range(len(DescList)):
+        for i in range(len(self.test_list)):
             self.Check(i, True)
 
     def SelectNoDescriptives(self, event):
-        for i in range(len(DescList)):
+        for i in range(len(self.test_list)):
             self.Check(i, False)
 
 #---------------------------------------------------------------------------
@@ -1957,7 +1953,7 @@ class OneConditionTestFrame(wx.Dialog):
         self.hypchoice.SetSelection(1)
         self.okaybutton = wx.Button(self,103,"Okay",wx.Point(10,winheight-35),\
                                     wx.Size(BWidth, BHeight))
-        #self.okaybutton.Enable(False)
+        self.okaybutton.SetDefault()
         cancelbutton = wx.Button(self,104,"Cancel",wx.Point(100,winheight-35),\
                                     wx.Size(BWidth, BHeight))
         self.DescChoice = DescChoiceBox(self, 104)
@@ -2121,6 +2117,7 @@ class TwoConditionTestFrame(wx.Dialog):
         self.DescChoice = DescChoiceBox(self, 215)
         okaybutton = wx.Button(self,216,"Okay",wx.Point(10,winheight-35), \
                                     wx.Size(BWidth, BHeight))
+        okaybutton.SetDefault()
         cancelbutton = wx.Button(self,217,"Cancel",wx.Point(100,winheight-35), \
                                     wx.Size(BWidth, BHeight))
         self.UserMean = wx.TextCtrl(self,219,pos=(140,345),size=(70,20))
@@ -2411,6 +2408,7 @@ class ThreeConditionTestFrame(wx.Dialog):
         self.DescChoice = DescChoiceBox(self, 512)
         okaybutton = wx.Button(self,516,"Okay",wx.Point(10,winheight-35), \
                                     wx.Size(BWidth, BHeight))
+        okaybutton.SetDefault()
         cancelbutton = wx.Button(self,517,"Cancel",wx.Point(100,winheight-35), \
                                     wx.Size(BWidth, BHeight))
         wx.EVT_BUTTON(okaybutton, 516, self.OnOkayButton)
@@ -2622,6 +2620,7 @@ class CorrelationTestFrame(wx.Dialog):
         self.DescChoice = DescChoiceBox(self, 215)
         okaybutton = wx.Button(self,216,"Okay",wx.Point(10,winheight-35), \
                                     wx.Size(BWidth, BHeight))
+        okaybutton.SetDefault()
         cancelbutton = wx.Button(self,217,"Cancel",wx.Point(100,winheight-35), \
                                     wx.Size(BWidth, BHeight))
         wx.EVT_BUTTON(okaybutton, 216, self.OnOkayButton)
@@ -2668,7 +2667,7 @@ class CorrelationTestFrame(wx.Dialog):
         # Kendalls tau correlation
         if self.paratests.IsChecked(0):
             output.Addhtml('<h3>Kendalls Tau correlation</h3>')
-            tau, prob = Inferentials.KendallsTau(x, y)
+            tau, df, prob = Inferentials.KendallsTau(x, y)
             if (prob == -1.0):
                 output.Addhtml('<p class="text-warning">Cannot do Kendall&#39;s tau correlation \
                                     - the data have unequal sizes')
@@ -2678,15 +2677,16 @@ class CorrelationTestFrame(wx.Dialog):
                 variables = [['Variable 1', name1],
                         ['Variable 2', name2],
                         ['Tau', tau],
+                        ['df', df],
                         ['p',prob]]
-                quote = ""
+                quote = "<b>Quote:</b> <i>Tau</i>(%d)=%1.3f, <i>p</i>=%1.4f<br />"%(df, tau, prob)
                 ln = quote + tabler.table(variables)
                 output.Addhtml(ln)
 
         # Pearsons r correlation
         if self.paratests.IsChecked(1):
             output.Addhtml('<H3>Pearsons correlation</H3>')
-            r, prob = Inferentials.PearsonR(x, y)
+            r, df, prob = Inferentials.PearsonR(x, y)
             if (prob == -1.0):
                 output.Addhtml('<p class="text-warning">Cannot do Pearson&#39;s correlation \
                                     - the data have unequal sizes')
@@ -2696,18 +2696,16 @@ class CorrelationTestFrame(wx.Dialog):
                 variables = [['Variable 1', name1],
                         ['Variable 2', name2],
                         ['r',r],
+                        ['df', df],
                         ['p',prob]]
-                quote = ""
+                quote = "<b>Quote:</b> <i>r</i>(%d)=%1.3f, <i>p</i>=%1.4f<br />"%(df, r, prob)
                 ln = quote + tabler.table(variables)
                 output.Addhtml(ln)
 
         # Point Biserial r
         if self.paratests.IsChecked(2):
-            pass
-        # Spearmans rho correlation
-        if self.paratests.IsChecked(3):
-            output.Addhtml('<H3>Spearmans rho correlation</H3>')
-            r, prob = Inferentials.SpearmanR(x, y)
+            output.Addhtml('<H3>Point Biserial r correlation</H3>')
+            r, df, prob = Inferentials.PointBiserial(x, y)
             if (prob == -1.0):
                 output.Addhtml('<p class="text-warning">Cannot do Spearmans correlation \
                                     - the data have unequal sizes')
@@ -2717,8 +2715,28 @@ class CorrelationTestFrame(wx.Dialog):
                 variables = [['Variable 1', name1],
                         ['Variable 2', name2],
                         ['r',r],
+                        ['df', df],
                         ['p',prob]]
-                quote = ""
+                quote = "<b>Quote:</b> <i>r</i>(%d)=%1.3f, <i>p</i>=%1.4f<br />"%(df, r, prob)
+                ln = quote + tabler.table(variables)
+                output.Addhtml(ln)
+
+        # Spearmans rho correlation
+        if self.paratests.IsChecked(3):
+            output.Addhtml('<H3>Spearmans rho correlation</H3>')
+            r, df, prob = Inferentials.SpearmanR(x, y)
+            if (prob == -1.0):
+                output.Addhtml('<p class="text-warning">Cannot do Spearmans correlation \
+                                    - the data have unequal sizes')
+            else:
+                if (self.hypchoice.GetSelection() == 0):
+                    prob = prob / 2
+                variables = [['Variable 1', name1],
+                        ['Variable 2', name2],
+                        ['r',r],
+                        ['df', df],
+                        ['p',prob]]
+                quote = "<b>Quote:</b> <i>r</i>(%d)=%1.3f, <i>p</i>=%1.4f<br />"%(df, r, prob)
                 ln = quote + tabler.table(variables)
                 output.Addhtml(ln)
 
