@@ -35,6 +35,7 @@ class DFrame(wx.Dialog):
 
         cancelButton = wx.Button(panelR03, 1341, "Cancel", pos=(20,0), size=(90,-1))
         okButton = wx.Button(panelR03, 1342, "Analyse", pos=(130,0), size=(90,-1))
+        okButton.SetDefault()
 
         wx.StaticText(panelR02, -1, "Alpha value:", pos=(0,-1))
         self.alphaText = wx.TextCtrl(panelR02, -1, pos=(120,0), size=(40,-1))

@@ -202,8 +202,6 @@ class VarPanel(wx.Panel):
                     colRep = self.grid.GetVariableData(col, 'string')
                     if test == "Frequencies":
                         series.append(colData)
-                        print colData
-                        print colRep
                     elif test == "Sum":
                         series.append([AllRoutines.Sum(colData)])
                     elif test == "Mean":
@@ -324,7 +322,7 @@ class ChartObject(object):
         self.charthtml = """<!DOCTYPE html>\n<html>\n<head>\n<script src="html/jquery/1.8.2/jquery.min.js"></script>\n\t\t<script src="html/highcharts/3.0.7/highcharts.js"></script>\n\t\t<script src="html/bootstrap/2.3.1/bootstrap.min.js"></script>\n\t\t<link href="html/bootstrap/2.3.1/bootstrap-combined.min.css" rel="stylesheet" media="screen">\n\t\t<script src="html/highcharts/3.0.7/exporting.js"></script>\n\t\t<script src="html/js/themes/gray.js"></script></script>\n\t<style>\n\t\tbody { font-family: helvectica, arial, \'lucida sans\'; }\n\t</style>\n</head>\n<body>\n"""
         self.title_text = " "
         #self.chart_anim = { animation: false }
-        self.chart_type = "area"
+        self.chart_type = "column"
         self.subtitle_text = " "
         self.xAxis_title = None
         self.xAxis_categories = []

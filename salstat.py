@@ -407,7 +407,6 @@ def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varn
                 table += '<td>%s</td>'%element
             data = ExtractGroupsData(group, groupingvars, var)
             data = ConvertToNumbers(data)
-            print "data = ",data
             if "Count" in stats:
                 val = AllRoutines.Count(data)
                 table += '<td>%s</td>'%str(val)
@@ -3471,12 +3470,6 @@ class DataFrame(wx.Frame):
                         data.append(self.grid.GetVariableData(colnum,'float'))
                         names.append(self.grid.GetColLabelValue(colnum))
                         alpha = win.alpha
-                        """
-                        name = self.grid.GetColLabelValue(colnum)
-                        descs.append(salstat_stats.FullDescriptives( \
-                                            self.grid.CleanData(colnum), name, \
-                                            self.grid.missing))
-                        """
                     ManyDescriptives(win, data, names,alpha)
             except NameError:
                 pass
