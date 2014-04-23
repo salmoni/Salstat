@@ -11,6 +11,7 @@ from wx.stc import *
 import wx.grid as gridlib
 import wx.html as htmllib
 import wx.html2 as html2lib
+import BeautifulSoup as BS
 #import xlrd, xlwt # import xls format
 import string, os, os.path, pickle, csv, sys
 import urlparse, urllib
@@ -2317,7 +2318,7 @@ class TwoConditionTestFrame(wx.Dialog):
             df, t, prob, d = Inferentials.TTestUnpaired(x, y)
             if (self.hypchoice.GetSelection() == 0):
                 prob = prob / 2
-            variables = [['Variable', "%s, %s"%(name1,name2)],
+            variables =[['Variable', "%s, %s"%(name1,name2)],
                     ['df', df],
                     ['t',t],
                     ['p',prob],
@@ -3114,6 +3115,24 @@ class DataFrame(wx.Frame):
             dlg = ImportCSV.ImportDialog(FileName)
         elif extension in htmls: # HTML table
             dlg = None
+            gridData = []
+            variableNames = []
+            fin = open(FileName.fileName,'r')
+            data = fin.read()
+            fin.close()
+            soup = BS.BeautifulSoup(data)
+            table = soup.find('table')
+            headings = table.findAll('th')
+            for heading in headings:
+                variableNames.append(heading.text)
+            rows = table.findAll('tr')
+            for row in rows:
+                line = []
+                cols = row.findAll('td')
+                for col in cols:
+                    line.append(col.text)
+                gridData.append(line)
+            self.FillGrid((FileName.fileName, variableNames, gridData))
         elif extension in xmls: # xml - unsure how to handle this
             dlg = None
         elif extension == '.salstat': # Salsat native
