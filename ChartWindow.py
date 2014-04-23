@@ -198,7 +198,30 @@ class VarPanel(wx.Panel):
             series = []
             if col_IV < 1: # no grouping
                 for col in col_DV:
-                    series.append(self.grid.GetColumnData(col))
+                    colData = self.grid.GetVariableData(col, 'float')
+                    colRep = self.grid.GetVariableData(col, 'string')
+                    if test == "Frequencies":
+                        series.append(colData)
+                        print colData
+                        print colRep
+                    elif test == "Sum":
+                        series.append([AllRoutines.Sum(colData)])
+                    elif test == "Mean":
+                        series.append([AllRoutines.Mean(colData)])
+                    elif test == "Median":
+                        series.append([AllRoutines.Median(colData)])
+                    elif test == "Minimum":
+                        series.append([AllRoutines.Minimum(colData)])
+                    elif test == "Maximum":
+                        series.append([AllRoutines.Maximum(colData)])
+                    elif test == "Range":
+                        series.append([AllRoutines.Range(colData)])
+                    elif test == "Variance":
+                        series.append([AllRoutines.SampVar(colData)])
+                    elif test == "Standard deviation":
+                        series.append([AllRoutines.SampStdDev(colData)])
+                    elif test == "Standard error":
+                        series.append([AllRoutines.StdErr(colData)])
                     #values, freqs = AllRoutines.UniqueVals(data)
                     #allVals.append(values)
                     #allFreqs.append(values)

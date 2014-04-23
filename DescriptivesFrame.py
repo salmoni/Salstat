@@ -46,7 +46,7 @@ class DFrame(wx.Dialog):
         t4 = wx.StaticText(self, -1, "Select descriptive statistics:")
 
         self.GetVars()
-        self.varListIV = wx.CheckListBox(self, -1, choices=self.vars)
+        self.varListDV = wx.CheckListBox(self, -1, choices=self.vars)
         self.varListGRP = wx.CheckListBox(self, -1, choices=self.vars)
 
         testshort, testlong = self.GetTests()
@@ -57,7 +57,7 @@ class DFrame(wx.Dialog):
 
         bord = 10
         sizerL.Add(t1, 0, wx.ALL, border=bord)
-        sizerL.Add(self.varListIV, 1, wx.EXPAND|wx.ALL)
+        sizerL.Add(self.varListDV, 1, wx.EXPAND|wx.ALL)
         sizerL.Add(t2, 0, wx.ALL, border=bord)
         sizerL.Add(self.varListGRP, 1, wx.EXPAND|wx.ALL)
         sizerL.Add(t3, 0, wx.ALL, border=bord)
@@ -107,10 +107,10 @@ class DFrame(wx.Dialog):
             self.Close()
 
     def GetValues(self):
-        IVs = self.varListIV.GetChecked()
-        self.IVs = []
-        for IV in IVs:
-            self.IVs.append(self.ColNums[IV])
+        DVs = self.varListDV.GetChecked()
+        self.DVs = []
+        for DV in DVs:
+            self.DVs.append(self.ColNums[DV])
         self.GRPs = self.varListGRP.GetChecked()
         page = self.tests.GetSelection()
         if page == 0:

@@ -367,6 +367,23 @@ def ExtractGroupsData(group, groupingvars, variable):
         indices = ma.array(indices)
         return variable[indices]
 
+def ConvertToNumbers(dataIn, missingvalues=[]):
+    maxIdx = len(dataIn)
+    data = ma.zeros(maxIdx,dtype='float')
+    for row in range(maxIdx):
+        val = dataIn[row]
+        if (val in missingvalues):
+            data[row] = ma.masked
+        else:
+            try:
+                data[row] = float(val)
+                if math.isnan(data[row]):
+                    data[row] = ma.masked
+            except ValueError:
+                data[row] = ma.masked
+    return data
+
+
 def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varnames,alpha):
     notests = ['Frequencies','Proportions','Percentages', 'Relative frequency of the mode', \
             'Trimmed mean', 'Bi-trimmed mean', 'Mode', 'Moment']
@@ -389,6 +406,8 @@ def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varn
             for element in group:
                 table += '<td>%s</td>'%element
             data = ExtractGroupsData(group, groupingvars, var)
+            data = ConvertToNumbers(data)
+            print "data = ",data
             if "Count" in stats:
                 val = AllRoutines.Count(data)
                 table += '<td>%s</td>'%str(val)
@@ -3436,17 +3455,18 @@ class DataFrame(wx.Frame):
             names = []
             try:
                 win.stats
-                win.IVs
+                win.DVs
                 if len(win.GRPs) > 0: # user's selected grouping variables
-                    groupedVars = [self.grid.GetVariableData(col,'float') for col in win.GRPs]
+                    #groupedVars = [self.grid.GetVariableData(col,'string') for col in win.GRPs]
+                    groupedVars = [self.grid.CleanData(col) for col in win.GRPs]
                     groups = GetGroups(groupedVars)
-                    IVs = [self.grid.GetVariableData(col,'float') for col in win.IVs]
+                    DVs = [self.grid.GetVariableData(col,'float') for col in win.DVs]
                     groupnames = win.varListGRP.GetCheckedStrings()
-                    varnames = win.varListIV.GetCheckedStrings()
+                    varnames = win.varListDV.GetCheckedStrings()
                     alpha = win.alpha
-                    GroupedDescriptives(groups, groupedVars, IVs, win.stats, groupnames, varnames,alpha)
+                    GroupedDescriptives(groups, groupedVars, DVs, win.stats, groupnames, varnames,alpha)
                 else:
-                    for i in win.IVs:
+                    for i in win.DVs:
                         colnum = win.ColNums[i]
                         data.append(self.grid.GetVariableData(colnum,'float'))
                         names.append(self.grid.GetColLabelValue(colnum))
