@@ -2,7 +2,6 @@
 .DS_Store?
 *.pyc
 
-
 tmp/html2text.py
 
 ImportExcel.py
@@ -18,18 +17,9 @@ tmp/Wire_ImportCSV.bmml
 
 tmp/chartput.html
 
-tmp/chartput.html
-
-tmp/chartput.html
-
 tmp/Chart_2.html
-
-tmp/chartput.html
-
-tmp/chartput.html
 
 tmp/Salstat – overall shot.png
 
-tmp/chartput.html
+tmp/*
 
-tmp/chartput.html

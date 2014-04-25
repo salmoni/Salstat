@@ -1453,6 +1453,8 @@ class DescChoiceBox(wx.CheckListBox):
         self.test_list = AllRoutines.GetMostUsedTests()
         wx.CheckListBox.__init__(self, parent, -1, pos=(250,30), \
                                     size=(240,310), choices=self.test_list)
+        print dir(self)
+        self.SetChecked([0,1,2,5,6,7])
 
     def SelectAllDescriptives(self, event):
         for i in range(len(self.test_list)):
@@ -2315,6 +2317,8 @@ class TwoConditionTestFrame(wx.Dialog):
         if self.paratests.IsChecked(6):
             output.Addhtml('<h3>t-test paired</h3>')
             df, t, prob, d = Inferentials.TTestPaired(x, y)
+            alpha = 0.95
+            mean, meanm, meanp = Inferentials.ConfidenceIntervals(x-y, alpha)
             if (prob == -1.0):
                 output.Addhtml('<p class="text-warning">Cannot do paired t test - unequal data sizes</p>')
             else:
@@ -2324,7 +2328,8 @@ class TwoConditionTestFrame(wx.Dialog):
                         ['df', df],
                         ['t',t],
                         ['p',prob],
-                        ["Cohen's d",d]]
+                        ["Cohen's d",d],
+                        ["%d%% confidence intervals"%(alpha*100), "%s  %s"%(str(meanm), str(meanp))]]
                 quote = "<b>Quote:</b> <i>t</i>(%d)=%2.3f, <i>p</i>=%1.3f, <i>d</i>=%1.3f<br />"%\
                         (df, t, prob, d)
                 ln = quote + tabler.table(variables)

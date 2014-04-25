@@ -4,56 +4,48 @@ This is not Salstat 2 (see https://code.google.com/p/salstat-statistics-package-
 
 I've done no work on this for about 10 years only to find that people are *still* using it. I'm surprised at its longevity and wonder if, just maybe, I should continue developing it.
 
-INSTALLATION (Windows):
+INSTALLATION:
 
-The Windows executable installs like any other application. Download it and
-run the executable to install it. You will be given options like having a
-desktop icon, a menu entry, links to the web pages and so on. The Python 
-source code is also included.
+You have two options for installation. 
 
-INSTALLATION (Linux executable):
+1. Buying an installable. We have to charge for these because it takes us a lot of time to prepare them. They don't cost much and all money goes towards Salstat development. It also includes some technical support.
+2. Source code (the source is open source and free). This will probably take a bit of work but will cost you time.
 
-This is in some ways more complex, but in other ways easier. Unpack the archive
-('gunzip salstat*' then 'tar -xvf salstat*') and everything will open into a 
-directory called salstat. If you wish, you can place the directory in /usr/share or
-somewhere in your home directory. The file called (simply) 'salstat' is the 
-executable, but you may wish to write a short bash script to call the main 
-executable. There is also an icon file which can be used for KDE or
-Gnome shortcuts if required. The Python source code is also included.
+We only have installables for Windows and OS X (64-bit).
 
-INSTALLATION - Linux/Unix and Windows (source code):
+1. BUYING AN INSTALLABLE
 
-Open the archive using tar/gunzip for packages ending in tar.gz, or something
-like WinZip for zip archives. There should be a core of files which you need
-to put somewhere. As you have wxPython installed, I recommend going to the
-wxPython directory, and putting them into a directory somewhere. Open a
-console/DOS box, and change to that directory. Then (assuming Python and
-wxPython has installed properly), run "python salstat.py".
+We offer installables for Windows and OS X that contain everything you need. They install like a regular software program and save lots of time. You can get them from http://www.salstat.com. 
 
-INSTALLATION - Mac OSX:
+To save your time, we have to work hard so we charge a small amount for the installables which goes straight back into Salstat development. 
 
-Thanks to Ludger Humbert who has OSX and tried the following:
+2. INSTALLING SOURCE CODE
 
-at first anyone who wants to install it has to
-install a X-Server on the Mac OS X
+Salstat runs using a computer language called Python. This costs nothing to download and install. It also uses a number of libraries, all of which cost nothing to download and install. It will probably, however, take time to get your computer ready. 
 
-I recommend installing all the software with fink, it's available via
-http://fink.sourceforge.net/
+First download and install Python. If possible, use a 64-bit version. 
+Then download and install setuptools or pip and then install these libraries. I've included the versions used on my machine. I will not guarantee that they work but they do on mine. 
 
-The second was taken while running Orobor. One can get it on
-http://wrench.et.ic.ac.uk/adrian/software/oroborosx/
+wxPython		(version 2.9.5.0)
+Scipy			(version 0.13.0)
+Numpy			(version 1.8.0)
+BeautifulSoup	(version 3.2.1)
+xlrd			(version 0.9.2)
+ezodf			(version 0.2.5) 
+sas7bdat		(version 0.2.2)
 
-This Window-Manager integrates with look and feel very fine into
-the native Mac OS X -- Aqua Windowmanager
+Now download the Salstat source file (if you haven't already) and uncompress it. Go into the top directory in a terminal and type:
 
+python salstat.py
 
-**WARNING** - this is beta software - DO NOT RELY UPON THIS FOR RESEARCH -
-there is a lot of testing to do before its accuracy can be verified, so the
-results that come out of this may not be any good at all. 
+This should launch Salstat.
 
-It may crash and ruin your data, trash your hard disk, kill you, burn your
-house down, run off with your life partner, and end the world as we know it.
-Well, you never know ;), so MAKE BACKUPS BEFORE USING IT!
+PROBLEMS INSTALLING FROM SOURCE
+
+1. Go back and ensure all the modules above were installed.
+2. Let me know – raise an issue on Github (https://github.com/salmoni/Salstat)
+3. See what error comes up and see if the help groups can sort it out. I used to use the newsgroup comp.lang.python but other places might be useful too. 
+
 
 Alan James Salmoni
 salmoni@gmail.com

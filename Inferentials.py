@@ -269,7 +269,7 @@ def SpearmanR(x, y):
 def ConfidenceIntervals(data, alpha=0.95):
     n  = Count(data)
     mean  = Mean(data)
-    delta  = StdErr(data) * stats.t._ppf((1+alpha)/2.0, n-1)
+    delta  = StdErr(data) * scipy.stats.t._ppf((1+alpha)/2.0, n-1)
     return mean, mean-delta, mean+delta
 
 
