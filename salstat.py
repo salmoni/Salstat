@@ -1453,7 +1453,6 @@ class DescChoiceBox(wx.CheckListBox):
         self.test_list = AllRoutines.GetMostUsedTests()
         wx.CheckListBox.__init__(self, parent, -1, pos=(250,30), \
                                     size=(240,310), choices=self.test_list)
-        print dir(self)
         self.SetChecked([0,1,2,5,6,7])
 
     def SelectAllDescriptives(self, event):
@@ -2404,6 +2403,7 @@ class ThreeConditionTestFrame(wx.Dialog):
         alltests = ['anova between subjects','anova within subjects',\
                                     'Kruskall Wallis','Friedman test',\
                                     'Cochranes Q']
+        alltests = ['anova between subjects','anova within subjects']
         ColumnList, self.colnums = frame.grid.GetUsedCols()
         l0 = wx.StaticText(self,-1,"Select Columns to Analyse",pos=(10,10))
         #l1 = wx.StaticText(self, -1, "Select IV:", pos=(10,60))
@@ -2442,37 +2442,24 @@ class ThreeConditionTestFrame(wx.Dialog):
 
     def OnOkayButton(self, event):
         biglist = []
-        ns = []
-        sums = []
-        means = []
         names = []
-        miss = []
-        k = 0
         for i in range(len(self.colnums)):
             if self.ColChoice.IsChecked(i):
-                k = k + 1
-                tmplist = frame.grid.CleanData(self.colnums[i])
-                miss.append(frame.grid.missing)
+                tmplist = frame.grid.GetVariableData(self.colnums[i], 'float')
                 biglist.append(tmplist)
                 names.append(frame.grid.GetColLabelValue(i))
         k = len(biglist)
-        d = []
-        for i in range(k):
-            x2=salstat_stats.FullDescriptives(biglist[i], names[i], miss[i])
-            ns.append(x2.N)
-            sums.append(x2.sum)
-            means.append(x2.mean)
-            d.append(x2)
-        x2=ManyDescriptives(self, d)
+        self.stats = self.DescChoice.GetCheckedStrings()
+        ManyDescriptives(self, biglist, names, None)
         if (len(biglist) < 2):
             output.Addhtml('<p><b>Not enough columns selected for \
                                     test!</b>')
             self.Close(True)
             return
-        TBase = salstat_stats.ThreeSampleTests()
         #single factor between subjects anova
         if self.TestChoice.IsChecked(0):
-            cols = []
+            # try to guess x and y
+            anova = Inferentials.anovaBetweenPrep(biglist)
             output.Addhtml('<P><B>Single Factor anova - between \
                                     subjects</B></P>')
             output.Addhtml('<P><i>Warning!</i> This test is based \
@@ -3001,11 +2988,11 @@ class DataFrame(wx.Frame):
         #preparation_menu.Append(ID_PREPARATION_NORMALITY, 'Check for Normal Distribution...')
         analyse_menu.Append(ID_ANALYSE_1COND, '&1 Condition Tests...')
         analyse_menu.Append(ID_ANALYSE_2COND, '&2 Condition Tests...')
-        analyse_menu.Append(ID_ANALYSE_3COND, '&3+ Condition Tests...')
+        #analyse_menu.Append(ID_ANALYSE_3COND, '&3+ Condition Tests...')
         analyse_menu.Append(ID_ANALYSE_CORRELATION,'&Correlations...')
         #analyse_menu.Append(ID_ANALYSE_2FACT, '2+ &Factor Tests...')
         analyse_menu.AppendSeparator()
-        analyse_menu.Append(ID_ANALYSE_SCRIPT, 'Scripting Window...')
+        #analyse_menu.Append(ID_ANALYSE_SCRIPT, 'Scripting Window...')
         chart_menu.Append(ID_CHART_DRAW, 'Draw a chart...')
         # the bar chart is *not* ready yet!
         help_menu.Append(ID_HELP_WIZARD, '&What Test Should I Use...')
@@ -3163,8 +3150,6 @@ class DataFrame(wx.Frame):
         elif extension in sass: # SAS 8 and later
             import sas7bdat as sas
             allData = sas.SAS7BDAT(FileName.fileName)
-            #print dir(allData)
-            #print allData.header
             gridData = []
             for line in allData.readData():
                 lineStr = [str(idx) for idx in line]

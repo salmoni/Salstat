@@ -38,6 +38,64 @@ def lower(a,b):
     else:
         return 0
 
+def ConfidenceIntervals(data, alpha=0.95):
+    n  = Count(data)
+    mean  = Mean(data)
+    delta  = StdErr(data) * scipy.stats.t._ppf((1+alpha)/2.0, n-1)
+    return mean, mean-delta, mean+delta
+
+def tiecorrect(rankvals):
+    """
+    Corrects for ties in Mann Whitney U and Kruskal Wallis H tests.  See
+    Siegel, S. (1956) Nonparametric Statistics for the Behavioral Sciences.
+    New York: McGraw-Hill.  Code adapted from |Stat rankind.c code.
+    
+    Usage:   tiecorrect(rankvals)
+    Returns: T correction factor for U or H
+    """
+    sorted = rankvals.sort()
+    print "rankvals = ",rankvals
+    print "sorted   = ",sorted
+    n = len(sorted)
+    T = 0.0
+    i = 0
+    while (i<n-1):
+        if sorted[i] == sorted[i+1]:
+            nties = 1
+            while (i<n-1) and (sorted[i] == sorted[i+1]):
+                nties = nties +1
+                i = i +1
+            T = T + nties**3 - nties
+        i = i+1
+    T = T / float(n**3-n)
+    return 1.0 - T
+
+def GroupData(x, y):
+    """
+    This function takes 2 variables, x (a grouping / dummy variable), and 
+    y (the actual data). Returned are a list of vectors for each condition.
+    """
+    uniques, freqs = UniqueVals(x)
+    data = []
+    for idx in zip(uniques, freqs):
+        indices = ma.equal(x, idx[0])
+        data.append(y[indices])
+    return data
+
+def GroupData2(x, y):
+    """
+    This function takes 2 variables, x (a grouping / dummy variable), and 
+    y (the actual data). Returned are a list of vectors for each condition.
+    """
+    uniques, freqs = UniqueVals(x)
+    data = []
+    for idx in zip(uniques, freqs):
+        vector = []
+        for idy in zip(x,y):
+            if idy[0] == idx[0]:
+                vector.append(idy[1])
+        data.append(vector)
+    print data
 
 #########################################################################
 # One sample tests (requires a user-hypthesised mean
@@ -266,23 +324,122 @@ def SpearmanR(x, y):
     df = Count(adj[0])-1
     return r, df, prob
 
-def ConfidenceIntervals(data, alpha=0.95):
-    n  = Count(data)
-    mean  = Mean(data)
-    delta  = StdErr(data) * scipy.stats.t._ppf((1+alpha)/2.0, n-1)
-    return mean, mean-delta, mean+delta
 
 
+def KruskalWallisH(args):
+    """
+    This method performs a Kruskal Wallis test (like a nonparametric 
+    between subjects anova) on a list of lists.
+    Usage: KruskalWallisH(args).
+    Returns: h, prob.
+    """
+    args = list(args)
+    n = [0]*len(args)
+    n = map(len,args)
+    ranked = CalculateRanks(args).tolist()
+    #T = tiecorrect(ranked)
+    T = 0
+    for i in range(len(args)):
+        args[i] = ranked[0:n[i]]
+        del ranked[0:n[i]]
+    rsums = []
+    for i in range(len(args)):
+        rsums.append(sum(args[i])**2)
+        rsums[i] = rsums[i] / float(n[i])
+    ssbn = sum(rsums)
+    totaln = sum(n)
+    h = 12.0 / (totaln*(totaln+1)) * ssbn - 3*(totaln+1)
+    df = len(args) - 1
+    if T == 0:
+        h = 0.0
+        prob = 1.0
+    else:
+        h = h / float(T)
+        prob = 0.5 #chisqprob(h,df)
+    return h, prob
 
+def KruskalWallis2 ( data ):
+    """
+    Kruskal-Wallis test for 2+ samples of independent nonparametric data.\n
+    Data are passed as a matrix, first dimension the variables, second the cases
+    """
+    k = len ( data )
+    df = k - 1
+    N = Count ( data )
+    ns = Count ( data[0] )
+    print k, df, N, ns
+    ranks = CalculateRanks ( data )
+    print ranks
+    Rj = sum ( numpy.transpose ( ranks ) )
+    RjM = Mean ( numpy.transpose ( ranks ) )
+    R = ( N + 1 ) / 2.0
+    pre = 12 / float ( N * ( N + 1 ) )
+    print RjM
+    mid = ns * ( RjM ** 2 )
+    post = 3 * ( N + 1 )
+    num = pre * mid - post
+    un, nu = tiecorrect ( data )
+    den = 1 - ( ( sum ( nu ** 2 ) - nu ) ) / float ( ( N ** 3 ) - N )
+    KW = num / float ( den )
+    return KW
+
+class anovaBetween(object):
+    def __init__(self, x, y):
+        """
+        This method performs a univariate single factor between-subjects
+        analysis of variance on a list of lists (or a Numeric matrix). It is
+        specialised for SalStat and best left alone.
+        Usage: anovaBetween(data). data are 2 variables, 1st being grouping, 2nd being
+        the actual data
+        Returns: SSbet, SSwit, SStot, dfbet, dferr, dftot, MSbet, MSerr, F, prob.
+        """
+        data = GroupData(x, y)
+        k = len(data)
+        GN = 0
+        GM = 0.0
+        self.SSwit = 0.0
+        self.SSbet = 0.0
+        self.SStot = 0.0
+        means = []
+        Ns = []
+        SSdevs = []
+        for variable in data:
+            self.SSwit = self.SSwit + SSDevs(variable)
+            Ns.append(Count(variable))
+            means.append(Mean(variable))
+            SSdevs.append(SampStdDev(variable))
+            GN = GN + Ns[-1]
+        GM = Mean(y)
+        for i in range(k):
+            self.SSbet = self.SSbet + (((means[i] - GM) **2) * Ns[i])
+        self.SStot = self.SSwit + self.SSbet
+        self.DFbet = k - 1
+        self.DFerr = GN - k
+        self.DFtot = self.DFbet + self.DFerr
+        self.MSbet = self.SSbet / float(self.DFbet)
+        self.MSerr = self.SSwit / float(self.DFerr)
+        try:
+            self.F = self.MSbet / self.MSerr
+        except ZeroDivisionError:
+            self.F = 1.0
+        self.prob = fprob(self.DFbet, self.DFerr, self.F)
 
 if __name__ == '__main__':
     d1 = ma.array([1,2,3,4,3,2], mask=[0,0,1,0,0,0])
     d2 = ma.array([5,4,5,6,7,6])
-    print KendallsTau(d1, d2)
+    #print KendallsTau(d1, d2)
     #print PearsonR(d1, d2)
     #print SpearmanR(d1, d2)
     #print TTestUnpaired(d1,d2)
     #print OneSampleTTest(d1, 1.8)
     #print ConfidenceIntervals(d1)
-
-
+    a1 = ma.array([1,2,3,4,3,2,5,4,5,6,5,6,4,3,2,9,3,2],mask=[0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
+    a2 = ma.array([1,1,1,1,1,1,2,2,2,2,2,2,3,3,3,3,3,3])
+    a3 = ma.array( [[1,2,3,4,3,2],
+                    [5,4,5,6,5,6],
+                    [4,3,2,9,3,2]])
+    res = anovaBetween(a2, a1)
+    print "SS = ",res.SSbet, res.SSwit, res.SStot
+    print "DF = ",res.DFbet, res.DFerr, res.DFtot
+    print "MS = ",res.MSbet, res.MSerr
+    print "F, p = ",res.F, res.prob

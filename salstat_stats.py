@@ -1307,4 +1307,10 @@ d1 = FullDescriptives(x)
 d2 = FullDescriptives(y)
 print d1.median
 print d2.median
+
+a1 = ma.array([1,2,3,4,3,2])
+a2 = ma.array([5,4,5,6,5,6])
+a3 = ma.array([4.3,2,1,3,2])
 """
+
+

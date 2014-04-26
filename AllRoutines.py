@@ -120,28 +120,6 @@ def Msort(data):
     length = dims[0] * dims[1]
     return numpy.ma.reshape(numpy.ma.sort(numpy.ma.reshape(data, length)), dims)
 
-def UniqueVals3(data):
-    """
-    All unique values. Currently, only numeric values.
-    """
-    try:
-        data = numpy.ma.array(data)
-        uniques = numpy.ma.sort(list(set(data.compressed())))
-        numbers = numpy.zeros((len(uniques)))
-        for idx, unique in enumerate(uniques):
-            number = numpy.ma.equal(data, unique).sum()
-            numbers[idx] = number
-    except AttributeError:
-        uniques = set(list(data))
-        numbers = []
-        for value in uniques:
-            freq = 0
-            for cell in data:
-                if cell == value:
-                    freq = freq + 1
-            numbers.append(freq)
-    return uniques, numbers
-
 def IndexMatches(value, data):
     indices = []
     for idx, item in enumerate(data):
@@ -167,18 +145,41 @@ def UniqueVals(data):
         freqs.append(Count(numpy.array(nummatches)))
     return uniques, freqs
 
+def UniqueVals3(data):
+    """
+    All unique values. Currently, only numeric values.
+    """
+    try:
+        data = numpy.ma.array(data)
+        uniques = numpy.ma.sort(list(set(data.compressed())))
+        numbers = numpy.zeros((len(uniques)))
+        for idx, unique in enumerate(uniques):
+            number = numpy.ma.equal(data, unique).sum()
+            numbers[idx] = number
+    except AttributeError:
+        uniques = set(list(data))
+        numbers = []
+        for value in uniques:
+            freq = 0
+            for cell in data:
+                if cell == value:
+                    freq = freq + 1
+            numbers.append(freq)
+    return uniques, numbers
+
 def CalculateRanks(data, start = 1):
     data = numpy.ma.array(data)
-    vals = sort(list(set(data.compressed())))
+    vals = list(set(data.flatten()))
     rank = start - 0.5
     ranks = numpy.ma.zeros(numpy.ma.shape(data), 'f')
     for i in vals:
         numpy.match = numpy.ma.equal(data, i)
         incr = numpy.ma.sum(numpy.ma.sum(numpy.match))
-        numpy.match = array(numpy.match)
+        numpy.match = numpy.array(numpy.match)
         ranks[numpy.match] = rank + (incr / 2.0)
         rank = rank + incr
-    return numpy.ma.numpy.masked_where(numpy.ma.equal(ranks, 0), ranks)
+    res = numpy.ma.masked_where(numpy.ma.equal(ranks, 0), ranks)
+    return res
 
 def GetSSCP_M(data):
     Xd = data - numpy.ma.average(data)
