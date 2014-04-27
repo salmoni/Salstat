@@ -14,12 +14,12 @@ import wx.html2 as html2lib
 import BeautifulSoup as BS
 #import xlrd, xlwt # import xls format
 import string, os, os.path, pickle, csv, sys
-import urlparse, urllib
+import urlparse, urllib, requests
 
 # import SalStat specific modules
 import salstat_stats, images, tabler, charter, ChartWindow
 import DescriptivesFrame, PrefsFrame
-import MetaGrid, AllRoutines, ImportCSV, ImportSS, Inferentials
+import MetaGrid, AllRoutines, ImportCSV, ImportSS, ImportHTML, Inferentials
 import numpy, math
 import numpy.ma as ma
 
@@ -2959,7 +2959,7 @@ class DataFrame(wx.Frame):
         file_menu.Append(ID_FILE_NEW,'&New Data\tCTRL+N')
         #file_menu.Append(ID_FILE_NEWOUTPUT, 'New &Output Sheet')
         file_menu.Append(ID_FILE_OPEN, '&Open...\tCTRL+O')
-        file_menu.Append(ID_FILE_URL, "Get data from URL...")
+        file_menu.Append(ID_FILE_URL, "Scrape URL...\tCTRL+U")
         file_menu.Append(ID_FILE_DB, "Open database...")
         file_menu.AppendSeparator()
         file_menu.Append(ID_FILE_SAVE, '&Save\tCTRL+S')
@@ -3057,6 +3057,7 @@ class DataFrame(wx.Frame):
         #...and some events!
         wx.EVT_MENU(self, ID_FILE_NEW, self.GoClearData)
         wx.EVT_TOOL(self, 10, self.GoClearData)
+        wx.EVT_TOOL(self, ID_FILE_URL, self.ScrapeURL)
         #wx.EVT_MENU(self, ID_FILE_NEWOUTPUT, self.GoNewOutputSheet)
         # unsure if I want this - maybe restrict user to just one?
         wx.EVT_MENU(self, ID_FILE_SAVE, self.grid.SaveDataASCII)
@@ -3192,6 +3193,21 @@ class DataFrame(wx.Frame):
         val = self.grid.GetVariableData(col, vtype='float')
         print val
         print AllRoutines.Mean(val)
+
+    def ScrapeURL(self, event):
+        # user enters URL
+        dlg = wx.TextEntryDialog(
+            self, "Enter a URL"
+        )
+        if dlg.ShowModal() == wx.ID_OK:
+            URL = dlg.GetValue()
+        else:
+            return
+        res = ImportHTML.ImportDialog(URL)
+        if res.ShowModal():
+            if res.URL:
+                self.FillGrid((res.URL, res.headers, res.gridData))
+            dlg.Destroy()
 
     def FillGrid(self, res):
         if res != None:

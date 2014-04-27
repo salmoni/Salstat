@@ -424,6 +424,60 @@ class anovaBetween(object):
             self.F = 1.0
         self.prob = fprob(self.DFbet, self.DFerr, self.F)
 
+class anovaWithin(object):
+    def __init__(self, data):
+        """
+        Produces a within-subjects ANOVA
+        For the brave:
+        Usage: anovaWithin(inlist, ns, sums, means). ns is a list of the N's, 
+        sums is a list of the sums of each condition, and the same for means 
+        being a list of means
+        Returns: SSint, SSres, SSbet, SStot, dfbet, dfwit, dfres, dftot, MSbet,
+        MSwit, MSres, F, prob.
+        """
+        GN = 0
+        GS = 0.0
+        GM = 0.0
+        k = len(inlist)
+        meanlist = []
+        Nlist = []
+        for variable in data:
+            GN = GN + Count[variable]
+            GS = GS + Sum[variable]
+            Nlist.append(Count[variable])
+            meanlist.append(Mean[variable])
+        GM = GS / float(GN)
+        self.SSwit = 0.0
+        self.SSbet = 0.0
+        self.SStot = 0.0
+        for i in range(k):
+            for j in range(Nlist[i]):
+                diff = inlist[i][j] - meanlist[i]
+                self.SSwit = self.SSwit + (diff ** 2)
+                diff = inlist[i][j] - GM
+                self.SStot = self.SStot + (diff ** 2)
+            diff = meanlist[i] - GM
+            self.SSbet = self.SSbet + (diff ** 2)
+        self.SSbet = self.SSbet * float(GN / k)
+        self.SSint = 0.0
+        for j in range(ns[0]):
+            rowlist = []
+            for i in range(k):
+                rowlist.append(inlist[i][j])
+            n, sum, mean, SS = minimaldescriptives(rowlist)
+            self.SSint = self.SSint + ((mean - GM) ** 2)
+        self.SSint = self.SSint * k
+        self.SSres = self.SSwit - self.SSint
+        self.dfbet = k - 1
+        self.dfwit = GN - k
+        self.dfres = (ns[0] - 1) * (k - 1)
+        self.dftot = self.dfbet + self.dfwit + self.dfres
+        self.MSbet = self.SSbet / float(self.dfbet)
+        self.MSwit = self.SSwit / float(self.dfwit)
+        self.MSres = self.SSres / float(self.dfres)
+        self.F = self.MSbet / self.MSres
+        self.prob = fprob(self.dfbet, self.dfres, self.F)
+
 if __name__ == '__main__':
     d1 = ma.array([1,2,3,4,3,2], mask=[0,0,1,0,0,0])
     d2 = ma.array([5,4,5,6,7,6])

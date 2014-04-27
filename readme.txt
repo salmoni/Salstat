@@ -29,6 +29,7 @@ Then download and install setuptools or pip and then install these libraries. I'
 wxPython		(version 2.9.5.0)
 Scipy			(version 0.13.0)
 Numpy			(version 1.8.0)
+requests		(version 1.2.3)
 BeautifulSoup	(version 3.2.1)
 xlrd			(version 0.9.2)
 ezodf			(version 0.2.5) 
