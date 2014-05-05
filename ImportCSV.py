@@ -34,7 +34,7 @@ OR
 
 
 from __future__ import unicode_literals
-import os, os.path 
+import os, os.path, sys
 import wx
 import wx.grid as gridlib
 
@@ -42,7 +42,9 @@ import wx.grid as gridlib
 # Dialog to retrieve file name. Needed before we can do anything
 
 class GetFilename(object):
-    def __init__(self, parent, startDir):
+    def __init__(self, parent, startDir=None):
+        if not startDir:
+            startDir = os.path.expanduser("~")
         dlg = wx.FileDialog(parent, message="Open a CSV file", defaultDir=startDir, \
                 wildcard="CSV text (*.csv)|*.csv|Plain text (*.txt)|*.txt|\
                 Data file (*.dat)|*.dat|Any file (*.*)|*.*")
@@ -163,7 +165,7 @@ class ImportDialog(wx.Dialog):
             # retrieve data 
             data = []
             fin = open(self.FileName.fileName,'r')
-            data = fin.read()
+            data = fin.read(10000)
             fin.close()
             # populate preview
             self.FillGrid(data)
@@ -243,6 +245,7 @@ class ImportDialog(wx.Dialog):
         inQuote = False # flag for being 'within' quotes
         token = '' # current token
         tokens = [] # list of tokens
+        # inQuoteChar = None
         for char in line:
             if inQuote: # so if we're in the middle of a quote...
                 if char == inQuoteChar: # ...and have a matching quote character...
@@ -278,11 +281,61 @@ class ImportDialog(wx.Dialog):
     def ImportButton(self, event):
         self.Close()
 
+class CSVObject(object):
+    """
+    This class instantiates a file object as an interable. It means that 
+    CSV files can be read more efficiently than reading the entire data 
+    into memory. 
+    """
+    def __init__(self, fileName, delims, quotes):
+        self.fileName = fileName
+        self.delims = delims
+        self.quotes = quotes
+        self.fin = open(fileName, 'r')
+        
+    def __iter__(self):
+        return self
+        
+    def next(self):
+        line = self.fin.next()
+        return self.ParseLine(line)
+
+    def ParseLine(self, line):
+        """
+        Parses a line of CSV text into components. This attempts to 
+        be a proper parser that can cope with multiple delimiters.
+        """
+        inQuote = False # flag for being 'within' quotes
+        token = '' # current token
+        tokens = [] # list of tokens
+        for char in line:
+            if inQuote: # so if we're in the middle of a quote...
+                if char == inQuoteChar: # ...and have a matching quote character...
+                    tokens.append(token) # add the token to list (ignore quote character)
+                    token = '' # and begin new token
+                    inQuote = False # flag that we're not in a quote any more
+                else: # But if char is a non-matching quote...
+                    token += char # ...just add to token 
+            elif char in self.delims: # or if char is a delimiter...
+                if len(token) > 0: # ...and token is worth recording...
+                    tokens.append(token) # add token to list
+                    token = '' # and begin new token
+                else: # if token has 0 length and no content...
+                    pass # ...adjacent delimiters so do nothing
+            elif char in self.quotes: # But if char is a quote...
+                inQuoteChar = char # record it to check for matching quote later
+                inQuote = True # and flag that we're in a quotation
+            else: # And if char is anything else...
+                token += char # add to token
+        if len(token) > 0: # Check if last item is worth recording (len > 0)
+            tokens.append(token) # add to list of tokens
+        return tokens # return list of tokens
+
 
 ################################################
 # Function to control all this
 
-def ImportCSV(frame, startDir):
+def ImportCSV(frame=None, startDir=None):
     """
     Controls all the module.
     Parameters: startDir: where to start the file dialog
@@ -291,6 +344,11 @@ def ImportCSV(frame, startDir):
     headers: Variable name (None if none selected)
     data: data as a list of lists
     """
+    if not startDir:
+        startDir = os.path.expanduser("~")
+    if not frame:
+        app = wx.App(False)
+        frame = wx.Frame(None, wx.ID_ANY, "Hello World")
     FileName = GetFilename(frame, startDir)
     if FileName.fileName == None:
         return None
@@ -314,17 +372,11 @@ def ImportCSV(frame, startDir):
 # Main routine for testing only!
 
 if __name__ == '__main__':
-    startDir = os.path.expanduser("~")
-    app = wx.App(False)
-    x = ImportCSV(startDir)
-    print x[0]
-    try:
-        print x[1],len(x[1])
-    except TypeError:
-        print "No headers"
-    print x[2],len(x[2])
-    #x.Close()
-    #frame = ImportDialog(startDir)
-    #frame.Show()
-    app.MainLoop()  
+    #print ImportCSV()
+    fname = '/Users/alansalmoni/00_test.csv'
+    delims = ", ;"
+    quotes = '"'
+    obj = CSVObject(fname, delims, quotes)
+    for ln in obj:
+        print ln
 

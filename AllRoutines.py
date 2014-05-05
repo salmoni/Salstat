@@ -143,6 +143,7 @@ def UniqueVals(data):
     for item in uniques:
         nummatches = IndexMatches(item, data)
         freqs.append(Count(numpy.array(nummatches)))
+    freqs = numpy.ma.array(freqs)
     return uniques, freqs
 
 def UniqueVals3(data):

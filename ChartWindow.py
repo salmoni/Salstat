@@ -106,8 +106,8 @@ class ControlPanel(wx.Panel):
         wx.Panel.__init__(self, parent, -1, size=(250,-1))
         self.chartObject = chartObject
         self.WebView = webview
-        self.types = ['line', 'spline', 'area', 'areaspline', 'column', \
-                'bar', 'pie', 'scatter']
+        self.types = ['boxplot','line', 'spline', 'area', 'areaspline', \
+                'column', 'bar', 'pie', 'scatter']
         self.align =  ["left", "center", "right", "do not show"]
         self.valign = ["top","middle","bottom"]
         self.aligned = ["Do not display legend","Top left","Top middle","Top right", \

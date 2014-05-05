@@ -168,7 +168,7 @@ def ChiSquareVariance(data, usermean):
 
 
 #########################################################################
-# One sample tests (requires a user-hypthesised mean
+# Two sample tests
 #########################################################################
 
 
@@ -299,6 +299,15 @@ def SignedRanks(x, y):
 def RankSums(x, y):
     z, prob = scipy.stats.ranksums(x, y)
     return z, prob
+
+def ChiSquare(x):
+    vals, freqs = UniqueVals(x)
+    expctd = Mean(freqs)
+    df = Count(freqs) - 1
+    num = (freqs - expctd)**2
+    chisq = Sum(num/float(expctd))
+    prob = chisqprob(chisq, df)
+    return Count(freqs), chisq, df, prob
 
 def KendallsTau(x, y):
     tau, prob = stats.kendalltau(x,y)
@@ -481,12 +490,16 @@ class anovaWithin(object):
 if __name__ == '__main__':
     d1 = ma.array([1,2,3,4,3,2], mask=[0,0,1,0,0,0])
     d2 = ma.array([5,4,5,6,7,6])
+    d3 = ma.array([1,1,1,1,1,1,1,1,2,2,2,2])
+    #d3 = ma.array([1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3])
+    print ChiSquare(d3)
     #print KendallsTau(d1, d2)
     #print PearsonR(d1, d2)
     #print SpearmanR(d1, d2)
     #print TTestUnpaired(d1,d2)
     #print OneSampleTTest(d1, 1.8)
     #print ConfidenceIntervals(d1)
+    """
     a1 = ma.array([1,2,3,4,3,2,5,4,5,6,5,6,4,3,2,9,3,2],mask=[0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0])
     a2 = ma.array([1,1,1,1,1,1,2,2,2,2,2,2,3,3,3,3,3,3])
     a3 = ma.array( [[1,2,3,4,3,2],
@@ -497,3 +510,4 @@ if __name__ == '__main__':
     print "DF = ",res.DFbet, res.DFerr, res.DFtot
     print "MS = ",res.MSbet, res.MSerr
     print "F, p = ",res.F, res.prob
+    """

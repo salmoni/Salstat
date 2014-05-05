@@ -387,7 +387,7 @@ def ConvertToNumbers(dataIn, missingvalues=[]):
 def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varnames,alpha):
     notests = ['Frequencies','Proportions','Percentages', 'Relative frequency of the mode', \
             'Trimmed mean', 'Bi-trimmed mean', 'Mode', 'Moment']
-    table = '<h3>Descriptives</h3>\n<table class="table table-striped">\n'
+    table = '<h3>Descriptive statistics</h3>\n<table class="table table-striped">\n'
     table += '\t<tr><th>Variable</th>'
     for groupname in groupnames:
         table += '<th>%s</th>'%(groupname)
@@ -538,22 +538,22 @@ def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varn
 
             table += '</tr>\n'
         table += '</tr>\n'
-    table += '</table>\n'
+    table += '</table>\n<p /><br />\n'
     output.Addhtml(table)
 
 #---------------------------------------------------------------------------
 # class to output the results of several "descriptives" in one table
 class ManyDescriptives:
-    def __init__(self, source, variables, names,alpha):
+    def __init__(self, stats, variables, names,alpha):
         #__x__ = len(ds)
-        str2 = '<table class="table table-striped">'
+        str2 = '<h3>Descriptive statistics</h3>\n<table class="table table-striped">'
         outlist = ['Statistic']
         for name in names:
             outlist.append(name)
         ln = tabler.vtable(outlist)
         str2 = str2 + ln
 
-        if "Count" in source.stats:
+        if "Count" in stats:
             outlist = ['N']
             for var in variables:
                 #outlist.append(i.N)
@@ -566,154 +566,154 @@ class ManyDescriptives:
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Sum" in source.stats:
+        if "Sum" in stats:
             outlist = ['Sum']
             for var in variables:
                 outlist.append(AllRoutines.Sum(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Minimum" in source.stats:
+        if "Minimum" in stats:
             outlist = ['Minimum']
             for var in variables:
                 outlist.append(AllRoutines.Minimum(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Maximum" in source.stats:
+        if "Maximum" in stats:
             outlist = ['Maximum']
             for var in variables:
                 outlist.append(AllRoutines.Maximum(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Range" in source.stats:
+        if "Range" in stats:
             outlist = ['Range']
             for var in variables:
                 outlist.append(AllRoutines.Range(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Midrange" in source.stats:
+        if "Midrange" in stats:
             outlist = ['Midrange']
             for var in variables:
                 outlist.append(AllRoutines.Midrange(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Relative frequency of the mode" in source.stats:
+        if "Relative frequency of the mode" in stats:
             outlist = ['RelFreqMode']
             for var in variables:
                 outlist.append(AllRoutines.RelFreqMode(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Cumulative sum" in source.stats:
+        if "Cumulative sum" in stats:
             outlist = ['CumSum']
             for var in variables:
                 outlist.append(AllRoutines.CumSum(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Cumulative product" in source.stats:
+        if "Cumulative product" in stats:
             outlist = ['CumProduct']
             for var in variables:
                 outlist.append(AllRoutines.CumProduct(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Cumulative percent" in source.stats:
+        if "Cumulative percent" in stats:
             outlist = ['CumPercent']
             for var in variables:
                 outlist.append(AllRoutines.CumPercent(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Mean" in source.stats:
+        if "Mean" in stats:
             outlist = ['Mean']
             for var in variables:
                 outlist.append(AllRoutines.Mean(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Median" in source.stats:
+        if "Median" in stats:
             outlist = ['Median']
             for var in variables:
                 outlist.append(AllRoutines.Median(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Tukey's hinges" in source.stats:
+        if "Tukey's hinges" in stats:
             outlist = ["Tukey's hinges"]
             for var in variables:
                 outlist.append(AllRoutines.TukeyQuartiles(var))
             ln = tabler.tableHinges(outlist)
             str2 = str2 + ln
 
-        if "Moore & McCabe's hinges" in source.stats:
+        if "Moore & McCabe's hinges" in stats:
             outlist = ["Moore & McCabe's hinges"]
             for var in variables:
                 outlist.append(AllRoutines.MooreQuartiles(var))
             ln = tabler.tableHinges(outlist)
             str2 = str2 + ln
 
-        if "Interquartile range" in source.stats:
+        if "Interquartile range" in stats:
             outlist = ["Interquartile range"]
             for var in variables:
                 outlist.append(AllRoutines.InterquartileRange(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Sum of squares" in source.stats:
+        if "Sum of squares" in stats:
             outlist = ["Sum of squares"]
             for var in variables:
                 outlist.append(AllRoutines.SS(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Sum of squared deviations" in source.stats:
+        if "Sum of squared deviations" in stats:
             outlist = ["Sum of squared deviations"]
             for var in variables:
                 outlist.append(AllRoutines.SSDevs(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Variance (sample)" in source.stats:
+        if "Variance (sample)" in stats:
             outlist = ['Variance (sample)']
             for var in variables:
                 outlist.append(AllRoutines.SampVar(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Variance (population)" in source.stats:
+        if "Variance (population)" in stats:
             outlist = ['Variance (population)']
             for var in variables:
                 outlist.append(AllRoutines.PopVar(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Standard deviation (sample)" in source.stats:
+        if "Standard deviation (sample)" in stats:
             outlist = ['Standard Deviation (sample)']
             for var in variables:
                 outlist.append(AllRoutines.SampStdDev(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Standard deviation (population)" in source.stats:
+        if "Standard deviation (population)" in stats:
             outlist = ['Standard deviation (population)']
             for var in variables:
                 outlist.append(AllRoutines.PopStdDev(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Standard error" in source.stats:
+        if "Standard error" in stats:
             outlist = ['Standard error']
             for var in variables:
                 outlist.append(AllRoutines.StdErr(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Quartiles" in source.stats:
+        if "Quartiles" in stats:
             outlist = ['Quartiles']
             for var in variables:
                 val = AllRoutines.Quartiles(var)
@@ -721,129 +721,129 @@ class ManyDescriptives:
             ln = tabler.tableHinges(outlist)
             str2 = str2 + ln
 
-        if "Coefficient of variation" in source.stats:
+        if "Coefficient of variation" in stats:
             outlist = ['Coefficient of variation']
             for var in variables:
                 outlist.append(AllRoutines.CoeffVar(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Median absolute deviation" in source.stats:
+        if "Median absolute deviation" in stats:
             outlist = ['Median absolute deviation']
             for var in variables:
                 outlist.append(AllRoutines.MAD(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Trimmed mean" in source.stats:
+        if "Trimmed mean" in stats:
             outlist = ['Trimmed mean']
             for var in variables:
                 outlist.append(AllRoutines.TrimmedMean(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Geometric mean" in source.stats:
+        if "Geometric mean" in stats:
             outlist = ['Geometric mean']
             for var in variables:
                 outlist.append(AllRoutines.GeometricMean(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Harmonic mean" in source.stats:
+        if "Harmonic mean" in stats:
             outlist = ['Harmonic mean']
             for var in variables:
                 outlist.append(AllRoutines.HarmonicMean(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Mean of subsequent squared differences" in source.stats:
+        if "Mean of subsequent squared differences" in stats:
             outlist = ['Mean of subsequent squared differences']
             for var in variables:
                 outlist.append(AllRoutines.MSSD(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Skewness" in source.stats:
+        if "Skewness" in stats:
             outlist = ['Skewness']
             for var in variables:
                 outlist.append(AllRoutines.Skewness(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "Kurtosis" in source.stats:
+        if "Kurtosis" in stats:
             outlist = ['Kurtosis']
             for var in variables:
                 outlist.append(AllRoutines.Kurtosis(var))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
 
-        if "S-Plus quantiles" in source.stats:
+        if "S-Plus quantiles" in stats:
             outlist = ['S-Plus quantiles']
             for var in variables:
                 outlist.append(AllRoutines.SPQuantile(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
-        if "SPSS quantiles" in source.stats:
+        if "SPSS quantiles" in stats:
             outlist = ['SPSS quantiles']
             for var in variables:
                 outlist.append(AllRoutines.TradQuantile(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
-        if "Mid-step quantiles" in source.stats:
+        if "Mid-step quantiles" in stats:
             outlist = ['Mid-step quantiles']
             for var in variables:
                 outlist.append(AllRoutines.MidstepQuantiles(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
-        if "Quantile 1 (Hyndman & Fan)" in source.stats:
+        if "Quantile 1 (Hyndman & Fan)" in stats:
             outlist = ['Quantile 1 (Hyndman & Fan)']
             for var in variables:
                 outlist.append(AllRoutines.Q1(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
-        if "Quantile 2 (Hyndman & Fan)" in source.stats:
+        if "Quantile 2 (Hyndman & Fan)" in stats:
             outlist = ['Quantile 2 (Hyndman & Fan)']
             for var in variables:
                 outlist.append(AllRoutines.Q2(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
-        if "Quantile 3 (Hyndman & Fan)" in source.stats:
+        if "Quantile 3 (Hyndman & Fan)" in stats:
             outlist = ['Quantile 3 (Hyndman & Fan)']
             for var in variables:
                 outlist.append(AllRoutines.Q3(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
-        if "Quantile 4 (Hyndman & Fan)" in source.stats:
+        if "Quantile 4 (Hyndman & Fan)" in stats:
             outlist = ['Quantile 4 (Hyndman & Fan)']
             for var in variables:
                 outlist.append(AllRoutines.Q4(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
-        if "Quantile 5 (Hyndman & Fan)" in source.stats:
+        if "Quantile 5 (Hyndman & Fan)" in stats:
             outlist = ['Quantile 5 (Hyndman & Fan)']
             for var in variables:
                 outlist.append(AllRoutines.Q5(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
-        if "Quantile 6 (Hyndman & Fan)" in source.stats:
+        if "Quantile 6 (Hyndman & Fan)" in stats:
             outlist = ['Quantile 6 (Hyndman & Fan)']
             for var in variables:
                 outlist.append(AllRoutines.Q6(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
-        if "Quantile 7 (Hyndman & Fan)" in source.stats:
+        if "Quantile 7 (Hyndman & Fan)" in stats:
             outlist = ['Quantile 7 (Hyndman & Fan)']
             for var in variables:
                 outlist.append(AllRoutines.Q7(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
-        if "Quantile 8 (Hyndman & Fan)" in source.stats:
+        if "Quantile 8 (Hyndman & Fan)" in stats:
             outlist = ['Quantile 8 (Hyndman & Fan)']
             for var in variables:
                 outlist.append(AllRoutines.Q8(var,alpha))
             ln = tabler.vtable(outlist)
             str2 = str2 + ln
-        if "Quantile 9 (Hyndman & Fan)" in source.stats:
+        if "Quantile 9 (Hyndman & Fan)" in stats:
             outlist = ['Quantile 9 (Hyndman & Fan)']
             for var in variables:
                 outlist.append(AllRoutines.Q9(var,alpha))
@@ -858,23 +858,23 @@ class ManyDescriptives:
 
         str2 += '</table>\n'
 
-        if ("Frequencies" in source.stats) \
-                or ("Proportions" in source.stats) \
-                or ("Percentages" in source.stats):
+        if ("Frequencies" in stats) \
+                or ("Proportions" in stats) \
+                or ("Percentages" in stats):
             for idx, var in enumerate(vars):
                 vals = {}
-                if "Frequencies" in source.stats:
+                if "Frequencies" in stats:
                     values, freqs = AllRoutines.Frequencies(var)
                     vals['values'] = values
                     vals['freqs'] = freqs
                 else:
                     vals['freqs'] = None
-                if "Proportions" in source.stats:
+                if "Proportions" in stats:
                     values, props = AllRoutines.Proportions(var)
                     vals['props'] = props
                 else:
                     vals['props'] = None
-                if "Percentages" in source.stats:
+                if "Percentages" in stats:
                     values, percs = AllRoutines.Percentages(var)
                     vals['percs'] = percs
                 else:
@@ -882,13 +882,14 @@ class ManyDescriptives:
                 ln = tabler.tableMultiples(vals, names[idx])
                 str2 += ln
 
-        if "Mode" in source.stats:
+        if "Mode" in stats:
             outlist = []
             for var in vars:
                 outlist.append(AllRoutines.Mode(var))
             ln = tabler.tableMode(outlist)
             str2 = str2 + ln
 
+        str2 += '<p /><br />\n'
         output.Addhtml(str2)
 
 #---------------------------------------------------------------------------
@@ -896,6 +897,7 @@ class ManyDescriptives:
 class SimpleGrid(gridlib.Grid):
     def __init__(self, parent, log):
         gridlib.Grid.__init__(self, parent)
+        self.backgroundColour = wx.Colour(216,122,50,127)
         self.parent = parent
         self.named = False
         self.Saved = True
@@ -940,6 +942,11 @@ class SimpleGrid(gridlib.Grid):
         col = self.GetGridCursorCol()
         row = self.GetGridCursorRow()
         value = self.GetCellValue(row, col)
+        try:
+            v = float(value)
+            self.SetCellBackgroundColour(row, col, wx.WHITE)
+        except ValueError:
+            self.SetCellBackgroundColour(row, col, self.backgroundColour)
         xmlevt = '<data row="'+str(row)+'" col="'+str(col)+'">'+str(value)+'</data>\n'
         hist.AppendEvent(xmlevt)
         #print hist.history
@@ -1057,6 +1064,8 @@ class SimpleGrid(gridlib.Grid):
         buffer = wx.TextDataObject()
         Cols = self.GetSelectedCols()
         Rows = self.GetSelectedRows()
+        maxCols = self.GetNumberCols()
+        maxRows = self.GetNumberRows()
         if len(Cols) > 0:
             currentcol = Cols[0]
             currentrow = 0
@@ -1074,6 +1083,18 @@ class SimpleGrid(gridlib.Grid):
             if pastetext:
                 self.Saved = False
                 rows = pastetext.split('\r')
+                maxWidth = 0
+                for row in rows:
+                    width = len(row.split('\t'))
+                    if width > maxWidth:
+                        maxWidth = width
+                print currentcol, maxWidth, maxCols
+                diffCols = (currentcol + maxWidth + 10) - maxCols
+                diffRows = (currentrow + len(rows) + 10) - maxRows
+                if diffCols > 0:
+                    self.AppendCols(diffCols)
+                if diffRows > 0:
+                    self.AppendRows(diffRows)
                 for row in range(len(rows)):
                     cells = rows[row].split('\t')
                     for col in range(len(cells)):
@@ -1200,6 +1221,7 @@ class SimpleGrid(gridlib.Grid):
                         except:
                             datapoint.append("0")
                         line = string.join(datapoint)
+                        line = ",".join(datapoint)
                     fout.write(line)
                     fout.write('\n')
             elif (dlg.GetFilterIndex() == 1):
@@ -1226,6 +1248,7 @@ class SimpleGrid(gridlib.Grid):
                     except:
                         datapoint.append("0")
                 line = string.join(datapoint)
+                line = ",".join(datapoint)
                 fout.write(line)
                 fout.write('\n')
             fout.close
@@ -2005,7 +2028,7 @@ class OneConditionTestFrame(wx.Dialog):
         #x = frame.grid.GetVariableData(x1,'float')
         data = frame.grid.GetVariableData(colNum,'float')
         self.stats = self.DescChoice.GetCheckedStrings()
-        ManyDescriptives(self, [data], [name], None)
+        ManyDescriptives(self.stats, [data], [name], None)
         # One sample t-test
         if self.TestChoice.IsChecked(0):
             output.Addhtml('<h3>One sample t-test</h3>')
@@ -2024,7 +2047,7 @@ class OneConditionTestFrame(wx.Dialog):
                         ["Cohen's d",d]]
                 quote = "<b>Quote:</b> <i>t</i>(%d)=%2.3f, <i>p</i>=%1.3f, <i>d</i>=%1.3f<br />"%\
                         (df, t, prob, d)
-                ln = quote + tabler.table(variables)
+                ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
                 output.Addhtml(ln)
                 #now draw up the xml history stuff
                 xmlevt = '<analyse test="one sample t-test" column = "'+str(colNum)
@@ -2055,7 +2078,7 @@ class OneConditionTestFrame(wx.Dialog):
                         ['Z',z],
                         ['p',prob]]
                 quote = "<i>Z</i>=%1.3f, <i>p</i>=%1.3f<br />"%(z, prob)
-                ln = quote + tabler.table(variables)
+                ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
                 output.Addhtml(ln)
         # chi square test for variance
         if self.TestChoice.IsChecked(2):
@@ -2190,21 +2213,22 @@ class TwoConditionTestFrame(wx.Dialog):
         y = frame.grid.GetVariableData(y1,'float')
         #ymiss = frame.grid.missing
         self.stats = self.DescChoice.GetCheckedStrings()
-        ManyDescriptives(self, [x,y], [name1,name2], None)
+        ManyDescriptives(self.stats, [x,y], [name1,name2], None)
 
         # chi square test
         if self.paratests.IsChecked(0):
             output.Addhtml('<H3>Chi square</H3>')
-            TBase.ChiSquare(x, y)
-            if (TBase.prob == -1.0):
+            N, chisq, df, prob = Inferentials.ChiSquare(x)
+            if (prob == -1.0):
                 output.Addhtml('<p class="text-warning">Cannot do chi square - unequal data sizes</p>')
             else:
-                vars = [['Variable 1', name1],
+                variables = [['Variable 1', name1],
                         ['Variable 2', name2],
-                        ['df', TBase.df],
-                        ['Chi',TBase.chisq],
-                        ['p',TBase.prob]]
-                ln = tabler.table(vars)
+                        ['df', df],
+                        ['Chi',chisq],
+                        ['p',prob]]
+                quote = "<i>&Chi;</i><sup>2</sup> (%d, N=%d) = %2.3f, <i>p</i>=%1.4f"%(df, N, chisq, prob)
+                ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
                 output.Addhtml(ln)
 
         # F-test for variance ratio's
@@ -2225,7 +2249,7 @@ class TwoConditionTestFrame(wx.Dialog):
                         ['F',f],
                         ['p',prob]]
                 quote = ""
-                ln = quote + tabler.table(variables)
+                ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
                 output.Addhtml(ln)
 
         # Kolmorogov-Smirnov 2 sample test
@@ -2239,7 +2263,7 @@ class TwoConditionTestFrame(wx.Dialog):
                     ['d', d],
                     ['p',prob]]
             quote = ""
-            ln = quote + tabler.table(variables)
+            ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
             output.Addhtml(ln)
 
         # Linear Regression
@@ -2260,7 +2284,7 @@ class TwoConditionTestFrame(wx.Dialog):
                         ['Est. Standard Error',st],
                         ['p',prob]]
                 quote = ""
-                ln = quote + tabler.table(variables)
+                ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
                 output.Addhtml(ln)
 
         # Mann-Whitney U
@@ -2278,7 +2302,7 @@ class TwoConditionTestFrame(wx.Dialog):
                         ['p',prob]]
                 quote = "<b>Quote:</b> <i>U</i>=%2.3f, <i>p</i>=%1.3f<br />"%\
                         (u, prob)
-                ln = quote + tabler.table(variables)
+                ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
                 output.Addhtml(ln)
 
         # Paired permutation test
@@ -2309,7 +2333,8 @@ class TwoConditionTestFrame(wx.Dialog):
                         ['N (total)', ntotal],
                         ['Z',z],
                         ['p',prob]]
-                ln = tabler.table(variables)
+                #ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
+                ln = '<br />' + tabler.table(variables) + '<p /><br />'
                 output.Addhtml(ln)
 
         # Paired t-test
@@ -2331,7 +2356,7 @@ class TwoConditionTestFrame(wx.Dialog):
                         ["%d%% confidence intervals"%(alpha*100), "%s  %s"%(str(meanm), str(meanp))]]
                 quote = "<b>Quote:</b> <i>t</i>(%d)=%2.3f, <i>p</i>=%1.3f, <i>d</i>=%1.3f<br />"%\
                         (df, t, prob, d)
-                ln = quote + tabler.table(variables)
+                ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
                 output.Addhtml(ln)
 
         # unpaired t-test
@@ -2347,7 +2372,7 @@ class TwoConditionTestFrame(wx.Dialog):
                     ["Cohen's d",d]]
             quote = "<b>Quote:</b> <i>t</i>(%d)=%2.3f, <i>p</i>=%1.3f, <i>d</i>=%1.3f<br />"%\
                     (df, t, prob, d)
-            ln = quote + tabler.table(variables)
+            ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
             output.Addhtml(ln)
 
         # Wald-Wolfowitz runs test (no yet coded)
@@ -2366,7 +2391,7 @@ class TwoConditionTestFrame(wx.Dialog):
                     ['p',prob]]
             quote = "<b>Quote:</b> <i>z</i>=%2.3f, <i>p</i>=%1.3f<br />"%\
                     (z, prob)
-            ln = quote + tabler.table(variables)
+            ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
             output.Addhtml(ln)
 
         # Wilcoxon Signed Ranks
@@ -2384,7 +2409,7 @@ class TwoConditionTestFrame(wx.Dialog):
                         ['p',prob]]
                 quote = "<b>Quote:</b> <i>U</i>=%2.3f, <i>p</i>=%1.3f<br />"%\
                         (T, prob)
-                ln = quote + tabler.table(variables)
+                ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
                 output.Addhtml(ln)
         self.Close(True)
 
@@ -2673,7 +2698,7 @@ class CorrelationTestFrame(wx.Dialog):
         y = frame.grid.GetVariableData(y1, 'float')
         #TBase = salstat_stats.TwoSampleTests(x, y, name1, name2,xmiss,ymiss)
         self.stats = self.DescChoice.GetCheckedStrings()
-        ManyDescriptives(self, [x,y], [name1,name2], None)
+        ManyDescriptives(self.stats, [x,y], [name1,name2], None)
         
         # Kendalls tau correlation
         if self.paratests.IsChecked(0):
@@ -2681,7 +2706,7 @@ class CorrelationTestFrame(wx.Dialog):
             tau, df, prob = Inferentials.KendallsTau(x, y)
             if (prob == -1.0):
                 output.Addhtml('<p class="text-warning">Cannot do Kendall&#39;s tau correlation \
-                                    - the data have unequal sizes')
+                                    - the data have unequal sizes<hr width="50%">')
             else:
                 if (self.hypchoice.GetSelection() == 0):
                     prob = prob / 2
@@ -2691,7 +2716,7 @@ class CorrelationTestFrame(wx.Dialog):
                         ['df', df],
                         ['p',prob]]
                 quote = "<b>Quote:</b> <i>Tau</i>(%d)=%1.3f, <i>p</i>=%1.4f<br />"%(df, tau, prob)
-                ln = quote + tabler.table(variables)
+                ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
                 output.Addhtml(ln)
 
         # Pearsons r correlation
@@ -2710,7 +2735,7 @@ class CorrelationTestFrame(wx.Dialog):
                         ['df', df],
                         ['p',prob]]
                 quote = "<b>Quote:</b> <i>r</i>(%d)=%1.3f, <i>p</i>=%1.4f<br />"%(df, r, prob)
-                ln = quote + tabler.table(variables)
+                ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
                 output.Addhtml(ln)
 
         # Point Biserial r
@@ -2729,7 +2754,7 @@ class CorrelationTestFrame(wx.Dialog):
                         ['df', df],
                         ['p',prob]]
                 quote = "<b>Quote:</b> <i>r</i>(%d)=%1.3f, <i>p</i>=%1.4f<br />"%(df, r, prob)
-                ln = quote + tabler.table(variables)
+                ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
                 output.Addhtml(ln)
 
         # Spearmans rho correlation
@@ -2748,7 +2773,7 @@ class CorrelationTestFrame(wx.Dialog):
                         ['df', df],
                         ['p',prob]]
                 quote = "<b>Quote:</b> <i>r</i>(%d)=%1.3f, <i>p</i>=%1.4f<br />"%(df, r, prob)
-                ln = quote + tabler.table(variables)
+                ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
                 output.Addhtml(ln)
 
         self.Close(True)
@@ -3206,8 +3231,13 @@ class DataFrame(wx.Frame):
         res = ImportHTML.ImportDialog(URL)
         if res.ShowModal():
             if res.URL:
-                self.FillGrid((res.URL, res.headers, res.gridData))
+                headers = res.headers
+                gridData = res.gridData
+                dlg.Destroy()
+                self.FillGrid((URL, headers, gridData))
             dlg.Destroy()
+            self.grid.Saved = False
+            self.grid.named = True
 
     def FillGrid(self, res):
         if res != None:
@@ -3476,7 +3506,7 @@ class DataFrame(wx.Frame):
                         data.append(self.grid.GetVariableData(colnum,'float'))
                         names.append(self.grid.GetColLabelValue(colnum))
                         alpha = win.alpha
-                    ManyDescriptives(win, data, names,alpha)
+                    ManyDescriptives(win.stats, data, names,alpha)
             except NameError:
                 pass
         win.Destroy()
@@ -3601,6 +3631,7 @@ class DataFrame(wx.Frame):
             fout.write(str(initskeys[i])+' '+str(initsvalues[i])+'\n')
         fout.close()
         frame.Destroy()
+        sys.exit()
 
 #---------------------------------------------------------------------------
 # Scripting API is defined here. So far, only basic (but usable!) stuff.

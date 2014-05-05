@@ -6,10 +6,12 @@ A Python module to read Excel files into Salstat. Does not include xlsx format
 
 from __future__ import unicode_literals
 import os, os.path 
+import HTMLParser
 import wx, wx.aui, xlrd
 import wx.grid as gridlib
 import requests
 import BeautifulSoup as BS
+
 
 
 ################################################
@@ -79,11 +81,16 @@ class ImportDialog(wx.Dialog):
         except:
             page = None
         # page is parsed and tables extracted
-        if page:
+        if not page:
+            self.URL = None
+            self.Close()
+        else:
+            parser = HTMLParser.HTMLParser()
             soup = BS.BeautifulSoup(page)
             self.tables = soup.findAll('table')
             # user selects which table to import
             # table & data are imported
+            ID_WINDOW_CLOSE = wx.NewId()
             help_text = "These are all the tables in the web page you just entered. "
             t1 = wx.StaticText(self, -1, label=help_text, pos=(20,10))
             t1.Wrap(545)
@@ -113,7 +120,9 @@ class ImportDialog(wx.Dialog):
                 # get number cols, rows
                 headings = table.findAll('th')
                 for heading in headings:
-                    variableNames.append(heading.text)
+                    val = heading.text
+                    val = parser.unescape(val)
+                    variableNames.append(val)
                 rows = table.findAll('tr')
                 ncols = 0
                 nrows = len(rows)
@@ -145,6 +154,7 @@ class ImportDialog(wx.Dialog):
                 for idx_row in range(len(gridData)):
                     for idx_col in range(len(gridData[idx_row])):
                         val = unicode(gridData[idx_row][idx_col])
+                        val = parser.unescape(val)
                         self.grids[idx].SetCellValue(idx_row, idx_col, val)
             # It seems odd but it seems better for all events to be routed to the same method
             wx.EVT_CHECKBOX(self, 760, self.AdjustGrid)
@@ -166,6 +176,7 @@ class ImportDialog(wx.Dialog):
         pass
 
     def ImportButton(self, event):
+        parser = HTMLParser.HTMLParser()
         self.gridData = []
         self.headers = []
         tableIdx = self.worksheets.GetSelection()
@@ -174,13 +185,16 @@ class ImportDialog(wx.Dialog):
         beginRow = self.dataRow.GetValue() - 1
         headings = table.findAll('th')
         for heading in headings:
-            self.headers.append(heading.text)
+            val = heading.text
+            val = parser.unescape(val)
+            self.headers.append(val)
         rows = table.findAll('tr')
         for row in rows:
             cols = row.findAll('td')
             line = []
             for col in cols:
-                line.append(col.text)
+                val = parser.unescape(col.text)
+                line.append(val)
             if len(line) > 0:
                 self.gridData.append(line)
         self.Close()
