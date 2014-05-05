@@ -1,8 +1,8 @@
 Salstat revitalised
 
-This is not Salstat 2 (see https://code.google.com/p/salstat-statistics-package-2/ and try it!).
+Salstat is open source statistics software. Think of something like SPSS or SAS but with a friendlier interface. 
 
-I've done no work on this for about 10 years only to find that people are *still* using it. I'm surprised at its longevity and wonder if, just maybe, I should continue developing it.
+I last worked on this 10 years only to find that people are *still* using it. I'm surprised at its longevity and am devoting my spare time to making it the best of its kind. There's a way to go yet but it is coming along well. 
 
 INSTALLATION:
 
