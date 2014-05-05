@@ -1,8 +1,11 @@
-Salstat revitalised
+Salstat 
+
+DESCRIPTION
 
 Salstat is open source statistics software. Think of something like SPSS or SAS but with a friendlier interface. 
 
 I last worked on this 10 years only to find that people are *still* using it. I'm surprised at its longevity and am devoting my spare time to making it the best of its kind. There's a way to go yet but it is coming along well. 
+
 
 INSTALLATION:
 
@@ -41,6 +44,7 @@ python salstat.py
 
 This should launch Salstat.
 
+
 PROBLEMS INSTALLING FROM SOURCE
 
 1. Go back and ensure all the modules above were installed.
@@ -48,5 +52,11 @@ PROBLEMS INSTALLING FROM SOURCE
 3. See what error comes up and see if the help groups can sort it out. I used to use the newsgroup comp.lang.python but other places might be useful too. 
 
 
+SALSTAT2 
+
+This is a different program written by someone else. Feel free to try it out and see if it suits you better: https://code.google.com/p/salstat-statistics-package-2/
+
 Alan James Salmoni
-salmoni@gmail.com
+alan@salstat.com
+
+
