@@ -17,7 +17,7 @@ import string, os, os.path, pickle, csv, sys
 import urlparse, urllib, requests
 
 # import SalStat specific modules
-import salstat_stats, images, tabler, charter, ChartWindow
+import salstat_stats, images, tabler, ChartWindow
 import DescriptivesFrame, PrefsFrame
 import MetaGrid, AllRoutines, ImportCSV, ImportSS, ImportHTML, Inferentials
 import numpy, math
