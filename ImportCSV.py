@@ -191,7 +191,6 @@ class ImportDialog(wx.Dialog):
         elif endSelect == 3:
             lineTerm = '\r'
         # split file into rows
-        data = data.split(lineTerm)
         # get delimiters
         delims = ''
         if self.p1.del_01.IsChecked():
@@ -222,6 +221,7 @@ class ImportDialog(wx.Dialog):
             bonus = 0
             self.headers = None
         # Fill the grid as specified
+        data = data.split(lineTerm)
         self.gridData = []
         for row in range(self.MaxRows):
             try:
@@ -279,6 +279,65 @@ class ImportDialog(wx.Dialog):
         self.Close()
 
     def ImportButton(self, event):
+        fin = open(self.FileName.fileName,'r')
+        data = fin.read()
+        fin.close()
+        endSelect = self.lineEnd.GetSelection()
+        lineTerm = '\n'
+        if endSelect == 0:
+            # Use most common as a guess
+            lineEnds = ['\n','\r\n','\r']
+            maxes = []
+            for lineEnd in lineEnds:
+                maxes.append(self.GetMax(data, lineEnd))
+            lineTerm = lineEnds[lineEnds.index(max(lineEnds))-1]
+        # Or have user selection
+        elif endSelect == 1:
+            lineTerm = '\n'
+        elif endSelect == 2:
+            lineTerm = '\r\n'
+        elif endSelect == 3:
+            lineTerm = '\r'
+        # split file into rows
+        # get delimiters
+        delims = ''
+        if self.p1.del_01.IsChecked():
+            delims += b'\t'
+        if self.p1.del_02.IsChecked():
+            delims += b','
+        if self.p1.del_03.IsChecked():
+            delims += b' '
+        if self.p1.del_04.IsChecked():
+            delims += b';'
+        val = self.p1.edit_01.GetValue()
+        if val != "":
+            delims += val
+        quotes = self.p1.edit_02.GetValue()
+        beginRow = self.dataRow.GetValue()
+        if self.headerRow.IsChecked():
+            # User's setting a row as a header for the grid
+            self.headers = self.ParseLine(data[beginRow-1], delims, quotes)
+            for idx in range(self.MaxCols):
+                try:
+                    self.grid.SetColLabelValue(idx, self.headers[idx])
+                except IndexError:
+                    self.grid.SetColLabelValue(idx," ")
+            bonus = 1
+        else:
+            for idx in range(self.MaxCols):
+                self.grid.SetColLabelValue(idx, " ")
+            bonus = 0
+            self.headers = None
+        # Fill the grid as specified
+        data = data.split(lineTerm)
+        self.gridData = []
+        for row in range(len(data)):
+            try:
+                line = data[beginRow+bonus+row-1]
+                tokens = self.ParseLine(line, delims, quotes)
+                self.gridData.append(tokens)
+            except IndexError:
+                break
         self.Close()
 
 class CSVObject(object):
