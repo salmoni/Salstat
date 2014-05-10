@@ -1088,7 +1088,6 @@ class SimpleGrid(gridlib.Grid):
                     width = len(row.split('\t'))
                     if width > maxWidth:
                         maxWidth = width
-                print currentcol, maxWidth, maxCols
                 diffCols = (currentcol + maxWidth + 10) - maxCols
                 diffRows = (currentrow + len(rows) + 10) - maxRows
                 if diffCols > 0:
@@ -1100,23 +1099,48 @@ class SimpleGrid(gridlib.Grid):
                     for col in range(len(cells)):
                         val = cells[col]
                         self.SetCellValue(currentrow+row, currentcol+col, val)
+            self.Saved = False
 
     def EditGrid(self, event, numrows):
         insert = self.AppendRows(numrows)
 
     def DeleteCurrentCol(self, event):
-        currentcol = self.GetGridCursorCol()
-        self.DeleteCols(currentcol, 1)
+        Cols  = self.GetSelectedCols()
+        Rows  = self.GetSelectedRows()
+        TopLt = self.GetSelectionBlockTopLeft()
+        BotRt = self.GetSelectionBlockBottomRight()
+        if len(Cols) > 0:
+            Cols.reverse()
+            for col in Cols:
+                self.DeleteCols(col, 1)
+        elif len(TopLt) < 1 and len(BotRt) < 1:
+            currentcol = self.GetGridCursorCol()
+            self.DeleteCols(currentcol, 1)
+        else:
+            tl = TopLt[0][1]
+            br = BotRt[0][1] + 1
+            self.DeleteCols(tl, br-tl)
         self.AdjustScrollbars()
-        xmlevt = '<deleteColumn>'+str(currentcol)+'</deleteColumn>\n'
-        hist.AppendEvent(xmlevt)
+        self.Saved = False
 
     def DeleteCurrentRow(self, event):
-        currentrow = self.GetGridCursorRow()
-        self.DeleteRows(currentrow, 1)
+        Cols  = self.GetSelectedCols()
+        Rows  = self.GetSelectedRows()
+        TopLt = self.GetSelectionBlockTopLeft()
+        BotRt = self.GetSelectionBlockBottomRight()
+        if len(Rows) > 0:
+            Rows.reverse()
+            for row in Rows:
+                self.DeleteRows(row, 1)
+        elif len(TopLt) < 1 and len(BotRt) < 1:
+            currentrow = self.GetGridCursorRow()
+            self.DeleteRows(currentrow, 1)
+        else:
+            tl = TopLt[0][0]
+            br = BotRt[0][0] + 1
+            self.DeleteRows(tl, br-tl)
         self.AdjustScrollbars()
-        xmlevt = '<deleteRow>'+str(currentrow)+'</deleteRow>\n'
-        hist.AppendEvent(xmlevt)
+        self.Saved = False
 
     def SelectAllCells(self, event):
         self.SelectAll()
@@ -1852,7 +1876,7 @@ class OutputSheet(wx.Frame):
         self.CreateStatusBar()
         self.SetStatusText('Salstat statistics - results')
         self.htmlpage = html2lib.WebView.New(self)
-        #self.htmlpage.SetEditable(True)
+        self.htmlpage.SetEditable(False)
         self.Addhtml('')
         self.printer = wx.Printout()
         wx.EVT_MENU(self, ID_OEDIT_UNDO, self.Undo)
