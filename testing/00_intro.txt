@@ -1,0 +1,1 @@
+This directory is reserved for unit tests of Salstat's statistics function. Results from these functions will be compared with those from SPSS and R for accuracy. 
