@@ -80,7 +80,7 @@ class ChartWindow(wx.Frame):
         self.webview = html2lib.WebView
         self.preview = self.webview.New(self) #, size=(100,100))
         self.preview.SetSize
-        self.control = ControlPanel(self, -1, self.chartObject, self.preview)
+        self.control = ControlPanel(self, -1, self.chartObject, self.preview, self.grid)
         # Windows crash not before here...
         if self.grid:
             self.variables = VarPanel(self, -1, self.grid, self.chartObject)
@@ -102,32 +102,35 @@ class ChartWindow(wx.Frame):
         self.parent.ReceiveChart(chart)
 
 class ControlPanel(wx.Panel):
-    def __init__(self, parent, id, chartObject, webview):
+    def __init__(self, parent, id, chartObject, webview, grid):
         wx.Panel.__init__(self, parent, -1, size=(250,-1))
+        self.grid = grid
+        variables, self.ColNums = self.grid.GetUsedCols()
+        #variables = ['None'] + variables
         self.chartObject = chartObject
         self.WebView = webview
         self.types = ['boxplot','line', 'spline', 'area', 'areaspline', \
                 'column', 'bar', 'pie', 'scatter']
-        self.align =  ["left", "center", "right", "do not show"]
-        self.valign = ["top","middle","bottom"]
-        self.aligned = ["Do not display legend","Top left","Top middle","Top right", \
-                "Centre left","Centre middle","Centre right", \
-                "Bottom left","Bottom middle","Bottom right"]
+        self.aligned = ["Do not display legend","Top left","Top centre","Top right", \
+                "Middle left","Middle centre","Middle right", \
+                "Bottom left","Bottom centre","Bottom right"]
 
         wx.StaticText(self, -1, "Chart type", (20,20))
         wx.StaticText(self, -1, "Chart title", (20,70))
         wx.StaticText(self, -1, "Chart subtitle", (20,120))
         wx.StaticText(self, -1, "Legend", (20,170))
+        wx.StaticText(self, -1, "X-axis labels", (20,260))
 
         self.ctrl_type = wx.ComboBox(self, -1, size=(200,-1),pos=(20,40), choices = self.types, value=self.chartObject.chart_type)
         self.ctrl_title = wx.TextCtrl(self, -1, size=(200,-1),pos=(20,90), \
                 value=self.chartObject.title_text)
         self.ctrl_subtitle = wx.TextCtrl(self, -1, size=(200,-1),pos=(20,140), \
                 value=self.chartObject.subtitle_text)
-        self.ctrl_align = wx.ComboBox(self, -1, size=(200,-1),pos=(20,190), choices = self.align, value=self.chartObject.legend_align)
-        self.ctrl_valign = wx.ComboBox(self, -1, size=(200,-1),pos=(20,220), choices = self.valign, value=self.chartObject.legend_verticalAlign)
+        self.alignedChoice = wx.Choice(self, -1, size=(200,-1),pos=(20,190),choices=self.aligned)
+        self.XLabels = wx.Choice(self, -1, size=(190,-1), pos=(20,280),choices=['None']+variables)
+        self.XLabels.SetSelection(0)
 
-        changebutton = wx.Button(self, 710, "Change settings", pos=(15,280))
+        changebutton = wx.Button(self, 710, "Change settings", pos=(15,330))
         wx.EVT_BUTTON(changebutton, 710, self.ChangeSettings)
 
     def ChangeSettings(self, event):
@@ -136,22 +139,34 @@ class ControlPanel(wx.Panel):
             self.chartObject.chart_type = self.types[type_idx]
         self.chartObject.title_text = self.ctrl_title.GetValue()
         self.chartObject.subtitle_text = self.ctrl_subtitle.GetValue()
-        align_idx  = self.ctrl_align.GetSelection()
-        valign_idx = self.ctrl_valign.GetSelection()
-        self.chartObject.legend_align = self.align[align_idx]
-        self.chartObject.legend_verticalAlign = self.valign[valign_idx]
-        #y_title = self.ctrl_yaxistitle.GetValue()
-        #x_title = self.ctrl_xaxistitle.GetValue()
-        #legend = self.ctrl_legendpos.GetValue()
-        #x_max = self.ctrl_xaxismax.GetValue()
+        idx_align = self.alignedChoice.GetSelection()
+        if idx_align in [1,2,3]:
+            self.chartObject.legend_verticalAlign = "top"
+        elif idx_align in [4,5,6]:
+            self.chartObject.legend_verticalAlign = "middle"
+        elif idx_align in [7,8,9]:
+            self.chartObject.legend_verticalAlign = "bottom"
+        if idx_align in [1,4,7]:
+            self.chartObject.legend_align = "left"
+        elif idx_align in [2,5,8]:
+            self.chartObject.legend_align = "center"
+        elif idx_align in [3,6,9]:
+            self.chartObject.legend_align = "right"
+        if idx_align == 0:
+            self.chartObject.legend_align = "do not show"
+            self.chartObject.legend_verticalAlign = None
+            
+        labelIdx = self.XLabels.GetSelection()
+        if labelIdx > 0:
+            labelVals = self.grid.GetVariableData(labelIdx - 1)
+            self.chartObject.xAxis_categories = labelVals
+        else:
+            self.chartObject.xAxis_categories = None
         self.chartObject.ToString()
-        #self.WebView.SetPage(self.chartObject.page, "")
         fout = open('tmp/chartput.html','w')
         fout.write(self.chartObject.page)
         fout.close()
         file_loc = FileToURL(basedir+os.sep+'tmp/chartput.html')
-        #self.parent.preview.LoadURL(file_loc)
-        #self.WebView.LoadURL(FileToURL(self.chartObject.page))
         self.WebView.LoadURL(file_loc)
 
     def ConstructGraphCode(self, codes):
@@ -179,7 +194,7 @@ class VarPanel(wx.Panel):
         wx.StaticText(self, -1, "Organised by:",pos=(20,260))
         self.IV = wx.ComboBox(self, -1, size=(190,-1), pos=(20,280),choices=['None']+variables)
 
-        acceptbutton = wx.Button(self, 711, "Draw this graph", pos=(15,330))
+        acceptbutton = wx.Button(self, 711, "Draw this chart", pos=(15,330))
         self.SetAutoLayout(True)
         self.Layout()
         wx.EVT_BUTTON(acceptbutton, 711, self.ChangeVars)
@@ -223,9 +238,11 @@ class VarPanel(wx.Panel):
                     #values, freqs = AllRoutines.UniqueVals(data)
                     #allVals.append(values)
                     #allFreqs.append(values)
+                self.chartObject.varNames = name_DV
             else: # is grouping
                 for single in col_DV:
                     data = []
+                    names = []
                     data_IV = self.grid.GetColumnRawData(col_IV-1)
                     data_DV = self.grid.GetColumnData(single)
                     groups = GetGroups([data_IV])
@@ -254,6 +271,7 @@ class VarPanel(wx.Panel):
                         elif test == "Standard error":
                             data.append(AllRoutines.StdErr(data_section))
                     series.append(data)
+                self.chartObject.varNames = name_DV
             self.chartObject.data = [series]
             yAxisText = '%s of %s'%(test, ', '.join(list(name_DV)))
             self.chartObject.yAxis_title = yAxisText
@@ -339,6 +357,7 @@ class ChartObject(object):
         self.legend_align = "do not show"
         self.legend_verticalAlign = "bottom"
         self.chart_series = None
+        self.varNames = []
         self.data = None
         self.ToString()
 
@@ -428,11 +447,12 @@ class ChartObject(object):
         if self.data:
             for series in self.data:
                 seriesbit = '\tseries: ['
-                for data_set in series:
+                for idx, data_set in enumerate(series):
                     datastr = self.FloatsToString(data_set)
-                    seriesbit += '{\n'
+                    seriesbit += '\t{\n'
                     if datastr:
-                        seriesbit += '\t\tdata: [%s]\n\t},'%(datastr)
+                        seriesbit += '\t\tdata: [%s],\n'%(datastr)
+                        seriesbit += '\t\tname: "%s"\n\t},\n'%self.varNames[idx]
                 seriesbit += '\t]\n'
         else:
             seriesbit = ''
