@@ -34,7 +34,7 @@ OR
 
 
 from __future__ import unicode_literals
-import os, os.path, sys
+import os, os.path, sys, codecs
 import wx
 import wx.grid as gridlib
 
@@ -164,7 +164,8 @@ class ImportDialog(wx.Dialog):
         else:
             # retrieve data 
             data = []
-            fin = open(self.FileName.fileName,'r')
+            fin = codecs.open(self.FileName.fileName, encoding='utf-8')
+            #fin = open(self.FileName.fileName,'r')
             data = fin.read(10000)
             fin.close()
             # populate preview
@@ -279,7 +280,7 @@ class ImportDialog(wx.Dialog):
         self.Close()
 
     def ImportButton(self, event):
-        fin = open(self.FileName.fileName,'r')
+        fin = codecs.open(self.FileName.fileName, encoding='utf-8')
         data = fin.read()
         fin.close()
         endSelect = self.lineEnd.GetSelection()
