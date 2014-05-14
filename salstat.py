@@ -6,6 +6,7 @@ details of this license. """
 
 # import wx stuff
 from __future__ import unicode_literals
+import codecs
 import wx
 from wx.stc import *
 import wx.grid as gridlib
@@ -968,7 +969,7 @@ class SimpleGrid(gridlib.Grid):
             for row in range(top, bot):
                 line = []
                 for col in range(left, right):
-                    val = str(self.GetCellValue(row, col))
+                    val = self.GetCellValue(row, col)
                     line.append(val)
                 data.append('\t'.join(line))
             data = '\r'.join(data)
@@ -977,7 +978,7 @@ class SimpleGrid(gridlib.Grid):
             for row in range(self.GetNumberRows()):
                 line = []
                 for col in Cols:
-                    line.append(str(self.GetCellValue(row, col)))
+                    line.append(self.GetCellValue(row, col))
                 data.append('\t'.join(line))
             data = '\r'.join(data)
         elif len(Rows) > 0:
@@ -985,7 +986,7 @@ class SimpleGrid(gridlib.Grid):
             for row in Rows:
                 line = []
                 for col in range(self.GetNumberCols()):
-                    line.append(str(self.GetCellValue(row, col)))
+                    line.append(self.GetCellValue(row, col))
                 data.append('\t'.join(line))
             data = '\r'.join(data)
         elif len(Cells) > 0:
@@ -1029,7 +1030,7 @@ class SimpleGrid(gridlib.Grid):
             for row in range(top, bot):
                 line = []
                 for col in range(left, right):
-                    val = str(self.GetCellValue(row, col))
+                    val = self.GetCellValue(row, col)
                     line.append(val)
                 data.append('\t'.join(line))
             data = '\r'.join(data)
@@ -1038,7 +1039,7 @@ class SimpleGrid(gridlib.Grid):
             for row in range(self.GetNumberRows()):
                 line = []
                 for col in Cols:
-                    line.append(str(self.GetCellValue(row, col)))
+                    line.append(self.GetCellValue(row, col))
                 data.append('\t'.join(line))
             data = '\r'.join(data)
         elif len(Rows) > 0:
@@ -1046,7 +1047,7 @@ class SimpleGrid(gridlib.Grid):
             for row in Rows:
                 line = []
                 for col in range(self.GetNumberCols()):
-                    line.append(str(self.GetCellValue(row, col)))
+                    line.append(self.GetCellValue(row, col))
                 data.append('\t'.join(line))
             data = '\r'.join(data)
         elif len(Cells) > 0:
@@ -1106,7 +1107,6 @@ class SimpleGrid(gridlib.Grid):
 
     def DeleteCurrentCol(self, event):
         Cols  = self.GetSelectedCols()
-        Rows  = self.GetSelectedRows()
         TopLt = self.GetSelectionBlockTopLeft()
         BotRt = self.GetSelectionBlockBottomRight()
         if len(Cols) > 0:
@@ -1123,8 +1123,43 @@ class SimpleGrid(gridlib.Grid):
         self.AdjustScrollbars()
         self.Saved = False
 
-    def DeleteCurrentRow(self, event):
+    def InsertCol(self, event):
         Cols  = self.GetSelectedCols()
+        TopLt = self.GetSelectionBlockTopLeft()
+        BotRt = self.GetSelectionBlockBottomRight()
+        if len(Cols) > 0:
+            Cols.reverse()
+            for col in Cols:
+                self.InsertCols(col, 1)
+        elif len(TopLt) < 1 and len(BotRt) < 1:
+            currentcol = self.GetGridCursorCol()
+            self.InsertCols(currentcol, 1)
+        else:
+            tl = TopLt[0][1]
+            br = BotRt[0][1] + 1
+            self.InsertCols(tl, br-tl)
+        self.AdjustScrollbars()
+        self.Saved = False
+
+    def InsertRow(self, event):
+        Rows  = self.GetSelectedRows()
+        TopLt = self.GetSelectionBlockTopLeft()
+        BotRt = self.GetSelectionBlockBottomRight()
+        if len(Rows) > 0:
+            Rows.reverse()
+            for row in Rows:
+                self.InsertRows(row, 1)
+        elif len(TopLt) < 1 and len(BotRt) < 1:
+            currentrow = self.GetGridCursorRow()
+            self.InsertRows(currentrow, 1)
+        else:
+            tl = TopLt[0][0]
+            br = BotRt[0][0] + 1
+            self.InsertRows(tl, br-tl)
+        self.AdjustScrollbars()
+        self.Saved = False
+
+    def DeleteCurrentRow(self, event):
         Rows  = self.GetSelectedRows()
         TopLt = self.GetSelectionBlockTopLeft()
         BotRt = self.GetSelectionBlockBottomRight()
@@ -1952,8 +1987,8 @@ class OutputSheet(wx.Frame):
     def Addhtml(self, htmlline):
         self.WholeOutString = self.WholeOutString + htmlline
         htmlend = "\n\t</body>\n</html>"
-        fout = open('tmp/output.html','w')
-        fout.write(self.WholeOutString+htmlend)
+        fout = codecs.open('tmp/output.html','w', encoding="utf-8")
+        fout.write(self.WholeOutString+htmlend.encode('UTF-8'))
         fout.close()
         file_loc = FileToURL(basedir+os.sep+'tmp/output.html')
         self.htmlpage.LoadURL(file_loc)
@@ -3125,6 +3160,8 @@ class DataFrame(wx.Frame):
         wx.EVT_TOOL(self, 80, self.grid.PasteData)
         wx.EVT_MENU(self, ID_EDIT_SELECTALL, self.grid.SelectAllCells)
         wx.EVT_MENU(self, ID_EDIT_FIND, self.GoFindDialog)
+        wx.EVT_MENU(self, ID_EDIT_INSERTCOL, self.grid.InsertCol)
+        wx.EVT_MENU(self, ID_EDIT_INSERTROW, self.grid.InsertRow)
         wx.EVT_MENU(self, ID_EDIT_DELETECOL, self.grid.DeleteCurrentCol)
         wx.EVT_MENU(self, ID_EDIT_DELETEROW, self.grid.DeleteCurrentRow)
         wx.EVT_MENU(self, ID_PREF_VARIABLES, self.GoVariablesFrame)
