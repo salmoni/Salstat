@@ -3289,16 +3289,21 @@ class DataFrame(wx.Frame):
             URL = dlg.GetValue()
         else:
             return
-        res = ImportHTML.ImportDialog(URL)
-        if res.ShowModal():
-            if res.URL:
-                headers = res.headers
-                gridData = res.gridData
+        path = urlparse.urlparse(URL).path
+        ext = os.path.splitext(path)[1]
+        if ext == '.csv' or ext == '.txt':
+            pass # import direct
+        else:
+            res = ImportHTML.ImportDialog(URL)
+            if res.ShowModal():
+                if res.URL:
+                    headers = res.headers
+                    gridData = res.gridData
+                    dlg.Destroy()
+                    self.FillGrid((URL, headers, gridData))
                 dlg.Destroy()
-                self.FillGrid((URL, headers, gridData))
-            dlg.Destroy()
-            self.grid.Saved = False
-            self.grid.named = True
+                self.grid.Saved = False
+                self.grid.named = True
 
     def FillGrid(self, res):
         if res != None:
