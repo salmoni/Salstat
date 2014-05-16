@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import time, os, os.path
-import urlparse, urllib
+import urlparse, urllib, codecs
 import wx
 import wx.html2 as html2lib
 #import wx.propgrid as wxpg
@@ -109,7 +109,7 @@ class ControlPanel(wx.Panel):
         #variables = ['None'] + variables
         self.chartObject = chartObject
         self.WebView = webview
-        self.types = ['boxplot','line', 'spline', 'area', 'areaspline', \
+        self.types = ['line', 'spline', 'area', 'areaspline', \
                 'column', 'bar', 'pie', 'scatter']
         self.aligned = ["Do not display legend","Top left","Top centre","Top right", \
                 "Middle left","Middle centre","Middle right", \
@@ -163,7 +163,8 @@ class ControlPanel(wx.Panel):
         else:
             self.chartObject.xAxis_categories = None
         self.chartObject.ToString()
-        fout = open('tmp/chartput.html','w')
+        #fout = open('tmp/chartput.html','w')
+        fout = codecs.open('tmp/chartput.html', mode="w",encoding='utf-8')
         fout.write(self.chartObject.page)
         fout.close()
         file_loc = FileToURL(basedir+os.sep+'tmp/chartput.html')
@@ -178,7 +179,7 @@ class VarPanel(wx.Panel):
         self.grid = grid
         self.parent = parent
         self.chartObject = chartObject
-        self.stats=["Frequencies","Sum","Mean","Median","Minimum","Maximum",\
+        self.stats=["None","Frequencies","Sum","Mean","Median","Minimum","Maximum",\
                 "Range","Variance","Standard deviation","Standard error"]
         if not grid:
             variables = ['Var 001 (IV)', 'Var 002 (IV)', 'Var 003 (DV)']
@@ -215,8 +216,10 @@ class VarPanel(wx.Panel):
                 for col in col_DV:
                     colData = self.grid.GetVariableData(col, 'float')
                     colRep = self.grid.GetVariableData(col, 'string')
-                    if test == "Frequencies":
+                    if test == "None":
                         series.append(colData)
+                    elif test == "Frequencies":
+                        series.append([AllRoutines.Count(colData)])
                     elif test == "Sum":
                         series.append([AllRoutines.Sum(colData)])
                     elif test == "Mean":
@@ -250,6 +253,8 @@ class VarPanel(wx.Panel):
                         data_section = numpy.array(ExtractGroupsData(group, [data_IV], data_DV))
                         if test == "":
                             pass
+                        elif test == "None":
+                            series.append(colData)
                         elif test == "Frequencies":
                             data.append(AllRoutines.Count(data_section))
                         elif test == "Sum":
@@ -273,7 +278,10 @@ class VarPanel(wx.Panel):
                     series.append(data)
                 self.chartObject.varNames = name_DV
             self.chartObject.data = [series]
-            yAxisText = '%s of %s'%(test, ', '.join(list(name_DV)))
+            if test != "None":
+                yAxisText = '%s of %s'%(test, ', '.join(list(name_DV)))
+            else:
+                yAxisText = ', '.join(list(name_DV))
             self.chartObject.yAxis_title = yAxisText
 
     def GetSetIV(self, col_IV):
@@ -310,7 +318,8 @@ class VarPanel(wx.Panel):
         if self.valid_content:
             self.chartObject.ToString()
             #self.parent.preview.SetPage(self.chartObject.page,"")
-            fout = open('tmp/chartput.html','w')
+            #fout = open('tmp/chartput.html','w')
+            fout = codecs.open('tmp/chartput.html', mode="w",encoding='utf-8')
             fout.write(self.chartObject.page)
             fout.close()
             file_loc = FileToURL(basedir+os.sep+'tmp/chartput.html')
@@ -318,7 +327,8 @@ class VarPanel(wx.Panel):
         else:
             help_prompt = "<br /><br /><br /><p>To create a chart, simply select which variable you want to display (to the left of this message)"
             #self.parent.preview.SetPage(help_prompt, "")
-            fout = open('tmp/chartput.html','w')
+            #fout = open('tmp/chartput.html','w')
+            fout = codecs.open('tmp/chartput.html', mode="w",encoding='utf-8')
             fout.write(help_prompt)
             fout.close()
             file_loc = FileToURL(basedir+os.sep+'tmp/chartput.html')
