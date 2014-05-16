@@ -113,10 +113,11 @@ class ImportDialog(wx.Dialog):
         self.dataRow.SetValue(1)
         self.buttonImport = wx.Button(self,763,"Import", \
                 pos=(500,310),size=(70,-1))
+        self.buttonImport.SetDefault()
         self.buttonCancel = wx.Button(self,764,"Cancel", \
                 pos=(405,310),size=(70,-1))
         self.worksheets = wx.aui.AuiNotebook(self, -1, pos=(20,90), \
-                size=(560,210),style=wx.NB_TOP)
+                size=(560,210),style=wx.NB_TOP|wx.aui.AUI_NB_WINDOWLIST_BUTTON)
         self.MaxRows = 100
         self.MaxCols = 40
         self.gridFont = wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL)
