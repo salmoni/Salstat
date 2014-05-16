@@ -45,7 +45,7 @@ python salstat.py
 This should launch Salstat.
 
 
-## PROBLEMS INSTALLING FROM SOURCE
+### PROBLEMS INSTALLING FROM SOURCE
 
 1. Go back and ensure all the modules above were installed.
 2. Let me know – raise an issue on Github (https://github.com/salmoni/Salstat)
