@@ -27,16 +27,18 @@ To save your time, we have to work hard so we charge a small amount for the inst
 Salstat runs using a computer language called Python. This costs nothing to download and install. It also uses a number of libraries, all of which cost nothing to download and install. It will probably, however, take time to get your computer ready. 
 
 First download and install Python. If possible, use a 64-bit version. 
+
 Then download and install setuptools or pip and then install these libraries. I've included the versions used on my machine. I will not guarantee that they work but they do on mine. 
 
-wxPython		(version 2.9.5.0)
-Scipy			(version 0.13.0)
-Numpy			(version 1.8.0)
-requests		(version 1.2.3)
-BeautifulSoup	(version 3.2.1)
-xlrd			(version 0.9.2)
-ezodf			(version 0.2.5) 
-sas7bdat		(version 0.2.2)
+* wxPython		(version 2.9.5.0)
+* Scipy			(version 0.13.0)
+* Numpy			(version 1.8.0)
+* requests		(version 1.2.3)
+* BeautifulSoup	(version 3.2.1)
+* xlrd			(version 0.9.2)
+* ezodf			(version 0.2.5) 
+* sas7bdat		(version 0.2.2)
+* HighCharts	(version 3.0.7)
 
 Now download the Salstat source file (if you haven't already) and uncompress it. Go into the top directory in a terminal and type:
 
