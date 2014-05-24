@@ -906,11 +906,12 @@ def FiveNumber(data):
     """
     Five number summary
     """
-    mn = Minimum(data)
-    mx = Maximum(data)
+    mn = numpy.minimum(data)
+    mx = numpy.maximum(data)
     med = Median(data)
     quartiles = (Q8(data, 0.25), Q8(data, 0.75))
-    return mn, quartiles[0], med, quartiles[1], mx
+    res = [mn, quartiles[0], med, quartiles[1], mx]
+    return res
 
 def OutliersIQR(data):
     """
