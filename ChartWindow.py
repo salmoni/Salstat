@@ -101,16 +101,24 @@ class ChartWindow(wx.Frame):
         chart = self.chartObject.FinalToString()
         self.parent.ReceiveChart(chart)
 
+    def GetChartType(self):
+        idx = self.control.ctrl_type.GetSelection()
+        return self.control.ctrl_type.GetString(idx)
+
+    def UpdateChart(self):
+        self.variables.ChangeVars(None)
+
 class ControlPanel(wx.Panel):
     def __init__(self, parent, id, chartObject, webview, grid):
         wx.Panel.__init__(self, parent, -1, size=(250,-1))
+        self.parent = parent
         self.grid = grid
         variables, self.ColNums = self.grid.GetUsedCols()
         #variables = ['None'] + variables
         self.chartObject = chartObject
         self.WebView = webview
         self.types = ['line', 'spline', 'area', 'areaspline', \
-                'column', 'bar', 'pie', 'scatter']
+                'column', 'bar', 'pie', 'scatter','boxplot']
         self.aligned = ["Do not display legend","Top left","Top centre","Top right", \
                 "Middle left","Middle centre","Middle right", \
                 "Bottom left","Bottom centre","Bottom right"]
@@ -121,7 +129,8 @@ class ControlPanel(wx.Panel):
         wx.StaticText(self, -1, "Legend", (20,170))
         wx.StaticText(self, -1, "X-axis labels", (20,260))
 
-        self.ctrl_type = wx.ComboBox(self, -1, size=(200,-1),pos=(20,40), choices = self.types, value=self.chartObject.chart_type)
+        self.ctrl_type = wx.Choice(self, -1, size=(200,-1),pos=(20,40), choices = self.types)
+        self.ctrl_type.SetSelection(0)
         self.ctrl_title = wx.TextCtrl(self, -1, size=(200,-1),pos=(20,90), \
                 value=self.chartObject.title_text)
         self.ctrl_subtitle = wx.TextCtrl(self, -1, size=(200,-1),pos=(20,140), \
@@ -162,7 +171,8 @@ class ControlPanel(wx.Panel):
             self.chartObject.xAxis_categories = labelVals
         else:
             self.chartObject.xAxis_categories = None
-        self.chartObject.ToString()
+        #self.chartObject.ToString()
+        self.parent.UpdateChart()
         #fout = open('tmp/chartput.html','w')
         fout = codecs.open('tmp/chartput.html', mode="w",encoding='utf-8')
         fout.write(self.chartObject.page)
@@ -212,11 +222,19 @@ class VarPanel(wx.Panel):
             allVals = [] 
             allFreqs = []
             series = []
+            chartType = self.parent.GetChartType()
             if col_IV < 1: # no grouping
                 for col in col_DV:
                     colData = self.grid.GetVariableData(col, 'float')
                     colRep = self.grid.GetVariableData(col, 'string')
-                    if test == "None":
+                    if chartType == 'boxplot':
+                        quartiles = (AllRoutines.Q8(colData, 0.25), AllRoutines.Q8(colData, 0.75))
+                        median = AllRoutines.Median(colData)
+                        minim = colData.min()
+                        maxim = colData.max()
+                        vals = [minim, quartiles[0], median, quartiles[1], maxim]
+                        series.append(vals)
+                    elif test == "None":
                         series.append(colData)
                     elif test == "Frequencies":
                         series.append([AllRoutines.Count(colData)])
@@ -238,9 +256,6 @@ class VarPanel(wx.Panel):
                         series.append([AllRoutines.SampStdDev(colData)])
                     elif test == "Standard error":
                         series.append([AllRoutines.StdErr(colData)])
-                    #values, freqs = AllRoutines.UniqueVals(data)
-                    #allVals.append(values)
-                    #allFreqs.append(values)
                 self.chartObject.varNames = name_DV
             else: # is grouping
                 for single in col_DV:
@@ -251,10 +266,17 @@ class VarPanel(wx.Panel):
                     groups = GetGroups([data_IV])
                     for group in groups:
                         data_section = numpy.array(ExtractGroupsData(group, [data_IV], data_DV))
-                        if test == "":
+                        if chartType == 'boxplot':
+                            quartiles = (AllRoutines.Q8(data_section, 0.25), AllRoutines.Q8(data_section, 0.75))
+                            median = AllRoutines.Median(data_section)
+                            minim = data_section.min()
+                            maxim = data_section.max()
+                            vals = [minim, quartiles[0], median, quartiles[1], maxim]
+                            series.append(vals)
+                        elif test == "":
                             pass
                         elif test == "None":
-                            series.append(colData)
+                            series.append(data_section)
                         elif test == "Frequencies":
                             data.append(AllRoutines.Count(data_section))
                         elif test == "Sum":
@@ -347,10 +369,11 @@ class DataObject(object):
 
 class ChartObject(object):
     def __init__(self):
-        self.charthtml = """<!DOCTYPE html>\n<html>\n<head>\n<script src="html/jquery/1.8.2/jquery.min.js"></script>\n\t\t<script src="html/highcharts/3.0.7/highcharts.js"></script>\n\t\t<script src="html/bootstrap/2.3.1/bootstrap.min.js"></script>\n\t\t<link href="html/bootstrap/2.3.1/bootstrap-combined.min.css" rel="stylesheet" media="screen">\n\t\t<script src="html/highcharts/3.0.7/exporting.js"></script>\n\t\t<script src="html/js/themes/gray.js"></script></script>\n\t<style>\n\t\tbody { font-family: helvectica, arial, \'lucida sans\'; }\n\t</style>\n</head>\n<body>\n"""
+        self.charthtml = """<!DOCTYPE html>\n<html>\n<head>\n<script src="html/jquery/1.8.2/jquery.min.js"></script>\n\t\t<script src="html/highcharts/3.0.7/highcharts.js"></script>\n\t\t<script src="html/highcharts/3.0.7/highcharts-more.js"></script>\n\t\t<script src="html/bootstrap/2.3.1/bootstrap.min.js"></script>\n\t\t<link href="html/bootstrap/2.3.1/bootstrap-combined.min.css" rel="stylesheet" media="screen">\n\t\t<script src="html/highcharts/3.0.7/exporting.js"></script>\n\t\t<script src="html/js/themes/gray.js"></script></script>\n\t<style>\n\t\tbody { font-family: helvectica, arial, \'lucida sans\'; }\n\t</style>\n</head>\n<body>\n"""
+
         self.title_text = " "
         #self.chart_anim = { animation: false }
-        self.chart_type = "column"
+        self.chart_type = "line"
         self.subtitle_text = " "
         self.xAxis_title = None
         self.xAxis_categories = []
@@ -456,14 +479,31 @@ class ChartObject(object):
     def series(self):
         if self.data:
             for series in self.data:
-                seriesbit = '\tseries: ['
-                for idx, data_set in enumerate(series):
-                    datastr = self.FloatsToString(data_set)
-                    seriesbit += '\t{\n'
-                    if datastr:
-                        seriesbit += '\t\tdata: [%s],\n'%(datastr)
-                        seriesbit += '\t\tname: "%s"\n\t},\n'%self.varNames[idx]
-                seriesbit += '\t]\n'
+                seriesbit = '\tseries: [\n'
+                if self.chart_type in ['boxplot']:
+                    seriesbit += '\t{\n\t\tname: "%s",\n'%(self.varNames[0])
+                    seriesbit += '\t\tdata: [\n'
+                    seriesstr = []
+                    for idx, data_set in enumerate(series):
+                        datastr = self.FloatsToString(data_set)
+                        if datastr:
+                            seriesstr.append(datastr)
+                            #seriesbit += '\t\t[%s],\n'%(datastr)
+                    datastr = '],\n\t\t['.join(seriesstr)
+                    seriesbit += '\t\t[%s]\n'%(datastr)
+                    seriesbit += '\t\t],\n'
+                    seriesbit += '\t}]\n'
+                else:
+                    for idx, data_set in enumerate(series):
+                        datastr = self.FloatsToString(data_set)
+                        if datastr:
+                            seriesbit += '\t{\n'
+                            seriesbit += '\t\tdata: [%s],\n'%(datastr)
+                            try:
+                                seriesbit += '\t\tname: "%s"\n\t},\n'%self.varNames[idx]
+                            except IndexError:
+                                seriesbit += '\t\tname: "%s%s"\n\t},\n'%(self.varNames[0], str(idx))
+                    seriesbit += '\t]\n'
         else:
             seriesbit = ''
         return seriesbit
