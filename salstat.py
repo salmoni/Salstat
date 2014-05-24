@@ -545,7 +545,7 @@ def GroupedDescriptives(groups, groupingvars, variables, stats, groupnames, varn
 #---------------------------------------------------------------------------
 # class to output the results of several "descriptives" in one table
 class ManyDescriptives:
-    def __init__(self, stats, variables, names,alpha):
+    def __init__(self, stats, variables, variablesr, names, alpha):
         #__x__ = len(ds)
         str2 = '<h3>Descriptive statistics</h3>\n<table class="table table-striped">'
         outlist = ['Statistic']
@@ -862,10 +862,12 @@ class ManyDescriptives:
         if ("Frequencies" in stats) \
                 or ("Proportions" in stats) \
                 or ("Percentages" in stats):
-            for idx, var in enumerate(vars):
+            for idx, var in enumerate(variablesr):
                 vals = {}
                 if "Frequencies" in stats:
                     values, freqs = AllRoutines.Frequencies(var)
+                    ln = tabler.vtable(['Number of items',len(values)])
+                    str2 += ln
                     vals['values'] = values
                     vals['freqs'] = freqs
                 else:
@@ -885,7 +887,7 @@ class ManyDescriptives:
 
         if "Mode" in stats:
             outlist = []
-            for var in vars:
+            for var in variables:
                 outlist.append(AllRoutines.Mode(var))
             ln = tabler.tableMode(outlist)
             str2 = str2 + ln
@@ -2086,8 +2088,9 @@ class OneConditionTestFrame(wx.Dialog):
             return
         #x = frame.grid.GetVariableData(x1,'float')
         data = frame.grid.GetVariableData(colNum,'float')
+        raw_data = frame.grid.GetVariableData(colNum,'string')
         self.stats = self.DescChoice.GetCheckedStrings()
-        ManyDescriptives(self.stats, [data], [name], None)
+        ManyDescriptives(self.stats, [data], [raw_data], [name], None)
         # One sample t-test
         if self.TestChoice.IsChecked(0):
             output.Addhtml('<h3>One sample t-test</h3>')
@@ -2268,11 +2271,11 @@ class TwoConditionTestFrame(wx.Dialog):
             self.Close(True)
             return
         x = frame.grid.GetVariableData(x1, 'float')
-        #xmiss = frame.grid.missing
         y = frame.grid.GetVariableData(y1,'float')
-        #ymiss = frame.grid.missing
+        xr = frame.grid.GetVariableData(x1, 'string')
+        yr = frame.grid.GetVariableData(y1,'string')
         self.stats = self.DescChoice.GetCheckedStrings()
-        ManyDescriptives(self.stats, [x,y], [name1,name2], None)
+        ManyDescriptives(self.stats, [x,y], [xr, yr], [name1,name2], None)
 
         # chi square test
         if self.paratests.IsChecked(0):
@@ -2526,15 +2529,18 @@ class ThreeConditionTestFrame(wx.Dialog):
 
     def OnOkayButton(self, event):
         biglist = []
+        biglistr = []
         names = []
         for i in range(len(self.colnums)):
             if self.ColChoice.IsChecked(i):
                 tmplist = frame.grid.GetVariableData(self.colnums[i], 'float')
                 biglist.append(tmplist)
+                tmplist = frame.grid.GetVariableData(self.colnums[i], 'string')
+                biglistr.append(tmplist)                
                 names.append(frame.grid.GetColLabelValue(i))
         k = len(biglist)
         self.stats = self.DescChoice.GetCheckedStrings()
-        ManyDescriptives(self, biglist, names, None)
+        ManyDescriptives(self, biglist, biglistr, names, None)
         if (len(biglist) < 2):
             output.Addhtml('<p><b>Not enough columns selected for \
                                     test!</b>')
@@ -2755,9 +2761,11 @@ class CorrelationTestFrame(wx.Dialog):
             return
         x = frame.grid.GetVariableData(x1, 'float')
         y = frame.grid.GetVariableData(y1, 'float')
+        xr = frame.grid.GetVariableData(x1, 'string')
+        yr = frame.grid.GetVariableData(y1, 'string')
         #TBase = salstat_stats.TwoSampleTests(x, y, name1, name2,xmiss,ymiss)
         self.stats = self.DescChoice.GetCheckedStrings()
-        ManyDescriptives(self.stats, [x,y], [name1,name2], None)
+        ManyDescriptives(self.stats, [x,y], [xr, yr], [name1,name2], None)
         
         # Kendalls tau correlation
         if self.paratests.IsChecked(0):
@@ -3553,6 +3561,7 @@ class DataFrame(wx.Frame):
         if win.res == "ok":
             vals = win.GetValues()
             data = []
+            datar = []
             names = []
             try:
                 win.stats
@@ -3569,10 +3578,13 @@ class DataFrame(wx.Frame):
                 else:
                     for i in win.DVs:
                         colnum = win.ColNums[i]
-                        data.append(self.grid.GetVariableData(colnum,'float'))
+                        vals = self.grid.GetVariableData(colnum,'float')
+                        data.append(vals)
+                        vals = self.grid.GetVariableData(colnum,'str')
+                        datar.append(vals)
                         names.append(self.grid.GetColLabelValue(colnum))
                         alpha = win.alpha
-                    ManyDescriptives(win.stats, data, names,alpha)
+                    ManyDescriptives(win.stats, data, datar, names,alpha)
             except NameError:
                 pass
         win.Destroy()
@@ -4133,7 +4145,7 @@ def CreateHTMLDoc():
         page = fin.read()
         fin.close()
     except IOError:
-        page = """<!DOCTYPE html>\n<html>\n    <head>\n        <script src="jquery/1.8.2/jquery.min.js"></script>\n        <script src="highcharts/3.0.7/highcharts.js"></script>\n        <script src="highcharts/3.0.7/exporting.js"></script>\n        <script src="/js/themes/gray.js"></script>\n        <style>\n            body { font-family: helvectica, arial, \'lucida sans\'; }\n        </style>\n    </head>\n    <body>\n        <a href="http://www.salstat.com" alt="Go to the Salstat home page"><img src="http://bit.ly/1fqFdQm" alt="Salstat Statistics" style="float: right;"></a>\n        <h2>Salstat Statistics</h2>\n\n\n"""   
+        page = """<!DOCTYPE html>\n<html>\n\t<head>\n\t<script src="jquery/1.8.2/jquery.min.js"></script>\n\t<script src="highcharts/3.0.7/highcharts.js"></script>\n\t<script src="html/highcharts/3.0.7/highcharts-more.js"></script\n\t<script src="highcharts/3.0.7/exporting.js"></script>\n\t<script src="/js/themes/gray.js"></script>\n\t<style>\n\t\tbody { font-family: helvectica, arial, \'lucida sans\'; }\n\t</style>\n</head>\n<body>\n\t<a href="http://www.salstat.com" alt="Go to the Salstat home page"><img src="http://bit.ly/1fqFdQm" alt="Salstat Statistics" style="float: right;"></a>\n\t<h2>Salstat Statistics</h2>\n\n\n"""   
     return page
 
 #---------------------------------------------------------------------------
