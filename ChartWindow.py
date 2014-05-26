@@ -118,7 +118,7 @@ class ControlPanel(wx.Panel):
         self.chartObject = chartObject
         self.WebView = webview
         self.types = ['line', 'spline', 'area', 'areaspline', \
-                'column', 'bar', 'pie', 'scatter','boxplot']
+                'column', 'bar', 'pie', 'scatter','boxplot', 'histogram']
         self.aligned = ["Do not display legend","Top left","Top centre","Top right", \
                 "Middle left","Middle centre","Middle right", \
                 "Bottom left","Bottom centre","Bottom right"]
@@ -227,13 +227,22 @@ class VarPanel(wx.Panel):
                 for col in col_DV:
                     colData = self.grid.GetVariableData(col, 'float')
                     colRep = self.grid.GetVariableData(col, 'string')
-                    if chartType == 'boxplot':
+                    self.chartObject.plotOptions = None
+                    if chartType in ['boxplot']:
                         quartiles = (AllRoutines.Q8(colData, 0.25), AllRoutines.Q8(colData, 0.75))
                         median = AllRoutines.Median(colData)
                         minim = colData.min()
                         maxim = colData.max()
                         vals = [minim, quartiles[0], median, quartiles[1], maxim]
                         series.append(vals)
+                    elif chartType in ['histogram']:
+                        freqs, vals = numpy.histogram(colData)
+                        series.append(freqs)
+                        self.chartObject.chart_type = "column"
+                        #self.chartObject.xAxis_min = vals[0]
+                        #self.chartObject.xAxis_max = vals[-1]
+                        self.chartObject.xAxis_categories = vals[0:-1]
+                        self.chartObject.plotOptions = "\tplotOptions: { column: { pointPadding: 0, borderWidth: 0, groupPadding: 0, shadow: false } },\n"
                     elif test == "None":
                         series.append(colData)
                     elif test == "Frequencies":
@@ -266,7 +275,7 @@ class VarPanel(wx.Panel):
                     groups = GetGroups([data_IV])
                     for group in groups:
                         data_section = numpy.array(ExtractGroupsData(group, [data_IV], data_DV))
-                        if chartType == 'boxplot':
+                        if chartType in ['boxplot']:
                             quartiles = (AllRoutines.Q8(data_section, 0.25), AllRoutines.Q8(data_section, 0.75))
                             median = AllRoutines.Median(data_section)
                             minim = data_section.min()
@@ -390,6 +399,7 @@ class ChartObject(object):
         self.legend_align = "do not show"
         self.legend_verticalAlign = "bottom"
         self.chart_series = None
+        self.plotOptions = None
         self.varNames = []
         self.data = None
         self.ToString()
@@ -476,6 +486,12 @@ class ChartObject(object):
         legendbit += '\t},\n'
         return legendbit
 
+    def options(self):
+        if self.plotOptions:
+            return self.plotOptions
+        else:
+            return ""
+
     def series(self):
         if self.data:
             for series in self.data:
@@ -514,7 +530,7 @@ class ChartObject(object):
         self.chartLine = """\t$(function () {\n\t$("#chart0001").highcharts({\n""" + \
                 self.chart() + self.title() + self.subtitle() + \
                 self.xAxis() + self.yAxis() + self.legend() + \
-                self.series() + \
+                self.options() + self.series() + \
                 """\t});\n});\n"""
         self.page = '%s<div id="chart0001" style="width:100&amp; height: auto;">\n<script type="text/javascript">\n%s</script>\n</div>\n</body>\n</html>'%(self.charthtml, self.chartLine)
 
@@ -525,7 +541,7 @@ class ChartObject(object):
         self.chartLine = """\t$(function () {\n\t$("#Chart_%s").highcharts({\n"""%t + \
                 self.chart() + self.title() + self.subtitle() + \
                 self.xAxis() + self.yAxis() + self.legend() + \
-                self.series() + \
+                self.options() + self.series() + \
                 """\t});\n});\n"""
         return '<div id="Chart_%s" style="width:100&amp; height: auto;">\n<script type="text/javascript">\n%s</script>\n</div>\n'%(t, self.chartLine)
 
