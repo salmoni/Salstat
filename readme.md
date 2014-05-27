@@ -38,6 +38,8 @@ Then download and install setuptools or pip and then install these libraries. I'
 * xlrd			(version 0.9.2)
 * ezodf			(version 0.2.5) 
 * sas7bdat		(version 0.2.2)
+* JQuery		(version 1.8.2)
+* Bootstrap		(version 2.3.1)
 * HighCharts	(version 3.0.7)
 
 Now download the Salstat source file (if you haven't already) and uncompress it. Go into the top directory in a terminal and type:
