@@ -55,6 +55,9 @@ This should launch Salstat.
 2. Let me know – raise an issue on Github (https://github.com/salmoni/Salstat)
 3. See what error comes up and see if the help groups can sort it out. I used to use the newsgroup comp.lang.python but other places might be useful too. 
 
+### RAISING ISSUES ON GITHUB
+
+If you find a bug or problem with Salstat, you can let us know by going to this page (https://github.com/salmoni/Salstat/issues?state=open) and clicking on the green "New Issue". This will let you write down what the problem was and someone should respond soon. 
 
 ## SALSTAT2 
 
