@@ -26,6 +26,10 @@ def PairwiseDeletion(data1, data2):
             data1[i] = ma.masked
     return data1, data2
 
+def PairwiseDeletion(data):
+    for row in data:
+        pass
+
 def higher(a,b):
     if a>b:
         return 1
@@ -333,6 +337,9 @@ def SpearmanR(x, y):
     df = Count(adj[0])-1
     return r, df, prob
 
+#########################################################################
+# Three sample tests
+#########################################################################
 
 
 def KruskalWallisH(args):
@@ -392,100 +399,124 @@ def KruskalWallis2 ( data ):
     KW = num / float ( den )
     return KW
 
-class anovaBetween(object):
-    def __init__(self, x, y):
-        """
-        This method performs a univariate single factor between-subjects
-        analysis of variance on a list of lists (or a Numeric matrix). It is
-        specialised for SalStat and best left alone.
-        Usage: anovaBetween(data). data are 2 variables, 1st being grouping, 2nd being
-        the actual data
-        Returns: SSbet, SSwit, SStot, dfbet, dferr, dftot, MSbet, MSerr, F, prob.
-        """
-        data = GroupData(x, y)
-        k = len(data)
-        GN = 0
-        GM = 0.0
-        self.SSwit = 0.0
-        self.SSbet = 0.0
-        self.SStot = 0.0
-        means = []
-        Ns = []
-        SSdevs = []
-        for variable in data:
-            self.SSwit = self.SSwit + SSDevs(variable)
-            Ns.append(Count(variable))
-            means.append(Mean(variable))
-            SSdevs.append(SampStdDev(variable))
-            GN = GN + Ns[-1]
-        GM = Mean(y)
-        for i in range(k):
-            self.SSbet = self.SSbet + (((means[i] - GM) **2) * Ns[i])
-        self.SStot = self.SSwit + self.SSbet
-        self.DFbet = k - 1
-        self.DFerr = GN - k
-        self.DFtot = self.DFbet + self.DFerr
-        self.MSbet = self.SSbet / float(self.DFbet)
-        self.MSerr = self.SSwit / float(self.DFerr)
-        try:
-            self.F = self.MSbet / self.MSerr
-        except ZeroDivisionError:
-            self.F = 1.0
-        self.prob = fprob(self.DFbet, self.DFerr, self.F)
+def anovaBetween(data):
+    """
+    This function performs a univariate single factor between-subjects
+    analysis of variance on a list of lists (or a Numeric matrix). It is
+    specialised for SalStat and best left alone.
+    Usage: anovaBetween(data). data are 2 variables, 1st being grouping, 2nd being
+    the actual data
+    Returns dictionary with: SSbet, SSwit, SStot, dfbet, dferr, dftot, MSbet, MSerr, F, prob.
+    """
+    results = {}
+    k = len(data)
+    GN = 0
+    GM = 0.0
+    SSwit = 0.0
+    SSbet = 0.0
+    SStot = 0.0
+    means = []
+    Ns = []
+    SSdevs = []
+    for variable in data:
+        SSwit = SSwit + SSDevs(variable)
+        Ns.append(Count(variable))
+        means.append(Mean(variable))
+        SSdevs.append(SampStdDev(variable))
+        GN = GN + Ns[-1]
+    GM = data.ravel().mean()
+    for i in range(k):
+        SSbet = SSbet + (((means[i] - GM) **2) * Ns[i])
+    SStot = SSwit + SSbet
+    DFbet = k - 1
+    DFerr = GN - k
+    DFtot = DFbet + DFerr
+    MSbet = SSbet / float(DFbet)
+    MSerr = SSwit / float(DFerr)
+    try:
+        F = MSbet / MSerr
+    except ZeroDivisionError:
+        F = 1.0
+    prob = fprob(DFbet, DFerr, F)
+    results["SSwit"] = SSwit
+    results["SSbet"] = SSbet
+    results["SStot"] = SStot
+    results["DFbet"] = DFbet
+    results["DFerr"] = DFerr
+    results["DFtot"] = DFtot
+    results["MSbet"] = MSbet
+    results["MSerr"] = MSerr
+    results["F"] = F
+    results["p"] = prob
+    return results
 
-class anovaWithin(object):
-    def __init__(self, data):
-        """
-        Produces a within-subjects ANOVA
-        For the brave:
-        Usage: anovaWithin(inlist, ns, sums, means). ns is a list of the N's, 
-        sums is a list of the sums of each condition, and the same for means 
-        being a list of means
-        Returns: SSint, SSres, SSbet, SStot, dfbet, dfwit, dfres, dftot, MSbet,
-        MSwit, MSres, F, prob.
-        """
-        GN = 0
-        GS = 0.0
-        GM = 0.0
-        k = len(inlist)
-        meanlist = []
-        Nlist = []
-        for variable in data:
-            GN = GN + Count[variable]
-            GS = GS + Sum[variable]
-            Nlist.append(Count[variable])
-            meanlist.append(Mean[variable])
-        GM = GS / float(GN)
-        self.SSwit = 0.0
-        self.SSbet = 0.0
-        self.SStot = 0.0
-        for i in range(k):
-            for j in range(Nlist[i]):
-                diff = inlist[i][j] - meanlist[i]
-                self.SSwit = self.SSwit + (diff ** 2)
-                diff = inlist[i][j] - GM
-                self.SStot = self.SStot + (diff ** 2)
-            diff = meanlist[i] - GM
-            self.SSbet = self.SSbet + (diff ** 2)
-        self.SSbet = self.SSbet * float(GN / k)
-        self.SSint = 0.0
-        for j in range(ns[0]):
-            rowlist = []
-            for i in range(k):
-                rowlist.append(inlist[i][j])
-            n, sum, mean, SS = minimaldescriptives(rowlist)
-            self.SSint = self.SSint + ((mean - GM) ** 2)
-        self.SSint = self.SSint * k
-        self.SSres = self.SSwit - self.SSint
-        self.dfbet = k - 1
-        self.dfwit = GN - k
-        self.dfres = (ns[0] - 1) * (k - 1)
-        self.dftot = self.dfbet + self.dfwit + self.dfres
-        self.MSbet = self.SSbet / float(self.dfbet)
-        self.MSwit = self.SSwit / float(self.dfwit)
-        self.MSres = self.SSres / float(self.dfres)
-        self.F = self.MSbet / self.MSres
-        self.prob = fprob(self.dfbet, self.dfres, self.F)
+def anovaWithin(data):
+    """
+    Produces a within-subjects ANOVA
+    For the brave:
+    Usage: anovaWithin(inlist, ns, sums, means). ns is a list of the N's, 
+    sums is a list of the sums of each condition, and the same for means 
+    being a list of means
+    Returns: SSint, SSres, SSbet, SStot, dfbet, dfwit, dfres, dftot, MSbet,
+    MSwit, MSres, F, prob.
+    """
+    GN = 0
+    GS = 0.0
+    GM = 0.0
+    k = len(data)
+    meanlist = []
+    Nlist = []
+    for variable in data:
+        GN = GN + Count(variable)
+        GS = GS + Sum(variable)
+        Nlist.append(Count(variable))
+        meanlist.append(Mean(variable))
+    GM = GS / float(GN)
+    SSwit = 0.0
+    SSbet = 0.0
+    SStot = 0.0
+    for i in range(k):
+        for j in range(Nlist[i]):
+            diff = data[i][j] - meanlist[i]
+            SSwit = SSwit + (diff ** 2)
+            diff = data[i][j] - GM
+            SStot = SStot + (diff ** 2)
+        diff = meanlist[i] - GM
+        SSbet = SSbet + (diff ** 2)
+    SSbet = SSbet * float(GN / k)
+    SSint = 0.0
+    SSint = ma.sum((ma.mean(data,0)-ma.mean(data))** 2)
+    SSint = SSint * k
+    SSres = SSwit - SSint
+    dfbet = k - 1
+    dfwit = Nlist[0] - (k - 1)
+    dfres = (Nlist[0] - 1) * (k - 1)
+    dftot = dfbet + dfwit + dfres
+    MSbet = SSbet / float(dfbet)
+    MSwit = SSwit / float(dfwit)
+    MSres = SSres / float(dfres)
+    F = MSbet / MSres
+    prob = fprob(dfbet, dfres, F)
+    results = {}
+    results["SSbet"] = SSbet
+    results["DFbet"] = dfbet
+    results["MSbet"] = MSbet
+    results["F"] = F
+    results["p"] = prob
+
+    results["SSwit"] = SSwit
+    results["DFwit"] = dfwit
+    results["MSwit"] = MSwit
+
+    results["SSres"] = SSres
+    results["DFres"] = dfres
+    results["MSres"] = MSres
+
+    results["SSint"] = SSint
+
+    results["SStot"] = SStot
+    results["DFtot"] = dftot
+    return results
 
 if __name__ == '__main__':
     d1 = ma.array([1,2,3,4,3,2], mask=[0,0,1,0,0,0])
