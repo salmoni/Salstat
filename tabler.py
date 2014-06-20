@@ -12,6 +12,34 @@ Following are a handful of tabler functions for particular tests
 
 """
 
+def tableANOVAWithin(results):
+    ln1 = '<table class="table table-striped"><tr>\n'
+    headhtml = '<tr><th>Variable</th><th>Source</th><th>Sum of squares</th><th>DF</th><th>Mean square</th><th>F</th><th>p</th></tr>\n'
+    l1vars = ("Name",results["SSbet"],results["DFbet"],results["MSbet"],results["F"],results["p"])
+    l2vars = (results["SSwit"],results["DFwit"],results["MSwit"])
+    l3vars = (results["SSres"],results["DFres"],results["MSres"])
+    l4vars = (results["SSint"])
+    l5vars = (results["SStot"],results["DFtot"])
+    line1 = '<tr><td>%s</td><td>Between groups</td><td>%.3f</td><td>%d</td><td>%.3f</td><td>%.3f</td><td>%1.4f</td></tr>\n'%(l1vars)
+    line2 = '<tr><td></td><td>Within groups</td><td>%.3f</td><td>%d</td><td>%.3f</td><td></td><td></td></tr>\n'%(l2vars)
+    line3 = '<tr><td></td><td>Residual</td><td>%.3f</td><td>%d</td><td>%.3f</td><td></td><td></td></tr>\n'%(l3vars)
+    line4 = '<tr><td></td><td>Interaction</td><td>%.3f</td><td></td><td></td><td></td><td></td></tr>\n'%(l4vars)
+    line5 = '<tr><td></td><td>Total</td><td>%.3f</td><td>%d</td><td></td><td></td><td></td></tr>\n'%(l5vars)
+    line = ln1+headhtml+line1+line3+line4+line2+line5
+    return line
+
+def tableANOVABetween(results):
+    ln1 = '<table class="table table-striped"><tr>\n'
+    headhtml = '<tr><th>Variable</th><th>Source</th><th>Sum of squares</th><th>DF</th><th>Mean square</th><th>F</th><th>p</th></tr>\n'
+    l1vars = ("Name",results["SSbet"],results["DFbet"],results["MSbet"],results["F"],results["p"])
+    l2vars = (results["SSwit"],results["DFerr"],results["MSerr"])
+    l3vars = (results["SStot"],results["DFtot"])
+    line1 = '<tr><td>%s</td><td>Between groups</td><td>%.3f</td><td>%d</td><td>%.3f</td><td>%.3f</td><td>%1.4f</td></tr>\n'%(l1vars)
+    line2 = '<tr><td></td><td>Within groups</td><td>%.3f</td><td>%d</td><td>%.3f</td></tr>\n'%(l2vars)
+    line3 = '<tr><td></td><td>Total</td><td>%.3f</td><td>%d</td></tr>\n'%(l3vars)
+    line = ln1+headhtml+line1+line2+line3
+    return line
+
 def table(ListofLists):
     ln1 = '<table class="table table-striped"><tr>'
     ln2 = '<tr>'
