@@ -56,31 +56,36 @@ class TestDialog(wx.Dialog):
 
     def AnalyseButton(self, event):
         page = self.decider.GetSelection()
+        self.results = {}
         tests = []
         if page == 0: # between-subjects test chosen
+            self.results["testType"] = 'between'
             if self.betweenSubs.test1.IsChecked():
                 tests.append('anovabetween')
             if self.betweenSubs.test2.IsChecked():
                 tests.append('kruskal')
             val = self.betweenSubs.IVBox.GetSelection()
             if val != wx.NOT_FOUND:
-                IV = [val]
+                self.results["IV"] = [val]
             val = self.betweenSubs.DVBox.GetSelection()
             if val != wx.NOT_FOUND:
-                DV = [val]
+                self.results["DV"] = [val]
+            self.results["tests"] = tests
         elif page == 1: # within-subjects tests
+            self.results["testType"] = 'within'
             if self.withinSubs.test1.IsChecked():
                 tests.append('anovawithin')
             if self.withinSubs.test2.IsChecked():
                 tests.append('friedmans')
             if self.withinSubs.test3.IsChecked():
                 tests.append('cochranes')
-            IV = []
-            DV = self.withinSubs.DVBox.GetChecked()
-        self.tests = test
-        self.IV = IV
-        self.DV = DV
+            self.results["IV"] = []
+            self.results["DV"] = self.withinSubs.DVBox.GetChecked()
+            self.results["tests"] = tests
+        else:
+            self.results = None
         self.Close()
+        return self.results
 
     def CancelButton(self, event):
         self.Close()
