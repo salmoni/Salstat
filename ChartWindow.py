@@ -318,7 +318,7 @@ class VarPanel(wx.Panel):
     def GetSetIV(self, col_IV):
         if col_IV < 1:
             # remove x-axis details or specify no x-axis details
-            self.chartObject.xAxis_categories = None
+            #self.chartObject.xAxis_categories = None
             self.chartObject.xAxis_min = None
             self.chartObject.xAxis_max = None
             self.chartObject.xAxis_minTickInterval = None
@@ -331,7 +331,7 @@ class VarPanel(wx.Panel):
             data_IV = self.grid.GetColumnRawData(col_IV - 1)
             values, freqs = AllRoutines.UniqueVals(data_IV)
             self.chartObject.xAxis_title = name_IV
-            self.chartObject.xAxis_categories = values
+            #self.chartObject.xAxis_categories = values
             self.chartObject.xAxis_min = None
             self.chartObject.xAxis_max = None
             self.chartObject.xAxis_minTickInterval = None
