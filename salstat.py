@@ -21,6 +21,7 @@ import urlparse, urllib, requests
 import salstat_stats, images, tabler, ChartWindow
 import DescriptivesFrame, PrefsFrame
 import MetaGrid, AllRoutines, ImportCSV, ImportSS, ImportHTML, Inferentials
+import TestThreeConditions
 import numpy, math
 import numpy.ma as ma
 
@@ -3080,7 +3081,7 @@ class DataFrame(wx.Frame):
         #preparation_menu.Append(ID_PREPARATION_NORMALITY, 'Check for Normal Distribution...')
         analyse_menu.Append(ID_ANALYSE_1COND, '&1 Condition Tests...')
         analyse_menu.Append(ID_ANALYSE_2COND, '&2 Condition Tests...')
-        #analyse_menu.Append(ID_ANALYSE_3COND, '&3+ Condition Tests...')
+        analyse_menu.Append(ID_ANALYSE_3COND, '&3+ Condition Tests...')
         analyse_menu.Append(ID_ANALYSE_CORRELATION,'&Correlations...')
         #analyse_menu.Append(ID_ANALYSE_2FACT, '2+ &Factor Tests...')
         analyse_menu.AppendSeparator()
@@ -3618,8 +3619,11 @@ class DataFrame(wx.Frame):
         # shows three conditions or more test dialog
         ColumnList, waste = self.grid.GetUsedCols()
         if (len(ColumnList) > 1):
-            win = ThreeConditionTestFrame(frame, -1, ColumnList)
-            win.Show(True)
+            #win = ThreeConditionTestFrame(frame, -1, ColumnList)
+            dlg = TestThreeConditions.TestDialog(ColumnList)
+            win = dlg.ShowModal()
+            if dlg.results:
+                DoThreeConditionTests(self.grid, dlg.results)
         else:
             self.SetStatusText('You need some data for that!')
 
@@ -3749,6 +3753,36 @@ def PutData(column, data):
 #---------------------------------------------------------------------------
 # API statistical analysis functions
 #One sample tests:
+def DoThreeConditionTests(grid, result):
+    if result["testType"] == 'within':
+        data = []
+        for column in result["DV"]:
+            vector = grid.GetVariableData(int(column), 'float')
+            data.append(vector)
+        result = Inferentials.anovaWithin(data)
+        quotevars = (result["DFbet"],result["DFres"],result["F"],result["p"])
+        quote = "<b>Quote:</b> <i>F</i>(%d, %d)=%.3f, <i>p</i>=%1.4f<br />"%(quotevars)
+        ln = '<br />'+quote+'<br />'+tabler.tableANOVAWithin(result)
+        output.Addhtml(ln)
+    elif result["testType"] == 'between':
+        #print "Between subs ",result['tests']
+        vectorIV = grid.GetVariableData(int(result["IV"][0]), 'str')
+        vectorDV = grid.GetVariableData(int(result["DV"][0]), 'float')
+        vals, freqs = AllRoutines.UniqueVals(vectorIV)
+        data = ma.zeros((len(freqs), max(freqs)))
+        data.mask = True
+        indices = [0] * len(freqs)
+        for idx in range(len(vectorIV)):
+            column = vals.index(vectorIV[idx])
+            row = indices[column]
+            data[column, row] = vectorDV[idx]
+            indices[column] += 1
+        result = Inferentials.anovaBetween(data)
+        quotevars = (result["DFbet"],result["DFerr"],result["F"],result["p"])
+        quote = "<b>Quote:</b> <i>F</i>(%d, %d)=%.3f, <i>p</i>=%1.4f<br />"%(quotevars)
+        ln = '<br />'+quote+'<br />'+tabler.tableANOVABetween(result)
+        output.Addhtml(ln)
+
 def DoOneSampleTTest(col1, usermean, tail = 2):
     """This routine performs a 1 sample t-test using the given data and
     a specified user mean."""
