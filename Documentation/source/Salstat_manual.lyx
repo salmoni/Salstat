@@ -1,0 +1,213 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Salstat Statistics
+\end_layout
+
+\begin_layout Author
+Alan J.
+ Salmoni
+\end_layout
+
+\begin_layout Chapter
+Introduction
+\end_layout
+
+\begin_layout Chapter
+Getting and installing Salstat
+\end_layout
+
+\begin_layout Section
+Buying or downloading?
+\end_layout
+
+\begin_layout Section
+Windows
+\end_layout
+
+\begin_layout Section
+Macintosh OS X
+\end_layout
+
+\begin_layout Section
+Linux
+\end_layout
+
+\begin_layout Chapter
+Getting data into Salstat
+\end_layout
+
+\begin_layout Section
+Typing in by hand
+\end_layout
+
+\begin_layout Section
+Comma-separated value (CSV) files
+\end_layout
+
+\begin_layout Section
+Excel and Libre Office Calc spreadsheets
+\end_layout
+
+\begin_layout Section
+HTML tables
+\end_layout
+
+\begin_layout Section
+SAS
+\end_layout
+
+\begin_layout Section
+From live web pages
+\end_layout
+
+\begin_layout Chapter
+Transforming data
+\end_layout
+
+\begin_layout Section
+Pre-prepared transforms
+\end_layout
+
+\begin_layout Section
+Advanced transforms
+\end_layout
+
+\begin_layout Chapter
+Describing data
+\end_layout
+
+\begin_layout Section
+Basic descriptives
+\end_layout
+
+\begin_layout Section
+Advanced descriptives
+\end_layout
+
+\begin_layout Section
+Cross-tabulated descriptions
+\end_layout
+
+\begin_layout Chapter
+Chart and graphs
+\end_layout
+
+\begin_layout Section
+Basic charts
+\end_layout
+
+\begin_layout Section
+Grouped charts
+\end_layout
+
+\begin_layout Section
+Changing chart attributes
+\end_layout
+
+\begin_layout Chapter
+One sample tests
+\end_layout
+
+\begin_layout Section
+Parametric tests
+\end_layout
+
+\begin_layout Section
+Non-parametric tests
+\end_layout
+
+\begin_layout Chapter
+Two sample tests
+\end_layout
+
+\begin_layout Section
+Parametric tests
+\end_layout
+
+\begin_layout Section
+Non-parametric tests
+\end_layout
+
+\begin_layout Chapter
+Correlations
+\end_layout
+
+\begin_layout Chapter
+Two or more sample tests
+\end_layout
+
+\begin_layout Section
+Parametric tests
+\end_layout
+
+\begin_layout Section
+Non-parametric tests
+\end_layout
+
+\begin_layout Chapter
+Acknowledgements
+\end_layout
+
+\end_body
+\end_document
