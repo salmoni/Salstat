@@ -81,16 +81,113 @@ Getting and installing Salstat
 Buying or downloading?
 \end_layout
 
-\begin_layout Section
-Windows
+\begin_layout Standard
+If you want to use Salstat, you have a simple choice.
+ You can either download it and install all the additional libraries (instructio
+ns are below) or you can pay for a download with everything contained.
+ 
+\end_layout
+
+\begin_layout Standard
+Is it fair to have a paid-for version? Ever penny earned by Salstat goes
+ back into Salstat's development.
+ It will always be a volunteer project because it's unlikely that we will
+ ever earn enough to work on Salstat alone.
+ All of us have day-jobs.
+ However, even a little money is useful to afford (for example) a new developmen
+t machine or to pay bounties for bug hunting.
+ 
+\end_layout
+
+\begin_layout Standard
+And of course, you don't have to pay anything.
+ If you wish, you can download and use Salstat for nothing.
+ It does take a bit of preparation which you will have to do yourself, but
+ it's not impossible.
 \end_layout
 
 \begin_layout Section
-Macintosh OS X
+For all platforms
+\end_layout
+
+\begin_layout Standard
+All of these libraries need to be installed.
+ All of these are freely available at the time of writing.
+ 
+\end_layout
+
+\begin_layout Itemize
+Python (this is the base language)
+\end_layout
+
+\begin_layout Itemize
+Setuptools (this helps install a lot of libraries)
+\end_layout
+
+\begin_layout Itemize
+wxPython (this runs the GUI)
+\end_layout
+
+\begin_layout Itemize
+Numpy (this handles a lot of numeric processing)
+\end_layout
+
+\begin_layout Itemize
+SciPy (this is a scientific library)
+\end_layout
+
+\begin_layout Itemize
+requests (this fetches web pages)
+\end_layout
+
+\begin_layout Itemize
+Beautiful Soup (this parses HTML code)
+\end_layout
+
+\begin_layout Itemize
+xlrd (this loads Excel worksheets)
+\end_layout
+
+\begin_layout Itemize
+xlwt (this saves Excel worksheets)
+\end_layout
+
+\begin_layout Itemize
+ezodf (this saves and loads Libre Office Calc worksheets)
+\end_layout
+
+\begin_layout Itemize
+sas7bdat (this loads SAS files)
+\end_layout
+
+\begin_layout Standard
+The Python needs to be done first because everything else needs it.
+ I'd suggest installing Setuptools next.
 \end_layout
 
 \begin_layout Section
-Linux
+Windows-specific notes
+\end_layout
+
+\begin_layout Standard
+Adding Python and Setuptools to the PATH.
+\end_layout
+
+\begin_layout Section
+Macintosh OS X-specific notes
+\end_layout
+
+\begin_layout Standard
+Co-existing with an existing Python installation
+\end_layout
+
+\begin_layout Section
+Linux-specific notes
+\end_layout
+
+\begin_layout Standard
+Compiling wxPython.
+ 
 \end_layout
 
 \begin_layout Chapter
@@ -101,24 +198,261 @@ Getting data into Salstat
 Typing in by hand
 \end_layout
 
+\begin_layout Standard
+When Salstat starts, you'll see 2 parts of the program: 
+\end_layout
+
+\begin_layout Itemize
+A data editor (with a grid, much like a spreadsheet)
+\end_layout
+
+\begin_layout Itemize
+Data output (it will have a heading like, 
+\begin_inset Quotes eld
+\end_inset
+
+Salstat Statistics
+\begin_inset Quotes erd
+\end_inset
+
+ at the top)
+\end_layout
+
+\begin_layout Standard
+The data editor works much like a spreadsheet except that it doesn't do
+ calculations or any fancy stuff.
+ Each box, or 
+\shape italic
+cell
+\shape default
+, contains one unit of data (a 
+\shape italic
+datum
+\shape default
+).
+\end_layout
+
+\begin_layout Standard
+You can enter data by just typing it in and pressing the enter of return
+ keys.
+ 
+\end_layout
+
+\begin_layout Standard
+When you perform some analysis, the output is presented in the data output
+ part of the program.
+\end_layout
+
 \begin_layout Section
 Comma-separated value (CSV) files
+\end_layout
+
+\begin_layout Standard
+Comma-Separated Value (CSV) files are plain text files in which each item
+ of data is separated (or 
+\shape italic
+delimited
+\shape default
+) by a particular value.
+ This value is probably most commonly a comma but it might be a semi-colon,
+ a space, or something else.
+ Salstat can handle a variety of delimiters and even multiple ones at once.
+ 
+\end_layout
+
+\begin_layout Standard
+To load a CSV file, either
+\end_layout
+
+\begin_layout Itemize
+Press Control-O at the same time
+\end_layout
+
+\begin_layout Itemize
+Go to the menu, click on 'File' then click on 'Open...'
+\end_layout
+
+\begin_layout Standard
+A dialog will appear and you can navigate around to file the CSV file you
+ want to analyse.
+ Click on 'Ok' and a new dialog will appear just like [link].
+\end_layout
+
+\begin_layout Standard
+[image of CSV preview dialog]
+\end_layout
+
+\begin_layout Standard
+This dialog helps you to preview the file before it's loaded.
+ Only a few lines will be shown at this stage (this is useful if you have
+ a truly enormous file because then your machine won't struggle to display
+ the lot until you actually load it properly after ther preview!)
+\end_layout
+
+\begin_layout Standard
+What you can do here is to change the various settings until the file looks
+ like it's going to load correctly.
+ 
+\end_layout
+
+\begin_layout Subsection
+Selecting delimiters
+\end_layout
+
+\begin_layout Standard
+You can select, for example, from a range of common delimiters or even enter
+ your own.
+ The comma is selected by default but you can change this if you wish or
+ even have multiple delimiters in one go if you need to.
+\end_layout
+
+\begin_layout Subsection
+Line endings
+\end_layout
+
+\begin_layout Subsection
+Headings and importing from line...
 \end_layout
 
 \begin_layout Section
 Excel and Libre Office Calc spreadsheets
 \end_layout
 
+\begin_layout Standard
+Salstat can handle Microsoft Excel and Libre Office calc spreadsheets.
+ File extensions are:
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+Excel .xls .xlsx
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+LibreOffice ods
+\end_layout
+
+\begin_layout Standard
+Loading spreadsheets is much the same as loading CSV files with a few crucial
+ differences:
+\end_layout
+
+\begin_layout Standard
+You won't select delimiters
+\end_layout
+
+\begin_layout Standard
+You will be asked to select which worksheet.
+ Spreadsheets often have multiple worksheets and Salstat can only load data
+ from one worksheet at any time.
+ .
+\end_layout
+
+\begin_layout Standard
+When you've found the spreadsheet file, open it and you will be shown a
+ preview [link]
+\end_layout
+
+\begin_layout Standard
+[image of preview]
+\end_layout
+
+\begin_layout Standard
+You can see that each worksheet produces a tab at the top of the preview
+ grid.
+ Select which one has your data on.
+ 
+\end_layout
+
 \begin_layout Section
 HTML tables
+\end_layout
+
+\begin_layout Standard
+If you load a file with the extension HTML, HTM or XML (upper or lower case),
+ Salstat will treat it like a HTML file.
+ What it does then is look for the <table> tag and load the table as data.
+ 
+\end_layout
+
+\begin_layout Standard
+Because HTML tables can contain more than one table, a preview is again
+ shown in which you can select which table has the data you want.
+ If empty tables apear, then don't worry – tables are often (mis) used for
+ layout rather than holding tabular data.
+ 
 \end_layout
 
 \begin_layout Section
 SAS
 \end_layout
 
+\begin_layout Standard
+SAS files (from version 8 onwards) are loaded straight in.
+ Just find the file and open it and the data should appear in the data editor.
+\end_layout
+
 \begin_layout Section
 From live web pages
+\end_layout
+
+\begin_layout Subsection
+Overview
+\end_layout
+
+\begin_layout Standard
+Find a web page with a table of data you want
+\end_layout
+
+\begin_layout Itemize
+Copy the page's URL
+\end_layout
+
+\begin_layout Itemize
+Go to Salstat, press Control-U or the menu 'File' -> 'Scrape from URL'
+\end_layout
+
+\begin_layout Itemize
+Paste the URL into the dialog (Control-V).
+ Click the 'Ok' button
+\end_layout
+
+\begin_layout Itemize
+A preview window shows all the tables it found with one in each tab
+\end_layout
+
+\begin_layout Itemize
+Select which one you want
+\end_layout
+
+\begin_layout Standard
+One of the best features of Salstat is the ability to grab data from web
+ pages.
+ 
+\end_layout
+
+\begin_layout Standard
+What this means is that if you see a web page with a table of data that
+ you want to analyse, you can download it directly into Salstat without
+ having to save it somewhere else first.
+ 
+\end_layout
+
+\begin_layout Standard
+Web pages can well contain multiple tables so a preview is shown of all
+ the tables Salstat found in the web page.
+ Here, you can select which table you want to load (if any!).
+\end_layout
+
+\begin_layout Standard
+We're not recommending you do this when ever you can –
+\begin_inset space ~
+\end_inset
+
+a lot of data might well be copyrighted.
+ It's your choice to judge whether you have permission to do this or not.
+ 
 \end_layout
 
 \begin_layout Chapter
