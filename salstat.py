@@ -49,6 +49,7 @@ ID_EDIT_DELETECOL = wx.NewId()
 ID_EDIT_DELETEROW = wx.NewId()
 ID_EDIT_INSERTCOL = wx.NewId()
 ID_EDIT_INSERTROW = wx.NewId()
+ID_PREF_DATA = wx.NewId()
 ID_PREF_VARIABLES = wx.NewId()
 ID_PREF_GRID = wx.NewId()
 ID_PREF_CELLS = wx.NewId()
@@ -3049,44 +3050,45 @@ class DataFrame(wx.Frame):
         chart_menu = wx.Menu()
         help_menu = wx.Menu()
         #add contents of menu
-        file_menu.Append(ID_FILE_NEW,'&New Data\tCTRL+N')
+        self.menuNew = file_menu.Append(ID_FILE_NEW,'&New Data\tCTRL+N')
         #file_menu.Append(ID_FILE_NEWOUTPUT, 'New &Output Sheet')
-        file_menu.Append(ID_FILE_OPEN, '&Open...\tCTRL+O')
-        file_menu.Append(ID_FILE_URL, "Scrape URL...\tCTRL+U")
-        file_menu.Append(ID_FILE_DB, "Open database...")
+        self.menuOpen = file_menu.Append(ID_FILE_OPEN, '&Open...\tCTRL+O')
+        self.menuScrape = file_menu.Append(ID_FILE_URL, "Scrape URL...\tCTRL+U")
+        self.menuOpenDB = file_menu.Append(ID_FILE_DB, "Open database...")
         file_menu.AppendSeparator()
-        file_menu.Append(ID_FILE_SAVE, '&Save\tCTRL+S')
-        file_menu.Append(ID_FILE_SAVEAS, 'Save &As...\tSHIFT+CTRL+S')
+        self.menuSave = file_menu.Append(ID_FILE_SAVE, '&Save\tCTRL+S')
+        self.menuSaveAs = file_menu.Append(ID_FILE_SAVEAS, 'Save &As...\tSHIFT+CTRL+S')
         file_menu.AppendSeparator()
-        file_menu.Append(ID_FILE_PRINT, '&Print...\tCTRL+P')
+        self.menuPrint = file_menu.Append(ID_FILE_PRINT, '&Print...\tCTRL+P')
         file_menu.AppendSeparator()
-        file_menu.Append(ID_FILE_EXIT, 'Q&uit\tCTRL+Q')
-        edit_menu.Append(ID_EDIT_CUT, 'Cu&t\tCTRL+X')
-        edit_menu.Append(ID_EDIT_COPY, '&Copy\tCTRL+C')
-        edit_menu.Append(ID_EDIT_PASTE, '&Paste\tCTRL+V')
-        edit_menu.Append(ID_EDIT_SELECTALL, 'Select &All\tCTRL+A')
-        edit_menu.Append(ID_EDIT_FIND, '&Find and Replace...\tCTRL+F')
+        self.menuExit = file_menu.Append(ID_FILE_EXIT, 'Q&uit\tCTRL+Q')
+        self.menuCut = edit_menu.Append(ID_EDIT_CUT, 'Cu&t\tCTRL+X')
+        self.menuCopy = edit_menu.Append(ID_EDIT_COPY, '&Copy\tCTRL+C')
+        self.menuPaste = edit_menu.Append(ID_EDIT_PASTE, '&Paste\tCTRL+V')
+        self.menuSelectAll = edit_menu.Append(ID_EDIT_SELECTALL, 'Select &All\tCTRL+A')
+        self.menuFind = edit_menu.Append(ID_EDIT_FIND, '&Find and Replace...\tCTRL+F')
         edit_menu.AppendSeparator()
-        edit_menu.Append(ID_EDIT_INSERTCOL, "Insert column(s)")
-        edit_menu.Append(ID_EDIT_INSERTROW, "Insert row(s)")
+        self.menuInsertCol = edit_menu.Append(ID_EDIT_INSERTCOL, "Insert column(s)")
+        self.menuInsertRow = edit_menu.Append(ID_EDIT_INSERTROW, "Insert row(s)")
         edit_menu.AppendSeparator()
-        edit_menu.Append(ID_EDIT_DELETECOL, 'Delete Current Column')
-        edit_menu.Append(ID_EDIT_DELETEROW, 'Delete Current Row')
-        prefs_menu.Append(ID_PREF_VARIABLES, 'Variables...')
-        prefs_menu.Append(ID_PREF_GEN, 'Preferences...')
-        analyse_menu.Append(ID_PREPARATION_DESCRIPTIVES, 'Descriptive Statistics...')
-        analyse_menu.Append(ID_PREPARATION_TRANSFORM, 'Transform Data...')
+        self.menuDeleteCol = edit_menu.Append(ID_EDIT_DELETECOL, 'Delete Current Column')
+        self.menuDeleteRow = edit_menu.Append(ID_EDIT_DELETEROW, 'Delete Current Row')
+        self.menuData = prefs_menu.Append(ID_PREF_DATA, 'View data')
+        self.menuVariables = prefs_menu.Append(ID_PREF_VARIABLES, 'View variables')
+        self.menuPrefs = prefs_menu.Append(ID_PREF_GEN, 'Preferences...')
+        self.menuDescribe = analyse_menu.Append(ID_PREPARATION_DESCRIPTIVES, 'Descriptive Statistics...')
+        self.menuTransform = analyse_menu.Append(ID_PREPARATION_TRANSFORM, 'Transform Data...')
         analyse_menu.AppendSeparator()
         #preparation_menu.Append(ID_PREPARATION_OUTLIERS, 'Check for Outliers...')
         #preparation_menu.Append(ID_PREPARATION_NORMALITY, 'Check for Normal Distribution...')
-        analyse_menu.Append(ID_ANALYSE_1COND, '&1 Condition Tests...')
-        analyse_menu.Append(ID_ANALYSE_2COND, '&2 Condition Tests...')
-        analyse_menu.Append(ID_ANALYSE_3COND, '&3+ Condition Tests...')
-        analyse_menu.Append(ID_ANALYSE_CORRELATION,'&Correlations...')
+        self.menuAnalyse1 = analyse_menu.Append(ID_ANALYSE_1COND, '&1 Condition Tests...')
+        self.menuAnalyst2 = analyse_menu.Append(ID_ANALYSE_2COND, '&2 Condition Tests...')
+        self.menuAnalyse3 = analyse_menu.Append(ID_ANALYSE_3COND, '&3+ Condition Tests...')
+        self.menuAnalyseCorr = analyse_menu.Append(ID_ANALYSE_CORRELATION,'&Correlations...')
         #analyse_menu.Append(ID_ANALYSE_2FACT, '2+ &Factor Tests...')
         analyse_menu.AppendSeparator()
         #analyse_menu.Append(ID_ANALYSE_SCRIPT, 'Scripting Window...')
-        chart_menu.Append(ID_CHART_DRAW, 'Draw a chart...')
+        self.menuChart = chart_menu.Append(ID_CHART_DRAW, 'Draw a chart...')
         # the bar chart is *not* ready yet!
         help_menu.Append(ID_HELP_WIZARD, '&What Test Should I Use...')
         help_menu.Append(ID_HELP_TOPICS, '&Topics...')
@@ -3132,16 +3134,33 @@ class DataFrame(wx.Frame):
         toolBar.AddLabelTool(87, "Meta", wx.Bitmap("icons/IconHelp.png"), shortHelp="Set variables")
         toolBar.AddLabelTool(88, "Chart", wx.Bitmap("icons/IconChart.png"), shortHelp="View the chart window")
         toolBar.AddLabelTool(90, "Help", wx.Bitmap("icons/IconHelp.png"), shortHelp="Get help")
+        self.menuData.Enable(False)
         toolBar.SetToolBitmapSize((24,24))
         # more toolbuttons are needed: New Output, Save, Print, Cut, \
         # Variables, and Wizard creates the toolbar
         toolBar.Realize()
         self.SetToolBar(toolBar)
-        #still need to define event handlers
-        #set up the datagrid
-        self.grid = SimpleGrid(self, log)
+        # Set up notebook tabs for data and variables
+        self.choice = wx.Notebook(self, -1, size=(-1,-1))
+        # set up the datagrid
+        self.grid = SimpleGrid(self.choice, log)
         self.grid.SetDefaultColSize(60, True)
         self.grid.SetRowLabelSize(40)
+        self.vargrid = SimpleGrid(self.choice, log)
+        self.vargrid.SetRowLabelSize(125)
+        self.vargrid.SetRowLabelAlignment(0, 0)
+        self.vargrid.SetRowLabelValue(0, "Variable name")
+        self.vargrid.SetRowLabelValue(1, "Variable type")
+        self.vargrid.SetRowLabelValue(2, "Decimal places")
+        self.vargrid.SetRowLabelValue(3, "Measure")
+        self.vargrid.SetRowLabelValue(4, "Missing values")
+        self.vargrid.SetRowLabelValue(5, " ")
+        self.vargrid.SetRowLabelValue(6, "Your data row 1")
+        self.vargrid.SetRowLabelValue(7, "Your data row 2")
+        self.vargrid.SetRowLabelValue(8, "Your data row 3")
+        self.vargrid.SetRowLabelValue(9, "Your data row 4")
+        self.choice.AddPage(self.grid, text="Data")
+        self.choice.AddPage(self.vargrid, text="Variables")
 
         #self.setTitle('Go')
         #win2 = TestFrame(self, 'Tests')
@@ -3173,9 +3192,10 @@ class DataFrame(wx.Frame):
         wx.EVT_MENU(self, ID_EDIT_INSERTROW, self.grid.InsertRow)
         wx.EVT_MENU(self, ID_EDIT_DELETECOL, self.grid.DeleteCurrentCol)
         wx.EVT_MENU(self, ID_EDIT_DELETEROW, self.grid.DeleteCurrentRow)
-        wx.EVT_MENU(self, ID_PREF_VARIABLES, self.GoVariablesFrame)
+        wx.EVT_MENU(self, ID_PREF_DATA, self.GoVariables)
+        wx.EVT_MENU(self, ID_PREF_VARIABLES, self.GoVariables)
         wx.EVT_MENU(self, ID_PREF_GEN, self.NewPrefs)
-        wx.EVT_TOOL(self, 85, self.GoVariablesFrame)
+        wx.EVT_TOOL(self, 85, self.GoVariables)
         wx.EVT_TOOL(self, 87, self.ToggleMetaGrid)
         wx.EVT_TOOL(self, 88, self.ToggleChartWindow)
         wx.EVT_MENU(self, ID_PREPARATION_DESCRIPTIVES, self.GoContinuousDescriptives)
@@ -3195,6 +3215,7 @@ class DataFrame(wx.Frame):
         wx.EVT_MENU(self, ID_HELP_LICENCE, self.GoHelpLicenceFrame)
         wx.EVT_MENU(self, ID_FILE_EXIT, self.EndApplication)
         wx.EVT_CLOSE(self, self.EndApplication)
+        self.choice.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.ChangedTab)
         #wx.EVT_FIND(self, ID_FIND_STRING, self.OnFind)
         #wx.EVT_FIND_NEXT(self, ID_FIND_STRING, self.on_find)
         #wx.EVT_FIND_REPLACE(self, ID_FIND_STRING, self.on_find)
@@ -3202,6 +3223,65 @@ class DataFrame(wx.Frame):
         if filename:
             frameTitle = filename
             self.grid.LoadFile(filename)
+
+    def GoVariables(self, evt):
+        # shows Variables grid
+        page = self.choice.GetSelection()
+        if page == 0:
+        	self.choice.SetSelection(1) # Should activate a notebook change event
+        else:
+        	self.choice.SetSelection(0) # ditto
+
+    def ChangedTab(self, event):
+    	# This is called when the tabs change. 
+    	# From data -> variable, repopulate variable with data
+    	# From variable -> data, save changes
+    	page = self.choice.GetSelection()
+    	if page == 0: # from data -> variables grid
+    		self.DisplayDataToVariables()
+    	else: # from variables -> data grid
+    		self.DisplayVariablesToData()
+
+    def DisplayDataToVariables(self):
+		self.menuCut.Enable(False)
+		self.menuCopy.Enable(False)
+		self.menuPaste.Enable(False)
+		self.menuSelectAll.Enable(False)
+		self.menuFind.Enable(False)
+		self.menuInsertCol.Enable(False)
+		self.menuInsertRow.Enable(False)
+		self.menuDeleteCol.Enable(False)
+		self.menuDeleteRow.Enable(False)
+		self.menuData.Enable(True)
+		self.menuVariables.Enable(False)
+		self.menuPrefs.Enable(False)
+		numcols = self.grid.GetNumberCols()
+		self.vargrid.ResizeGrid(numcols, 10, spare=0)
+		for i in range(numcols):
+			self.vargrid.SetColLabelValue(i, str(i + 1))
+			colLabel = self.grid.GetColLabelValue(i)
+			self.vargrid.SetCellValue(0, i, colLabel)
+			for j in range(4):
+				cellValue = self.grid.GetCellValue(j, i)
+				self.vargrid.SetCellValue(j+6, i, cellValue)
+
+    def DisplayVariablesToData(self):
+		self.menuCut.Enable(True)
+		self.menuCopy.Enable(True)
+		self.menuPaste.Enable(True)
+		self.menuSelectAll.Enable(True)
+		self.menuFind.Enable(True)
+		self.menuInsertCol.Enable(True)
+		self.menuInsertRow.Enable(True)
+		self.menuDeleteCol.Enable(True)
+		self.menuDeleteRow.Enable(True)
+		self.menuData.Enable(False)
+		self.menuVariables.Enable(True)
+		self.menuPrefs.Enable(True)
+		numcols = self.grid.GetNumberCols()
+		for i in range(numcols):
+			colLabel = self.vargrid.GetCellValue(0, i)
+			self.grid.SetColLabelValue(i, colLabel)
 
     def OpenFile(self, event):
         startDir = inits.get('opendir')
@@ -3548,11 +3628,6 @@ class DataFrame(wx.Frame):
         self.dlg.Bind(wx.EVT_FIND_REPLACE, self.OnFindReplace)
         self.dlg.Bind(wx.EVT_FIND_REPLACE_ALL, self.OnFindReplaceAll)
         res = self.dlg.Show(True)
-
-    def GoVariablesFrame(self, evt):
-        # shows Variables dialog
-        win = VariablesFrame(frame, -1)
-        win.Show(True)
 
     def GoContinuousDescriptives(self, evt):
         # shows the continuous descriptives dialog
