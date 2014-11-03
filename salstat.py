@@ -1131,7 +1131,7 @@ class SimpleGrid(gridlib.Grid):
             #self.DeleteCols(tl, br-tl)
             #del self.meta[col]
             for i in range(br-tl):
-                colname = self.GetColLabelValue(tl+i)
+                colname = self.GetColLabelValue(tl)
                 self.DeleteCols(tl, 1)
                 del self.meta[colname]
         self.AdjustScrollbars()
@@ -3257,7 +3257,8 @@ class DataFrame(wx.Frame):
     	# This is called when the tabs change. 
     	# From data -> variable, repopulate variable with data
     	# From variable -> data, save changes
-    	print self.grid.meta
+    	for i in self.grid.meta.keys():
+    		print self.grid.meta[i]
     	page = self.choice.GetSelection()
     	if page == 0: # from data -> variables grid
     		self.DisplayDataToVariables()
