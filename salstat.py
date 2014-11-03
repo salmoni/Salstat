@@ -3144,6 +3144,7 @@ class DataFrame(wx.Frame):
         self.choice = wx.Notebook(self, -1, size=(-1,-1))
         # set up the datagrid
         self.grid = SimpleGrid(self.choice, log)
+        self.grid.ResizeGrid(10,70)
         self.grid.SetDefaultColSize(60, True)
         self.grid.SetRowLabelSize(40)
         self.vargrid = SimpleGrid(self.choice, log)
@@ -3161,10 +3162,6 @@ class DataFrame(wx.Frame):
         self.vargrid.SetRowLabelValue(9, "Your data row 4")
         self.choice.AddPage(self.grid, text="Data")
         self.choice.AddPage(self.vargrid, text="Variables")
-
-        #self.setTitle('Go')
-        #win2 = TestFrame(self, 'Tests')
-        #win2.Show(True)
 
         #...and some events!
         wx.EVT_MENU(self, ID_FILE_NEW, self.GoClearData)
@@ -3478,6 +3475,7 @@ class DataFrame(wx.Frame):
         self.grid.Saved = True
         self.grid.named = False
         self.grid.ClearGrid()
+        self.grid.ResizeGrid(10,70)
 
     def GoNewOutputSheet(self, evt):
         #shows a new output frame
