@@ -919,7 +919,7 @@ class SimpleGrid(gridlib.Grid):
         self.wildcard = "Any File (*.*)|*.*|" \
                         "ASCII data format (*.dat)|*.dat|" \
                         "SalStat Format (*.xml)|*.xml"
-        self.BeginMeta()
+        self.colnames = 21
         #print self.meta
 
     def BeginMeta(self):
@@ -927,13 +927,14 @@ class SimpleGrid(gridlib.Grid):
         ncols = self.GetNumberCols()
         for colidx in range(ncols):
             labelObj = {}
+            colname = self.GetColLabelValue(colidx)
             varObj = {'label':labelObj}
-            varObj['name'] = self.GetColLabelValue(colidx)
+            varObj['name'] = colname
             varObj['ivdv'] = 'None set'
             varObj['align'] = 'left'
             varObj['missingvalues'] = ''
             varObj['measure'] = 'None set'
-            self.meta[colidx] = varObj
+            self.meta[colname] = varObj
 
     def RangeSelected(self, event):
         if event.Selecting():
@@ -1116,50 +1117,23 @@ class SimpleGrid(gridlib.Grid):
         if len(Cols) > 0:
             Cols.reverse()
             for col in Cols:
+                colname = self.GetColLabelValue(col)
                 self.DeleteCols(col, 1)
+                del self.meta[colname]
         elif len(TopLt) < 1 and len(BotRt) < 1:
             currentcol = self.GetGridCursorCol()
+            colname = self.GetColLabelValue(currentcol)
             self.DeleteCols(currentcol, 1)
+            del self.meta[colname]
         else:
             tl = TopLt[0][1]
             br = BotRt[0][1] + 1
-            self.DeleteCols(tl, br-tl)
-        self.AdjustScrollbars()
-        self.Saved = False
-
-    def InsertCol(self, event):
-        Cols  = self.GetSelectedCols()
-        TopLt = self.GetSelectionBlockTopLeft()
-        BotRt = self.GetSelectionBlockBottomRight()
-        if len(Cols) > 0:
-            Cols.reverse()
-            for col in Cols:
-                self.InsertCols(col, 1)
-        elif len(TopLt) < 1 and len(BotRt) < 1:
-            currentcol = self.GetGridCursorCol()
-            self.InsertCols(currentcol, 1)
-        else:
-            tl = TopLt[0][1]
-            br = BotRt[0][1] + 1
-            self.InsertCols(tl, br-tl)
-        self.AdjustScrollbars()
-        self.Saved = False
-
-    def InsertRow(self, event):
-        Rows  = self.GetSelectedRows()
-        TopLt = self.GetSelectionBlockTopLeft()
-        BotRt = self.GetSelectionBlockBottomRight()
-        if len(Rows) > 0:
-            Rows.reverse()
-            for row in Rows:
-                self.InsertRows(row, 1)
-        elif len(TopLt) < 1 and len(BotRt) < 1:
-            currentrow = self.GetGridCursorRow()
-            self.InsertRows(currentrow, 1)
-        else:
-            tl = TopLt[0][0]
-            br = BotRt[0][0] + 1
-            self.InsertRows(tl, br-tl)
+            #self.DeleteCols(tl, br-tl)
+            #del self.meta[col]
+            for i in range(br-tl):
+                colname = self.GetColLabelValue(tl+i)
+                self.DeleteCols(tl, 1)
+                del self.meta[colname]
         self.AdjustScrollbars()
         self.Saved = False
 
@@ -1181,6 +1155,52 @@ class SimpleGrid(gridlib.Grid):
         self.AdjustScrollbars()
         self.Saved = False
 
+    def InsertCol(self, event):
+        Cols  = self.GetSelectedCols()
+        TopLt = self.GetSelectionBlockTopLeft()
+        BotRt = self.GetSelectionBlockBottomRight()
+        if len(Cols) > 0: # column headers selected
+            #Cols.reverse()
+            for col in Cols:
+                self.InsertCols(col, 1)
+                label = "Var %03d"%(self.colnames)
+                self.SetColLabelValue(col, label)
+                self.colnames += 1
+        elif len(TopLt) < 1 and len(BotRt) < 1: # single cell selected
+            currentcol = self.GetGridCursorCol()
+            self.InsertCols(currentcol, 1)
+            label = "Var %03d"%(self.colnames)
+            self.SetColLabelValue(currentcol, label)
+            self.colnames += 1
+        else: # block of cells selected
+            tl = TopLt[0][1]
+            br = BotRt[0][1] + 1
+            for i in range(br-tl):
+	            self.InsertCols(tl+i, 1)
+	            label = "Var %03d"%(self.colnames)
+	            self.SetColLabelValue(tl+i, label)
+	            self.colnames += 1
+        self.AdjustScrollbars()
+        self.Saved = False
+
+    def InsertRow(self, event):
+        Rows  = self.GetSelectedRows()
+        TopLt = self.GetSelectionBlockTopLeft()
+        BotRt = self.GetSelectionBlockBottomRight()
+        if len(Rows) > 0:
+            Rows.reverse()
+            for row in Rows:
+                self.InsertRows(row, 1)
+        elif len(TopLt) < 1 and len(BotRt) < 1:
+            currentrow = self.GetGridCursorRow()
+            self.InsertRows(currentrow, 1)
+        else:
+            tl = TopLt[0][0]
+            br = BotRt[0][0] + 1
+            self.InsertRows(tl, br-tl)
+        self.AdjustScrollbars()
+        self.Saved = False
+
     def SelectAllCells(self, event):
         self.SelectAll()
 
@@ -1196,6 +1216,10 @@ class SimpleGrid(gridlib.Grid):
         num_rows_to_append = nRows + spare
         self.DeleteRows(pos=0, numRows=actual_rows)
         self.AppendRows(numRows=num_rows_to_append)
+        for i in range(self.GetNumberCols()):
+        	label = "Var %03d"%(i+1)
+        	self.SetColLabelValue(i, label)
+        self.BeginMeta()
 
     # adds columns and rows to the grid
     def AddNCells(self, numcols, numrows):
@@ -3233,6 +3257,7 @@ class DataFrame(wx.Frame):
     	# This is called when the tabs change. 
     	# From data -> variable, repopulate variable with data
     	# From variable -> data, save changes
+    	print self.grid.meta
     	page = self.choice.GetSelection()
     	if page == 0: # from data -> variables grid
     		self.DisplayDataToVariables()
