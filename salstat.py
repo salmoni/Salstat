@@ -172,7 +172,7 @@ class History:
     def ClearHistory(self):
         self.history = ''
 
-class SaveDialog2(wx.Dialog):
+class SaveDialog(wx.Dialog):
     def __init__(self, parent, id):
         wx.Dialog.__init__(self, parent, id, "Save Data?", \
                            size=(404+wind,100+wind))#, style = wx.DIALOG_MODAL)
@@ -206,52 +206,6 @@ class SaveDialog2(wx.Dialog):
 
     def GetVals(self):
         return self.ExitVal
-
-class SaveDialog(wx.Dialog):
-    def __init__(self, parent, id):
-        wx.Dialog.__init__(self, parent, id, "Save Data?", \
-                           size=(270+wind,100+wind))#, style = wx.DIALOG_MODAL)
-        icon = images.getIconIcon()
-        self.SetIcon(ico)
-        self.Choice = 'none'
-        vbox = wx.BoxSizer(wx.VERTICAL)
-        l1 = wx.StaticText(self, -1, 'You have unsaved Data')
-        l2 = wx.StaticText(self, -1, 'Do you wish to save it?')
-        vbox.Add(l1,1, wx.ALIGN_CENTER)
-        vbox.Add(l2,1, wx.ALIGN_CENTER)
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
-        saveButton = wx.Button(self, 331, "Save...", size=(BWidth, BHeight))
-        discardButton = wx.Button(self, 332, "Don't save", size=(BWidth, BHeight))
-        CancelButton = wx.Button(self, 333, "Cancel", size=(BWidth, BHeight))
-        hbox.Add(saveButton, 0, wx.ALL, 5)
-        hbox.Add(discardButton, 0, wx.ALL, 5)
-        hbox.Add(CancelButton, 0, wx.ALL, 5)
-        vbox.Add(hbox,1)
-        self.SetAutoLayout(True)
-        self.SetSizer(vbox)
-        self.Layout()
-        self.res = ""
-        wx.EVT_BUTTON(self, 331, self.SaveData)
-        wx.EVT_BUTTON(self, 332, self.DiscardData)
-        wx.EVT_BUTTON(self, 333, self.CancelDialog)
-
-    def SaveData(self, event):
-        frame.grid.Saved = True
-        frame.grid.SaveAsDataASCII(self) # will it be ASCII or XML?
-        output.Close(True)
-        frame.Close(True)
-        self.res = "Saved"
-        self.Close(True)
-
-    def DiscardData(self, event):
-        output.Close(True)
-        frame.Close(True)
-        self.res = "Discard"
-        self.Close(True)
-
-    def CancelDialog(self, event):
-        self.res = "Cancel"
-        self.Close(True)
 
 ################################################
 # wx.FileDialog to retrieve file name. Needed before we can do anything
@@ -1120,53 +1074,6 @@ class AboutFrame(wx.Frame):
         self.Destroy()
 
 #---------------------------------------------------------------------------
-# user can change settings like variable names, decimal places, missing no.s
-# using a SimpleGrid Need event handler - when new name entered, must be
-#checked against others so no match each other
-
-class VariablesFrame(wx.Dialog):
-    def __init__(self,parent,id):
-        wx.Dialog.__init__(self, parent,id,"SalStat - Variables", \
-                                    size=(500,185+wind))
-        #set icon for frame (needs x-platform separator!
-        self.SetIcon(ico)
-        okaybutton = wx.Button(self, 2001, "Okay",wx.Point(10,170),\
-                                    wx.Size(BWidth, BHeight))
-        cancelbutton = wx.Button(self, 2002, "Cancel",wx.Point(100,170),\
-                                    wx.Size(BWidth, BHeight))
-        self.vargrid = gridlib.Grid(self,-1,size=(480,130),pos=(10,10))
-        self.vargrid.SetRowLabelSize(120)
-        self.vargrid.SetDefaultRowSize(27, True)
-        maxcols = frame.grid.GetNumberCols()
-        self.vargrid.CreateGrid(3,maxcols)
-        for i in range(maxcols):
-            oldlabel = frame.grid.GetColLabelValue(i)
-            self.vargrid.SetCellValue(0, i, oldlabel)
-        self.vargrid.SetRowLabelValue(0,"Variable Name")
-        self.vargrid.SetRowLabelValue(1,"Decimal Places")
-        self.vargrid.SetRowLabelValue(2,"Missing Value")
-        wx.EVT_BUTTON(self, 2001, self.OnOkayVariables)
-        wx.EVT_BUTTON(self, 2002, self.OnCloseVariables)
-
-    # this method needs to work out the other variables too
-    def OnOkayVariables(self, event):
-        for i in range(frame.grid.GetNumberCols()-1):
-            newlabel = self.vargrid.GetCellValue(0, i)
-            if (newlabel != ''):
-                frame.grid.SetColLabelValue(i, newlabel)
-            newsig = self.vargrid.GetCellValue(1, i)
-            if (newsig != ''):
-                try:
-                    frame.grid.SetColFormatFloat(i, -1, int(newsig))
-                except ZeroDivisionError:
-                    pass
-        frame.grid.ForceRefresh()
-        self.Close(True)
-
-    def OnCloseVariables(self, event):
-        self.Close(True)
-
-#---------------------------------------------------------------------------
 # base html window class
 class MyHtmlWindow(htmllib.HtmlWindow):
     def __init__(self, parent, id):
@@ -1203,11 +1110,6 @@ class MyHtmlWindow(htmllib.HtmlWindow):
             fout.close()
             inits.update({'savedir': dlg.GetDirectory()})
             self.Saved = True
-
-    def PrintHtmlPage(self, event):
-        dlg = wx.PrintDialog(self)
-        if dlg.ShowModal() == wx.ID_OK:
-            null
 
     def GoBack(self, event):
         if self.HistoryCanBack():
@@ -1438,9 +1340,6 @@ class OneConditionTestFrame(wx.Dialog):
         # Can the wx.TextCtrl allow only numbers to be entered?
         #wx.EVT_TEXT(self.UserMean, 107, self.EnteredText) # doesn't work on Windows!
 
-    def EnteredText(self, event):
-        self.okaybutton.Enable(True)
-
     def OnOkayButton(self, event):
         colNum = self.ColBox.GetSelection()
         name = frame.grid.GetColLabelValue(colNum)
@@ -1620,15 +1519,6 @@ class TwoConditionTestFrame(wx.Dialog):
         else:
             pass
             # enable all tests in the listbox
-
-    def ChangeCol2(self, event):
-        # check that len of 2 cols is equal, if not disable choices of test
-        x1 = len(frame.grid.CleanData(self.ColBox1.GetSelection()))
-        x2 = len(frame.grid.CleanData(self.ColBox2.GetSelection()))
-        if (x1 != x2):
-            pass
-        else:
-            pass
 
     def OnOkayButton(self, event):
         x1 = self.ColBox1.GetSelection()
@@ -2701,18 +2591,6 @@ class DataFrame(wx.Frame):
         path, self.filename = os.path.split(filename)
         self.SetTitle(self.filename)
 
-    def ImportSSWindow(self, event):
-        # TODO Check that data have been saved first!
-        res = ImportSS.ImportSS(self, '/Users/alansalmoni')
-        self.FillGrid(res)
-
-    def ImportCSVWindow(self, event):
-        # TODO Check that data have been saved first!
-        col = self.grid.GetGridCursorCol()
-        val = self.grid.GetVariableData(col, vtype='float')
-        print val
-        print AllRoutines.Mean(val)
-
     def ScrapeURL(self, event):
         # user enters URL
         dlg = wx.TextEntryDialog(
@@ -2771,9 +2649,6 @@ class DataFrame(wx.Frame):
         #print frame.chartObject.page
         #frame.preview.SetPage(frame.chartObject.chartLine,HOME)
 
-    def ReceiveChart(self, chartString):
-        output.Addhtml(chartString)
-
     def NewPrefs(self, event):
         PFrame = PrefsFrame.PFrame(None, -1, self.grid, inits['savedir'])
         PWin = PFrame.ShowModal()
@@ -2806,16 +2681,6 @@ class DataFrame(wx.Frame):
         self.metaGrid = MetaGrid.MetaFrame(self)
         self.metaGrid.Show(True)
 
-    def MacOpenFile(self, filename):
-        # overrides method to load file on OSX
-        print filename
-
-    def MacReopenApp(self):
-        self.GetTopWindow().Raise()
-
-    def setTitle(self, title):
-        self.SetTitle(title)
-
     def GoClearData(self, evt):
         #shows a new data entry frame
         self.grid.filename = "Untitled"
@@ -2823,11 +2688,6 @@ class DataFrame(wx.Frame):
         self.grid.named = False
         self.grid.ClearGrid()
         self.grid.ResizeGrid(10,70)
-
-    def GoNewOutputSheet(self, evt):
-        #shows a new output frame
-        SheetWin = OutputSheet(frame, -1)
-        SheetWin.Show(True)
 
     def CheckMatch(self, val, fstring):
         if fstring in val:
@@ -3056,10 +2916,6 @@ class DataFrame(wx.Frame):
         else:
             self.SetStatusText('You need 2 data columns for that!')
 
-    def GoMFanovaFrame(self, event):
-        win = MFanovaFrame(frame, -1)
-        win.Show(True)
-
     def GoScriptWindow(self, event):
         # Shows the scripting window
         win = ScriptFrame(frame, -1)
@@ -3089,7 +2945,7 @@ class DataFrame(wx.Frame):
         if self.grid.Saved:
             self.FinalExit()
         else:
-            dlg = SaveDialog2(self, -1)
+            dlg = SaveDialog(self, -1)
             val = dlg.ShowModal()
             #val = dlg.ShowWindowModal()
             if val == 3:
@@ -3202,394 +3058,6 @@ def DoThreeConditionTests(grid, result):
         quote = "<b>Quote:</b> <i>F</i>(%d, %d)=%.3f, <i>p</i>=%1.4f<br />"%(quotevars)
         ln = '<br />'+quote+'<br />'+tabler.tableANOVABetween(result)
         output.Addhtml(ln)
-
-def DoOneSampleTTest(col1, usermean, tail = 2):
-    """This routine performs a 1 sample t-test using the given data and
-    a specified user mean."""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for column 1\n'
-    TBase = salstat_stats.OneSampleTests(col1, umean)
-    TBase.OneSampleTTest(usermean)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.t, TBase.df, TBase.prob
-    else:
-        return Error
-
-def DoOneSampleSignTest(col1, usermean, tail = 2):
-    """This routine performs a 1 sample sign-test using the given data and
-    a specified user mean."""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for column 1\n'
-    TBase = salstat_stats.OneSampleTests(col1, umean)
-    TBase.OneSampleSignTest(usermean)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.nplus, TBase.nminus, TBase.z, TBase.prob
-    else:
-        return Error
-
-def DoChiSquareVariance(col1, usermean, tail = 2):
-    """This routine performs a chi square for variance ratio test using 
-    the given data and a specified user mean."""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for column 1\n'
-    TBase = salstat_stats.OneSampleTests(col1, umean)
-    TBase.ChiSquareVariance(usermean)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.chisquare, TBase.df, TBase.prob
-    else:
-        return Error
-
-#Two sample tests:
-def DoPairedTTest(col1, col2, tail = 2):
-    """This routine performs a paired t-test using the data contained in
-    col1 and col2 on the grid, with the passed alpha value which defaults
-    to 0.05 (5%). If col1 and col2 are lists, then the data contained in the
-    lists are used instead. There is a modicum of bounds checking on the
-    passed variables to ensure that they are the right types (and bounds)"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for column 1\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col2)
-    elif (type(col2) != list):
-        error = error +'Invalid information for column 2\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.TTestPaired(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.t, TBase.df, TBase.prob
-    else:
-        return Error
-
-def DoUnpairedTTest(col1, col2, tail = 2):
-    """This function performs an unpaired t-test on the data passed. If the
-    passed parameters are a list, then that is used as the data, otherwise
-    if the parameters are an integer, then that integers columns data are
-    retrieved."""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.TTestUnpaired()
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.t, TBase.df, TBase.prob
-    else:
-        return error
-
-def DoPearsonsCorrelation(col1, col2, tail = 2):
-    """This function performs a Pearsons correlation upon 2 data sets."""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.PearsonsCorrelation(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.t, TBase.r, TBase.df, TBase.prob
-    else:
-        return error
-
-def DoFTest(col1, col2, uservar, tail = 2):
-    """This performs an F-test for variance ratios upon 2 data sets. Passed
-    in addition to the datasets is the user variance"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.TwoSampleSignTextCorrelation(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.t, TBase.r, TBase.df, TBase.prob
-    else:
-        return error
-
-def DoSignTest(col1, col2, tail = 2):
-    """This function performs a 2-sample sign test on 2 data sets"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.TwoSampleSignTextCorrelation(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.z, TBase.prob
-    else:
-        return error
-
-def DoKendallsCorrelation(col1, col2, tail = 2):
-    """This function performs a Kendalls tau correlation"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.KendalssTau(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.tau, TBase.z, TBase.prob
-    else:
-        return error
-
-def DoKSTest(col1, col2, tail = 2):
-    """This function performs a Komogorov-Smirnov test on 2 data sets"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.KolmogorovSmirnov(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.d, TBase.prob
-    else:
-        return error
-
-def DoSpearmansCorrelation(col1, col2, tail = 2):
-    """This function performs a Spearmans correlation on 2 data sets"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.SpearmansCorrelation(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.rho, TBase.t, TBase.df, TBase.prob
-    else:
-        return error
-
-def DoRankSums(col1, col2, tail = 2):
-    """This function performs a Wilcoxon rank sums test on 2 data sets"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.RankSums(col1, col2)
-    TBase.TwoSampleSignTextCorrelation(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.z, TBase.prob
-    else:
-        return error
-
-def DoSignedRanks(col1, col2, tail = 2):
-    """This function performs a Wilcoxon signed ranks test on 2 data sets"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.SignedRanks(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.z, TBase.wt, TBase.prob
-    else:
-        return error
-
-def DoMannWhitneyTest(col1, col2, tail = 2):
-    """This function performs a Mann-Whitney U test on 2 data sets"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.MannWhitneyU(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.bigu, TBase.smallu, TBase.z, TBase.prob
-    else:
-        return error
-
-def DoLinearRegression(col1, col2, tail = 2):
-    """This function performs a 2-sample sign test on 2 data sets"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.LinearRegression(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.df, TBase.r, TBase.slope, TBase.intercept, \
-                                    TBase.sterrest, TBase.prob
-    else:
-        return error
-
-def DoPairedPermutation(col1, col2, tail = 2):
-    """This function performs a 2-sample sign test on 2 data sets"""
-    error = ""
-    if (type(col1) == int):
-        col1 = frame.grid.CleanData(col1)
-    elif (type(col1) != list):
-        error = error + 'Invalid information for first dataset\n'
-    if (type(col2) == int):
-        col2 = frame.grid.CleanData(col1)
-    elif (type(col2) != list):
-        error = error + 'Invalid information for second dataset\n'
-    TBase = salstat_stats.TwoSampleTests(col1, col2)
-    TBase.PairedPermutation(col1, col2)
-    if (tail == 1):
-        TBase.prob = TBase.prob / 2
-    if (tail != 1) and (tail != 2):
-        error = error + "Invalid information for the tail"
-    if (error == ""):
-        return TBase.nperm, TBase.prob
-    else:
-        return error
-
-# Three+ sample tests:
-
-# Probability values
-def GetChiProb(chisq, df):
-    """This function takes the chi square value and the df and returns the
-    p-value"""
-    return salstat_stats.chisqprob(chisq, df)
-
-def GetInverseChiProb(prob, df):
-    """This function returns a chi value that matches the probability and
-    df passed"""
-    return salstat_stats.inversechi(prob, df)
-
-def GetZProb(z):
-    """This function returns the probability of z"""
-    return salstat_stats.zprob(z)
-
-def GetKSProb(ks):
-    """This function returns the probability of a Kolmogorov-Smirnov test
-    being significant"""
-    return salstat_stats.ksprob(ks)
-
-def GetTProb(t, df):
-    """Gets the p-value for the passed t statistic and df"""
-    return salstat_stats.betai(0.5*self.df,0.5,float(self.df)/(self.df+ \
-                                    self.t*self.t))
-
-def GetFProb(f, df1, df2):
-    """This returns the p-value of the F-ratio and the 2 df's passed"""
-    return salstat_stats.fprob(df1, df2, f)
-
-def GetInverseFProb(prob, df1, df2):
-    """Returns the f-ratio of the given p-value and df's"""
-    return salstat_stats.inversef(prob, df1, df2)
 
 #---------------------------------------------------------------------------
 # Creating HTML document
