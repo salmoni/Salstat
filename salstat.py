@@ -2649,6 +2649,9 @@ class DataFrame(wx.Frame):
         #print frame.chartObject.page
         #frame.preview.SetPage(frame.chartObject.chartLine,HOME)
 
+    def ReceiveChart(self, chartString):
+        output.Addhtml(chartString)
+
     def NewPrefs(self, event):
         PFrame = PrefsFrame.PFrame(None, -1, self.grid, inits['savedir'])
         PWin = PFrame.ShowModal()
