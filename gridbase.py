@@ -1,7 +1,8 @@
 import wx
 from wx.stc import *
 import wx.grid as gridlib
-
+import numpy
+import numpy.ma as ma
 
 #---------------------------------------------------------------------------
 # class for variables grid
@@ -54,7 +55,6 @@ class VariablesGrid(gridlib.Grid):
             newname = self.GetCellValue(0, col)
             if newname not in self.grid.meta.keys(): # unused name
                 obj = self.grid.meta[oldname]
-                print obj
                 self.grid.AddNewMeta(newname, obj)
                 del self.grid.meta[oldname]
             else:
@@ -671,7 +671,7 @@ class DataGrid(gridlib.Grid):
         It's inefficient and requires 2 passes but it should be reliable.
         """
         maxRow = self.GetNumberRows()
-        meta = self.meta[col]
+        meta = self.meta[self.GetColLabelValue(col)]
         missing = meta["missingvalues"]
         if col > self.GetNumberCols():
             return None
