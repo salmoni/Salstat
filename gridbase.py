@@ -3,10 +3,10 @@ from wx.stc import *
 import wx.grid as gridlib
 import numpy
 import numpy.ma as ma
+import string, os
 
 #---------------------------------------------------------------------------
 # class for variables grid
-
 
 class VariablesGrid(gridlib.Grid):
     def __init__(self, parent, grid, cols=None):
@@ -99,11 +99,9 @@ class DataGrid(gridlib.Grid):
         self.filename = "Untitled"
         self.moveTo = None
         self.SetGridLineColour(wx.LIGHT_GREY)
-        if inits:
-            self.CreateGrid(int(inits.get("gridcellsy")), \
-                                    int(inits.get("gridcellsx")))
-        else:
-            self.CreateGrid(20, 80)
+        self.inits = inits
+        self.CreateGrid(int(self.inits.get("gridcellsy")), \
+                                    int(self.inits.get("gridcellsx")))
         self.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_BOTTOM)
         #for i in range(20):
             #self.SetColFormatFloat(i, 8, 4)
@@ -497,12 +495,13 @@ class DataGrid(gridlib.Grid):
         return RowsUsed
 
     def SaveAsDataASCII(self, event):
-        default = inits.get('savedir')
+        default = self.inits.get('savedir')
         dlg = wx.FileDialog(self, "Save Data File", default,"",\
                                     "CSV text (*.csv)|*.csv|Plain text (*.txt)|*.txt", wx.SAVE)
+        ico = wx.Icon('icons/PurpleIcon05_32.png',wx.BITMAP_TYPE_PNG)
         dlg.SetIcon(ico)
         if dlg.ShowModal() == wx.ID_OK:
-            inits.update({'savedir': dlg.GetDirectory()})
+            self.inits.update({'savedir': dlg.GetDirectory()})
             filename = dlg.GetPath()
             fout = open(filename, "w")
             cols,waste = self.GetUsedCols()
@@ -532,11 +531,11 @@ class DataGrid(gridlib.Grid):
             self.Saved = True
             self.named = True
             path, self.filename = os.path.split(filename)
-            self.parent.SetTitle(self.filename)
+            #self.parent.SetTitle(self.filename)
 
     def SaveDataASCII(self, event):
         if self.named:
-            defaultDir = inits.get('savedir')
+            defaultDir = self.inits.get('savedir')
             fout = open(defaultDir + os.sep + self.filename, "w")
             cols, waste = self.GetUsedCols()
             rows = self.GetUsedRows()
@@ -623,12 +622,12 @@ class DataGrid(gridlib.Grid):
             self.Thaw()
 
     def LoadNumericData(self, event):
-        default = inits.get('opendir')
+        default = self.inits.get('opendir')
         dlg = wx.FileDialog(self, "Load Data File", default,"","*.\
                                     dat|*.*", wx.OPEN)
         dlg.SetIcon(ico)
         if dlg.ShowModal() == wx.ID_OK:
-            inits.update({'opendir': dlg.GetDirectory()})
+            self.inits.update({'opendir': dlg.GetDirectory()})
             filename = dlg.GetPath()
             self.ClearGrid()
             # exception handler here!
