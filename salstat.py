@@ -23,6 +23,7 @@ import salstat_stats, images, tabler, ChartWindow
 import DescriptivesFrame, PrefsFrame
 import MetaGrid, AllRoutines, ImportCSV, ImportSS, ImportHTML, Inferentials
 import TestThreeConditions
+import exportSQLite
 import numpy, math
 import numpy.ma as ma
 
@@ -2375,6 +2376,7 @@ class DataFrame(wx.Frame):
         PasteIcon = images.getPasteBitmap()
         PrefsIcon = images.getPreferencesBitmap()
         HelpIcon = images.getHelpBitmap()
+        TestIcon = images.getNewBitmap()
         #create toolbar (nothing to add yet!)
         toolBar = self.CreateToolBar(wx.TB_HORIZONTAL|wx.NO_BORDER| \
                                     wx.TB_FLAT|wx.TB_TEXT)
@@ -2390,6 +2392,7 @@ class DataFrame(wx.Frame):
         toolBar.AddLabelTool(87, "Meta", wx.Bitmap("icons/IconHelp.png"), shortHelp="Set variables")
         toolBar.AddLabelTool(88, "Chart", wx.Bitmap("icons/IconChart.png"), shortHelp="View the chart window")
         toolBar.AddLabelTool(90, "Help", wx.Bitmap("icons/IconHelp.png"), shortHelp="Get help")
+        toolBar.AddLabelTool(91, "TEST", wx.Bitmap("icons/IconNew.png"), shortHelp="Testing")
         self.menuData.Enable(False)
         toolBar.SetToolBitmapSize((24,24))
         # more toolbuttons are needed: New Output, Save, Print, Cut, \
@@ -2403,6 +2406,7 @@ class DataFrame(wx.Frame):
         #self.grid.ResizeGrid(10,70)
         self.grid.SetDefaultColSize(60, True)
         self.grid.SetRowLabelSize(40)
+        #self.grid.inits = inits
         numcols = self.grid.GetNumberCols()
         self.vargrid = gridbase.VariablesGrid(self.choice, self.grid, numcols)
         # Add both grids to the notebook control
@@ -2458,6 +2462,7 @@ class DataFrame(wx.Frame):
         wx.EVT_MENU(self, ID_HELP_LICENCE, self.GoHelpLicenceFrame)
         wx.EVT_MENU(self, ID_FILE_EXIT, self.EndApplication)
         wx.EVT_CLOSE(self, self.EndApplication)
+        wx.EVT_TOOL(self, 91, self.Test)
         self.choice.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.ChangedTab)
         #wx.EVT_FIND(self, ID_FIND_STRING, self.OnFind)
         #wx.EVT_FIND_NEXT(self, ID_FIND_STRING, self.on_find)
@@ -2466,6 +2471,9 @@ class DataFrame(wx.Frame):
         if filename:
             frameTitle = filename
             self.grid.LoadFile(filename)
+
+    def Test(self, event):
+        exportSQLite.exporttoSQLiteTEST(self.grid)
 
     def GoVariables(self, evt):
         # shows Variables grid
@@ -2679,6 +2687,11 @@ class DataFrame(wx.Frame):
         else:
             pass
         PFrame.Destroy()
+
+    def GoNewOutputSheet(self, evt):
+        #shows a new output frame
+        SheetWin = OutputSheet(frame, -1)
+        SheetWin.Show(True)
 
     def ToggleMetaGrid(self, event):
         self.metaGrid = MetaGrid.MetaFrame(self)
