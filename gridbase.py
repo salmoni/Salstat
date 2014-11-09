@@ -115,14 +115,15 @@ class DataGrid(gridlib.Grid):
 
     def AddNewMeta(self, colname, obj=None):
 		varObj = {'name': colname}
-		varObj['label'] = colname
 		if obj:
+		    varObj['label'] = obj['label']
 		    varObj['align'] = obj['align']
 		    varObj['measure'] = obj['measure']
 		    varObj['ivdv'] = obj['ivdv']
 		    varObj['decplaces'] = obj['decplaces']
 		    varObj['missingvalues'] = obj['missingvalues']
 		else:
+		    varObj['label'] = colname
 		    varObj['align'] = 'left'
 		    varObj['measure'] = 'None set'
 		    varObj['ivdv'] = 'None set'
@@ -735,7 +736,8 @@ class DataGrid(gridlib.Grid):
         for i in range(self.GetNumberRows()):
             datapoint = self.GetCellValue(i, col)
             if datapoint != '':
-                if datapoint != missingvalue:
+                label = self.GetColLabelValue(i)
+                if datapoint != self.meta[label]['missingvalues']:
                     if datapoint.isspace() == False:
                         indata.append(datapoint)
                 else:
