@@ -22,6 +22,7 @@ import urlparse, urllib, requests
 import salstat_stats, images, tabler, ChartWindow
 import DescriptivesFrame, PrefsFrame
 import MetaGrid, AllRoutines, ImportCSV, ImportSS, ImportHTML, Inferentials
+import sas7bdat as sas
 import TestThreeConditions
 import exportSQLite
 import numpy, math
@@ -2473,7 +2474,7 @@ class DataFrame(wx.Frame):
             self.grid.LoadFile(filename)
 
     def Test(self, event):
-        exportSQLite.exporttoSQLiteTEST(self.grid)
+        exportSQLite.importfromSQLite("/Users/alan/Projects/SQLitefile.sqlite",self.grid, output)
 
     def GoVariables(self, evt):
         # shows Variables grid
@@ -2537,6 +2538,7 @@ class DataFrame(wx.Frame):
         xmls    = ['.xml']
         sass    = ['.sas7bdat']
         spsss   = ['.sav']
+        sqlites = ['.sqlite','.sqlite3','.db','.salstat']
         if extension in spreads: # file extension is for spreadsheet
             dlg = ImportSS.ImportDialog(FileName)
         elif extension in csvs: # csv / txt format
@@ -2566,17 +2568,21 @@ class DataFrame(wx.Frame):
         elif extension == '.salstat': # Salsat native
             dlg = None
         elif extension in sass: # SAS 8 and later
-            import sas7bdat as sas
             allData = sas.SAS7BDAT(FileName.fileName)
+            numcols = allData.header.colcount
+            numrows = allData.header.rowcount
+            self.grid.ResizeGrid(numcols, numrows)
             gridData = []
             for line in allData.readData():
                 lineStr = [str(idx) for idx in line]
                 gridData.append(lineStr)
             variableNames = gridData.pop(0)
             dlg = None
-            self.FillGrid((FileName.fileName, variableNames, gridData))
+            self.FillGrid((FileName.fileName, variableNames, gridData), allData.header)
         elif extension in spsss: # SPSS
             dlg = None
+        elif extension in sqlites: # sqlite database
+            exportSQLite.importfromSQLite(FileName.fileName, self.grid, output)
         else:
             dlg = None
         if dlg:
@@ -2624,7 +2630,7 @@ class DataFrame(wx.Frame):
                 self.grid.Saved = False
                 self.grid.named = True
 
-    def FillGrid(self, res):
+    def FillGrid(self, res, meta=None):
         if res != None:
             fname = res[0]
             varnames = res[1]
@@ -2646,6 +2652,17 @@ class DataFrame(wx.Frame):
                 for idxCol, colValue in enumerate(dataRow):
                     if colValue.isspace() == False:
                         self.grid.SetCellValue(idxRow, idxCol, colValue)
+            #self.grid.meta = {}
+            if meta:
+                for index, col in enumerate(meta.cols):
+                    print col.name
+                    obj = {'name': col.name, 'label': col.label[1] }
+                    obj['align'] = "Left"
+                    obj['measure'] = 'None set'
+                    obj['ivdv'] = 'None set'
+                    obj['decplaces'] = None
+                    obj['missingvalues'] = ''
+                    self.grid.AddNewMeta(col.name, obj)
         else:
             pass
 
