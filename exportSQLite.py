@@ -55,7 +55,6 @@ def importfromSQLite(filename, datagrid, output):
 
 def exporttoSQLite(filename, datagrid, output=None):
     # first, open the SQLite file (filename should include the full path)
-    
     # open connection to database
     try:
         conn = sqlite3.connect(filename)
