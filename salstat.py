@@ -39,6 +39,7 @@ ID_FILE_URL = wx.NewId()
 ID_FILE_DB = wx.NewId()
 ID_FILE_SAVE = wx.NewId()
 ID_FILE_SAVEAS = wx.NewId()
+ID_FILE_EXPORT = wx.NewId()
 ID_FILE_PRINT = wx.NewId()
 ID_FILE_EXIT = wx.NewId()
 ID_EDIT_UNDO = wx.NewId()
@@ -2316,6 +2317,7 @@ class DataFrame(wx.Frame):
         file_menu.AppendSeparator()
         self.menuSave = file_menu.Append(ID_FILE_SAVE, '&Save\tCTRL+S')
         self.menuSaveAs = file_menu.Append(ID_FILE_SAVEAS, 'Save &As...\tSHIFT+CTRL+S')
+        self.menuExport = file_menu.Append(ID_FILE_EXPORT, "Export...")
         file_menu.AppendSeparator()
         self.menuPrint = file_menu.Append(ID_FILE_PRINT, '&Print...\tCTRL+P')
         file_menu.AppendSeparator()
@@ -2420,10 +2422,11 @@ class DataFrame(wx.Frame):
         wx.EVT_TOOL(self, ID_FILE_URL, self.ScrapeURL)
         #wx.EVT_MENU(self, ID_FILE_NEWOUTPUT, self.GoNewOutputSheet)
         # unsure if I want this - maybe restrict user to just one?
-        wx.EVT_MENU(self, ID_FILE_SAVE, self.grid.SaveDataASCII)
-        wx.EVT_TOOL(self, 30, self.grid.SaveDataASCII)
-        wx.EVT_MENU(self, ID_FILE_SAVEAS, self.grid.SaveAsDataASCII)
-        wx.EVT_TOOL(self, 40, self.grid.SaveAsDataASCII)
+        wx.EVT_MENU(self, ID_FILE_SAVE, self.SaveData)
+        wx.EVT_TOOL(self, 30, self.SaveData)
+        wx.EVT_MENU(self, ID_FILE_SAVEAS, self.SaveAsData)
+        wx.EVT_TOOL(self, 40, self.SaveAsData)
+        wx.EVT_MENU(self, ID_FILE_EXPORT, self.grid.SaveAsDataASCII)
         wx.EVT_MENU(self, ID_FILE_OPEN, self.OpenFile)
         #EVT_MENU(self, ID_FILE_OPEN, self.grid.LoadNumericData)
         wx.EVT_TOOL(self, 20, self.OpenFile)
@@ -2526,6 +2529,41 @@ class DataFrame(wx.Frame):
 		self.menuPrefs.Enable(True)
 		self.vargrid.BackToData()
 
+    def SaveData(self, event):
+        if self.grid.named:
+            defaultDir = self.inits.get('savedir')
+            fout = open(defaultDir + os.sep + self.filename, "w")
+            cols, waste = self.GetUsedCols()
+            rows = self.GetUsedRows()
+            maxrows = max(rows) + 1
+            for i in range(maxrows):
+                datapoint=[]
+                for j in range(len(cols)):
+                    try:
+                        datapoint.append(self.GetCellValue(i, j))
+                    except:
+                        datapoint.append("0")
+                line = string.join(datapoint)
+                line = ",".join(datapoint)
+                fout.write(line)
+                fout.write('\n')
+            fout.close
+            self.Saved = True
+        else:
+            self.SaveAsData(None)
+
+    def SaveAsData(self, event):
+        default = inits.get('savedir')
+        dlg = wx.FileDialog(self, "Save Data File", default,"",\
+                                    "Salstat (*.salstat)|*.salstat", wx.SAVE)
+        ico = wx.Icon('icons/PurpleIcon05_32.png',wx.BITMAP_TYPE_PNG)
+        dlg.SetIcon(ico)
+        if dlg.ShowModal() == wx.ID_OK:
+            inits.update({'savedir': dlg.GetDirectory()})
+            filename = dlg.GetPath()
+            print filename
+            exportSQLite.exporttoSQLite(filename, self.grid, output)
+
     def OpenFile(self, event):
         startDir = inits.get('opendir')
         FileName = GetFilename(frame, startDir)
@@ -2565,8 +2603,6 @@ class DataFrame(wx.Frame):
             self.FillGrid((FileName.fileName, variableNames, gridData))
         elif extension in xmls: # xml - unsure how to handle this
             dlg = None
-        elif extension == '.salstat': # Salsat native
-            dlg = None
         elif extension in sass: # SAS 8 and later
             allData = sas.SAS7BDAT(FileName.fileName)
             numcols = allData.header.colcount
@@ -2582,6 +2618,7 @@ class DataFrame(wx.Frame):
         elif extension in spsss: # SPSS
             dlg = None
         elif extension in sqlites: # sqlite database
+            dlg = None
             exportSQLite.importfromSQLite(FileName.fileName, self.grid, output)
         else:
             dlg = None
