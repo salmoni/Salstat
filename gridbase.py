@@ -49,8 +49,10 @@ class VariablesGrid(gridlib.Grid):
 
     def CellChanged(self, event):
         row = event.GetRow()
-        if row == 0:
-            col = event.GetCol()
+        col = event.GetCol()
+        val = self.GetCellValue(row, col).lower()
+        label = self.grid.GetColLabelValue(col)
+        if row == 0: # change variable name
             oldname = event.GetString()
             newname = self.GetCellValue(0, col)
             if newname not in self.grid.meta.keys(): # unused name
@@ -59,6 +61,24 @@ class VariablesGrid(gridlib.Grid):
                 del self.grid.meta[oldname]
             else:
                 self.SetCellValue(0, col, oldname)
+        elif row == 1: # changed column text alignment
+            if val == 'left':
+                cellattr = gridlib.GridCellAttr()
+                cellattr.SetAlignment(wx.ALIGN_LEFT, wx.ALIGN_CENTRE)
+                self.grid.SetColAttr(col, cellattr)
+                self.grid.meta[label]['align'] = "Left"
+            if val == 'right':
+                cellattr = gridlib.GridCellAttr()
+                cellattr.SetAlignment(wx.ALIGN_RIGHT, wx.ALIGN_CENTRE)
+                self.grid.SetColAttr(col, cellattr)
+                self.grid.meta[label]['align'] = "Right"
+            if val == 'centre' or val == 'center':
+                cellattr = gridlib.GridCellAttr()
+                cellattr.SetAlignment(wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
+                self.grid.SetColAttr(col, cellattr)
+                self.grid.meta[label]['align'] = "Centre"
+        elif row == 5: # decimal places
+            pass
 
     def ResetGrid(self):
         # called when the user clicks to view the tab. This updates the view
