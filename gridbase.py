@@ -737,15 +737,17 @@ class DataGrid(gridlib.Grid):
     def GetColumnData(self, col):
         indata = []
         self.missing = 0
+        label = self.GetColLabelValue(col)
+        missingvalues = self.meta[label]['missingvalues']
         for i in range(self.GetNumberRows()):
             datapoint = self.GetCellValue(i, col)
             if (datapoint != '') and (datapoint != '.'):
                 try:
                     value = float(datapoint)
-                    if (value != missingvalue):
-                        indata.append(value)
-                    else:
+                    if (str(value) in missingvalues):
                         self.missing = self.missing + 1
+                    else:
+                        indata.append(value)
                 except ValueError:
                     pass
         return indata
@@ -756,7 +758,7 @@ class DataGrid(gridlib.Grid):
         for i in range(self.GetNumberRows()):
             datapoint = self.GetCellValue(i, col)
             if datapoint != '':
-                label = self.GetColLabelValue(i)
+                label = self.GetColLabelValue(col)
                 if datapoint != self.meta[label]['missingvalues']:
                     if datapoint.isspace() == False:
                         indata.append(datapoint)
