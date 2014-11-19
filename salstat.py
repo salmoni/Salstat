@@ -1282,6 +1282,12 @@ class OutputSheet(wx.Frame):
         self.htmlpage.SetPage(self.WholeOutString+htmlend,HOME)
         #self.htmlpage.Reload()
 
+    def NewHTML(self, html):
+        self.ClearAll(None)
+        self.WholeOutString = html
+        htmlend = "\n\t</body>\n</html>"
+        self.htmlpage.SetPage(self.WholeOutString+htmlend,HOME)
+
 #---------------------------------------------------------------------------
 # Same as DescriptivesContinuousFrame, but for nominal descriptives
 class OneConditionTestFrame(wx.Dialog):
@@ -2553,7 +2559,6 @@ class DataFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             inits.update({'savedir': dlg.GetDirectory()})
             filename = dlg.GetPath()
-            print filename
             exportSQLite.exporttoSQLite(filename, self.grid, output)
 
     def OpenFile(self, event):
