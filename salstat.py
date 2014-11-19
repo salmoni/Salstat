@@ -1270,15 +1270,7 @@ class OutputSheet(wx.Frame):
         #self.htmlpage.SetPage(self.WholeOutString+htmlend,HOME)
 
     def PrintOutput(self, event):
-        data = wx.PrintDialogData()
-        data.EnablePrintToFile(True)
-        data.EnablePageNumbers(True)
-        data.EnableSelection(True)
-        dlg = wx.PrintDialog(output, data)
-        if dlg.ShowModal() == wx.ID_OK:
-            #print out html
-            self.printer.PrintText(self.htmlpage.WholeOutString)
-        dlg.Destroy()
+        self.htmlpage.Print()
 
     def DoNothing(self, event):
         pass
@@ -2692,7 +2684,6 @@ class DataFrame(wx.Frame):
             #self.grid.meta = {}
             if meta:
                 for index, col in enumerate(meta.cols):
-                    print col.name
                     obj = {'name': col.name, 'label': col.label[1] }
                     obj['align'] = "Left"
                     obj['measure'] = 'None set'
