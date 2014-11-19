@@ -47,6 +47,8 @@ def importfromSQLite(filename, datagrid, output):
                     datum = data[idx]
                     datagrid.SetCellValue(idx, index, datum)
         # read & show output
+        cout = c.execute("SELECT * FROM output").fetchall()[0]
+        output.NewHTML(cout[0])
         # wrap up
         conn.close()
     else:
