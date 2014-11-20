@@ -51,9 +51,9 @@ class VariablesGrid(gridlib.Grid):
         row = event.GetRow()
         col = event.GetCol()
         val = self.GetCellValue(row, col).lower()
+        oldname = event.GetString()
         label = self.grid.GetColLabelValue(col)
         if row == 0: # change variable name
-            oldname = event.GetString()
             newname = self.GetCellValue(0, col)
             if newname not in self.grid.meta.keys(): # unused name
                 obj = self.grid.meta[oldname]
@@ -62,21 +62,26 @@ class VariablesGrid(gridlib.Grid):
             else:
                 self.SetCellValue(0, col, oldname)
         elif row == 1: # changed column text alignment
-            if val == 'left':
+            if val[0].lower() == 'l':
+                self.SetCellValue(1, col, "Left")
                 cellattr = gridlib.GridCellAttr()
                 cellattr.SetAlignment(wx.ALIGN_LEFT, wx.ALIGN_CENTRE)
                 self.grid.SetColAttr(col, cellattr)
                 self.grid.meta[label]['align'] = "Left"
-            if val == 'right':
+            elif val[0].lower() == 'r':
+                self.SetCellValue(1, col, "Right")
                 cellattr = gridlib.GridCellAttr()
                 cellattr.SetAlignment(wx.ALIGN_RIGHT, wx.ALIGN_CENTRE)
                 self.grid.SetColAttr(col, cellattr)
                 self.grid.meta[label]['align'] = "Right"
-            if val == 'centre' or val == 'center':
+            elif val[0].lower() == 'c':
+                self.SetCellValue(1, col, "Centre")
                 cellattr = gridlib.GridCellAttr()
                 cellattr.SetAlignment(wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
                 self.grid.SetColAttr(col, cellattr)
                 self.grid.meta[label]['align'] = "Centre"
+            else:
+                self.SetCellValue(row, col, oldname)
         elif row == 5: # decimal places
             pass
 
@@ -85,6 +90,8 @@ class VariablesGrid(gridlib.Grid):
         numcols = self.grid.GetNumberCols()
         self.ResizeGrid()
         for i in range(numcols):
+            #attr = gridlib.GridCellAttr()
+            #attr.SetEditor(self.choice_align)
             self.SetColLabelValue(i, str(i + 1))
             colLabel = self.grid.GetColLabelValue(i)
             meta = self.grid.meta[colLabel]
@@ -101,6 +108,7 @@ class VariablesGrid(gridlib.Grid):
             for j in range(4):
                 cellValue = self.grid.GetCellValue(j, i)
                 self.SetCellValue(j+8, i, cellValue)
+        #self.SetRowAttr(1, attr)
 
     def ResizeGrid(self):
         self.ClearGrid()
@@ -144,7 +152,7 @@ class DataGrid(gridlib.Grid):
 		    varObj['missingvalues'] = obj['missingvalues']
 		else:
 		    varObj['label'] = colname
-		    varObj['align'] = 'left'
+		    varObj['align'] = 'Left'
 		    varObj['measure'] = 'None set'
 		    varObj['ivdv'] = 'None set'
 		    varObj['decplaces'] = None
@@ -158,7 +166,7 @@ class DataGrid(gridlib.Grid):
             labelObj = {}
             colname = self.GetColLabelValue(colidx)
             varObj = {'name': colname}
-            varObj['align'] = 'left'
+            varObj['align'] = 'Left'
             varObj['label'] =colname
             varObj['measure'] = 'None set'
             varObj['ivdv'] = 'None set'
