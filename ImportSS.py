@@ -9,8 +9,77 @@ import os, os.path
 import wx, wx.aui, xlrd
 import wx.grid as gridlib
 from xlrd import open_workbook
+from xlwt import Workbook
 import ezodf
 
+
+################################################
+# Save in xlsx format
+
+def SaveToExcel(filename, grid):
+    book = Workbook()
+    book = Workbook(encoding='utf-8')
+    datasheet = book.add_sheet('Data')
+    metasheet = book.add_sheet('Meta')
+    metasheet.write(0,0,"Name")
+    metasheet.write(1,0,"Alignment")
+    metasheet.write(2,0,"Label")
+    metasheet.write(3,0,"Measure")
+    metasheet.write(4,0,"Variable type")
+    metasheet.write(5,0,"Decimal places")
+    metasheet.write(6,0,"Missing values")
+    numcols = grid.GetNumberCols()
+    numrows = grid.GetNumberRows()
+    for idxx in range(numcols):
+        for idxy in range(numrows):
+            val = grid.GetCellValue(idxy, idxx)
+            datasheet.write(idxy + 1, idxx, val)
+        label = grid.GetColLabelValue(idxx)
+        meta = grid.meta[label]
+        datasheet.write(0, idxx, meta['name'])
+        metasheet.write(0, idxx + 1, meta['name'])
+        metasheet.write(1, idxx + 1, meta['align'])
+        metasheet.write(2, idxx + 1, meta['label'])
+        metasheet.write(3, idxx + 1, meta['measure'])
+        metasheet.write(4, idxx + 1, meta['ivdv'])
+        metasheet.write(5, idxx + 1, meta['decplaces'])
+        metasheet.write(6, idxx + 1, meta['missingvalues'])
+    book.save(filename)    
+
+################################################
+# Save in xlsx format
+
+def SaveToLibre(filename, grid):
+    numcols = grid.GetNumberCols()
+    numrows = grid.GetNumberRows()
+    book = ezodf.newdoc(doctype="ods", filename=filename)
+    book.sheets += ezodf.Sheet('Data', size=(numrows + 10, numcols + 10))
+    book.sheets += ezodf.Sheet('Meta', size=(20, numcols + 10))
+    datasheet = book.sheets['Data']
+    metasheet = book.sheets['Meta']
+    metasheet[(0,0)].set_value("Name")
+    metasheet[(1,0)].set_value("Alignment")
+    metasheet[(2,0)].set_value("Label")
+    metasheet[(3,0)].set_value("Measure")
+    metasheet[(4,0)].set_value("Variable type")
+    metasheet[(5,0)].set_value("Decimal places")
+    metasheet[(6,0)].set_value("Missing values")
+    for idxx in range(numcols):
+        for idxy in range(numrows):
+            val = grid.GetCellValue(idxy, idxx)
+            datasheet[(idxy + 1, idxx)].set_value(val)
+        label = grid.GetColLabelValue(idxx)
+        meta = grid.meta[label]
+        datasheet[(0, idxx)].set_value(meta['name'])
+        metasheet[(0, idxx + 1)].set_value(meta['name'])
+        metasheet[(1, idxx + 1)].set_value(meta['align'])
+        metasheet[(2, idxx + 1)].set_value(meta['label'])
+        metasheet[(3, idxx + 1)].set_value(meta['measure'])
+        metasheet[(4, idxx + 1)].set_value(meta['ivdv'])
+        metasheet[(5, idxx + 1)].set_value(meta[str('decplaces')])
+        metasheet[(6, idxx + 1)].set_value(meta['missingvalues'])
+    book.save()
+    
 
 ################################################
 # Custom grid class for previewing data
