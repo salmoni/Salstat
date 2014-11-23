@@ -38,6 +38,31 @@ import os, os.path, sys, codecs
 import wx
 import wx.grid as gridlib
 
+
+################################################
+# Regular saves in CSV format
+
+def SaveCSV(filename, grid):
+    defaultDir = inits.get('savedir')
+    fout = open(filename, "w")
+    cols, waste = grid.GetUsedCols()
+    rows = grid.GetUsedRows()
+    maxrows = max(rows) + 1
+    for i in range(maxrows):
+        datapoint=[]
+        for j in range(len(cols)):
+            try:
+                datapoint.append(grid.GetCellValue(i, j))
+            except:
+                datapoint.append("0")
+        line = string.join(datapoint)
+        line = ",".join(datapoint)
+        fout.write(line)
+        fout.write('\n')
+    fout.close
+    grid.Saved = True
+
+
 ################################################
 # Dialog to retrieve file name. Needed before we can do anything
 
