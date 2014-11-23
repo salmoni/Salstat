@@ -155,7 +155,7 @@ class DataGrid(gridlib.Grid):
 		    varObj['align'] = 'Left'
 		    varObj['measure'] = 'None set'
 		    varObj['ivdv'] = 'None set'
-		    varObj['decplaces'] = None
+		    varObj['decplaces'] = ''
 		    varObj['missingvalues'] = ''
 		self.meta[colname] = varObj
 
@@ -170,7 +170,7 @@ class DataGrid(gridlib.Grid):
             varObj['label'] =colname
             varObj['measure'] = 'None set'
             varObj['ivdv'] = 'None set'
-            varObj['decplaces'] = None
+            varObj['decplaces'] = ''
             varObj['missingvalues'] = ''
             self.meta[colname] = varObj
 
@@ -523,44 +523,42 @@ class DataGrid(gridlib.Grid):
                         break
         return RowsUsed
 
-    def SaveAsDataASCII(self, event):
+    def SaveAsDataASCII(self, filename):
+        """
         default = self.inits.get('savedir')
         dlg = wx.FileDialog(self, "Save Data File", default,"",\
                                     "CSV text (*.csv)|*.csv|Plain text (*.txt)|*.txt", wx.SAVE)
         ico = wx.Icon('icons/PurpleIcon05_32.png',wx.BITMAP_TYPE_PNG)
         dlg.SetIcon(ico)
         if dlg.ShowModal() == wx.ID_OK:
-            self.inits.update({'savedir': dlg.GetDirectory()})
-            filename = dlg.GetPath()
-            fout = open(filename, "w")
-            cols,waste = self.GetUsedCols()
-            if (dlg.GetFilterIndex() == 0):
-                #save as plain text
-                rows = self.GetUsedRows()
-                maxrows = max(rows) 
-                for i in range(len(cols)):
-                    for j in range(maxrows):
-                        if (self.GetCellValue(j,i) == ''):
-                            self.SetCellValue(j,i,'.')
-                for i in range(maxrows):
-                    datapoint=[]
-                    for j in range(len(cols)):
-                        try:
-                            datapoint.append(self.GetCellValue(i, j))
-                        except:
-                            datapoint.append("0")
-                        line = string.join(datapoint)
-                        line = ",".join(datapoint)
-                    fout.write(line)
-                    fout.write('\n')
-            elif (dlg.GetFilterIndex() == 1):
-                # save as native format
-                print "cannot do this just yet!"
-            fout.close
-            self.Saved = True
-            self.named = True
-            path, self.filename = os.path.split(filename)
-            #self.parent.SetTitle(self.filename)
+        """
+        self.inits.update({'savedir': filename})
+        #filename = dlg.GetPath()
+        fout = open(filename, "w")
+        cols,waste = self.GetUsedCols()
+        #save as plain text
+        rows = self.GetUsedRows()
+        maxrows = max(rows) 
+        for i in range(len(cols)):
+            for j in range(maxrows):
+                if (self.GetCellValue(j,i) == ''):
+                    self.SetCellValue(j,i,'.')
+        for i in range(maxrows):
+            datapoint=[]
+            for j in range(len(cols)):
+                try:
+                    datapoint.append(self.GetCellValue(i, j))
+                except:
+                    datapoint.append("0")
+                line = string.join(datapoint)
+                line = ",".join(datapoint)
+            fout.write(line)
+            fout.write('\n')
+        fout.close
+        self.Saved = True
+        self.named = True
+        path, self.filename = os.path.split(filename)
+        #self.parent.SetTitle(self.filename)
 
     def SaveDataASCII(self, event):
         if self.named:
