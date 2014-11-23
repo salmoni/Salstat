@@ -2315,7 +2315,6 @@ class DataFrame(wx.Frame):
         file_menu.AppendSeparator()
         self.menuSave = file_menu.Append(ID_FILE_SAVE, '&Save\tCTRL+S')
         self.menuSaveAs = file_menu.Append(ID_FILE_SAVEAS, 'Save &As...\tSHIFT+CTRL+S')
-        self.menuExport = file_menu.Append(ID_FILE_EXPORT, "Export...")
         file_menu.AppendSeparator()
         self.menuPrint = file_menu.Append(ID_FILE_PRINT, '&Print...\tCTRL+P')
         file_menu.AppendSeparator()
@@ -2424,7 +2423,6 @@ class DataFrame(wx.Frame):
         wx.EVT_TOOL(self, 30, self.SaveData)
         wx.EVT_MENU(self, ID_FILE_SAVEAS, self.SaveAsData)
         wx.EVT_TOOL(self, 40, self.SaveAsData)
-        wx.EVT_MENU(self, ID_FILE_EXPORT, self.grid.SaveAsDataASCII)
         wx.EVT_MENU(self, ID_FILE_OPEN, self.OpenFile)
         #EVT_MENU(self, ID_FILE_OPEN, self.grid.LoadNumericData)
         wx.EVT_TOOL(self, 20, self.OpenFile)
@@ -2529,37 +2527,51 @@ class DataFrame(wx.Frame):
 
     def SaveData(self, event):
         if self.grid.named:
-            defaultDir = self.inits.get('savedir')
-            fout = open(defaultDir + os.sep + self.filename, "w")
-            cols, waste = self.GetUsedCols()
-            rows = self.GetUsedRows()
-            maxrows = max(rows) + 1
-            for i in range(maxrows):
-                datapoint=[]
-                for j in range(len(cols)):
-                    try:
-                        datapoint.append(self.GetCellValue(i, j))
-                    except:
-                        datapoint.append("0")
-                line = string.join(datapoint)
-                line = ",".join(datapoint)
-                fout.write(line)
-                fout.write('\n')
-            fout.close
-            self.Saved = True
+            filename = self.grid.filename
+            filetype = os.path.splitext(filename)[1].lower()
+            print filename, filetype
+            if filetype in ['.salstat']: # native Salstat
+                print "Salstat"
+                exportSQLite.exporttoSQLite(filename, self.grid, output)
+                self.saved = True
+            elif filetype in ['.txt','csv']: # save as CSV
+                ImportCSV.SaveCSV(filename, self.grid)
+            elif filetype in ['.xls','xlsx']:
+                pass # save as Excel
+            elif filetype in ['.ods']:
+                pass # save as LibreOffice
+            elif filetype in ['.html','.htm']:
+                pass # save as HTML table
+                
         else:
             self.SaveAsData(None)
 
     def SaveAsData(self, event):
         default = inits.get('savedir')
-        dlg = wx.FileDialog(self, "Save Data File", default,"",\
-                                    "Salstat (*.salstat)|*.salstat", wx.SAVE)
+        wildcard = "Salstat database (.salstat)|*.salstat|"    \
+                   "Comma separated values (.csv)|*.csv|"      \
+                   "Excel workbook (.xls)|.xls|"             \
+                   "Libre Office calc (.ods)|.ods|"             \
+                   "Hypertext table (.html)|.html"
+        dlg = wx.FileDialog(self, "Save File", defaultDir=default,defaultFile="",\
+                                    wildcard=wildcard, style=wx.SAVE)
+                                    #"Salstat (*.salstat)|*.salstat", \
         ico = wx.Icon('icons/PurpleIcon05_32.png',wx.BITMAP_TYPE_PNG)
         dlg.SetIcon(ico)
         if dlg.ShowModal() == wx.ID_OK:
+            fileType = dlg.GetFilterIndex()
             inits.update({'savedir': dlg.GetDirectory()})
             filename = dlg.GetPath()
-            exportSQLite.exporttoSQLite(filename, self.grid, output)
+            if fileType == 0: # Save as Salstat SQLite database (.salstat)
+                exportSQLite.exporttoSQLite(filename, self.grid, output)
+            elif fileType == 1: # Save as CSV (.csv)
+                ImportCSV.SaveCSV(filename, self.grid)
+            elif fileType == 2: # Save as Excel (.xls)
+                ImportSS.SaveToExcel(filename, self.grid)
+            elif fileType == 3: # Save as Libre Office (.ods)
+                ImportSS.SaveToLibre(filename, self.grid)
+            elif fileType == 4: # Save as HTML table (.html)
+                pass
 
     def OpenFile(self, event):
         startDir = inits.get('opendir')
@@ -2576,8 +2588,11 @@ class DataFrame(wx.Frame):
         sqlites = ['.sqlite','.sqlite3','.db','.salstat']
         if extension in spreads: # file extension is for spreadsheet
             dlg = ImportSS.ImportDialog(FileName)
+            self.grid.filename = FileName.fileName
         elif extension in csvs: # csv / txt format
             dlg = ImportCSV.ImportDialog(FileName)
+            self.grid.filename = FileName.fileName
+            self.grid.Saved = False
         elif extension in htmls: # HTML table
             dlg = None
             gridData = []
@@ -2598,6 +2613,8 @@ class DataFrame(wx.Frame):
                     line.append(col.text)
                 gridData.append(line)
             self.FillGrid((FileName.fileName, variableNames, gridData))
+            self.grid.filename = FileName.fileName
+            self.grid.Saved = False
         elif extension in xmls: # xml - unsure how to handle this
             dlg = None
         elif extension in sass: # SAS 8 and later
@@ -2612,11 +2629,17 @@ class DataFrame(wx.Frame):
             variableNames = gridData.pop(0)
             dlg = None
             self.FillGrid((FileName.fileName, variableNames, gridData), allData.header)
+            self.grid.filename = FileName.fileName
+            self.SetTitle(os.path.split(FileName.fileName)[1])
+            self.grid.Saved = False
         elif extension in spsss: # SPSS
             dlg = None
         elif extension in sqlites: # sqlite database
             dlg = None
             exportSQLite.importfromSQLite(FileName.fileName, self.grid, output)
+            self.grid.filename = FileName.fileName
+            self.SetTitle(os.path.split(FileName.fileName)[1])
+            self.grid.Saved = True
         else:
             dlg = None
         if dlg:
@@ -2634,10 +2657,7 @@ class DataFrame(wx.Frame):
                 dlg.Destroy()
                 return None
         self.grid.ForceRefresh()
-        self.grid.Saved = False
         self.grid.named = True
-        path, self.filename = os.path.split(filename)
-        self.SetTitle(self.filename)
 
     def ScrapeURL(self, event):
         # user enters URL
@@ -2693,7 +2713,7 @@ class DataFrame(wx.Frame):
                     obj['align'] = "Left"
                     obj['measure'] = 'None set'
                     obj['ivdv'] = 'None set'
-                    obj['decplaces'] = None
+                    obj['decplaces'] = ''
                     obj['missingvalues'] = ''
                     self.grid.AddNewMeta(col.name, obj)
         else:
