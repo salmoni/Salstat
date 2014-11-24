@@ -2541,8 +2541,7 @@ class DataFrame(wx.Frame):
             elif filetype in ['.ods']:
                 pass # save as LibreOffice
             elif filetype in ['.html','.htm']:
-                pass # save as HTML table
-                
+                ImportHTML.ExportHTML(filename, self.grid)
         else:
             self.SaveAsData(None)
 
@@ -2571,7 +2570,7 @@ class DataFrame(wx.Frame):
             elif fileType == 3: # Save as Libre Office (.ods)
                 ImportSS.SaveToLibre(filename, self.grid)
             elif fileType == 4: # Save as HTML table (.html)
-                pass
+                ImportHTML.ExportHTML(filename, self.grid)
 
     def OpenFile(self, event):
         startDir = inits.get('opendir')
