@@ -13,6 +13,24 @@ import requests
 import BeautifulSoup as BS
 
 
+################################################
+# Save data as HTML table
+def ExportHTML(filename, grid):
+    fout = open(filename, "w")
+    numcols = grid.GetNumberCols()
+    numrows = grid.GetNumberRows()
+    fout.write('<!DOCTYPE html>\n<html lang="en">\n<body>\n<table>\n<tr>\n')
+    for colidx in range(numcols):
+        fout.write('<th>%s</th>'%(grid.GetColLabelValue(colidx)))
+    fout.write('</tr>/n')
+    for i in range(numrows):
+        fout.write('<tr>')
+        for j in range(numcols):
+            fout.write('<td>%s</td>'%(grid.GetCellValue(i, j)))
+        fout.write('</tr>\n')
+    fout.write('</table>\n</body>\n</html>')
+    fout.close
+    grid.Saved = True
 
 ################################################
 # Custom grid class for previewing data
