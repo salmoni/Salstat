@@ -43,7 +43,6 @@ import wx.grid as gridlib
 # Regular saves in CSV format
 
 def SaveCSV(filename, grid):
-    defaultDir = inits.get('savedir')
     fout = open(filename, "w")
     cols, waste = grid.GetUsedCols()
     rows = grid.GetUsedRows()
