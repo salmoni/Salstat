@@ -2710,8 +2710,8 @@ class DataFrame(wx.Frame):
                 for index, col in enumerate(meta.cols):
                     obj = {'name': col.name, 'label': col.label[1] }
                     obj['align'] = "Left"
-                    obj['measure'] = 'None set'
-                    obj['ivdv'] = 'None set'
+                    obj['measure'] = 'Unset'
+                    obj['ivdv'] = 'Unset'
                     obj['decplaces'] = ''
                     obj['missingvalues'] = ''
                     self.grid.AddNewMeta(col.name, obj)
