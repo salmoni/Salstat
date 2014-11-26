@@ -33,7 +33,7 @@ class VariablesGrid(gridlib.Grid):
         self.SetRowLabelValue(11, "Your data row 4")
         self.choices_align = ['Left','Centre','Right']
         self.choice_align = gridlib.GridCellChoiceEditor(self.choices_align, False)
-        self.choices_measure = ['Nominal','Ordinal','Interval','Ratio']
+        self.choices_measure = ['Nominal','Ordinal','Interval','Ratio', 'Unset']
         self.choice_measure = gridlib.GridCellChoiceEditor(self.choices_measure, False)
         self.choices_ivdv = ['None','IV','DV']
         self.choice_ivdv  = gridlib.GridCellChoiceEditor(self.choices_ivdv, False)
@@ -80,6 +80,36 @@ class VariablesGrid(gridlib.Grid):
                 cellattr.SetAlignment(wx.ALIGN_CENTRE, wx.ALIGN_CENTRE)
                 self.grid.SetColAttr(col, cellattr)
                 self.grid.meta[label]['align'] = "Centre"
+            else:
+                self.SetCellValue(row, col, oldname)
+        elif row == 3: # measure (nominal, ordinal, interval, ratio, unset)
+            if val[0].lower() == 'n' or val[0].lower() == 'c':
+                self.SetCellValue(3, col, "Nominal")
+                self.grid.meta[label]['measure'] = "Nominal"
+            elif val[0].lower() == 'o':
+                self.SetCellValue(3, col, "Ordinal")
+                self.grid.meta[label]['measure'] = "Ordinal"
+            elif val[0].lower() == 'i':
+                self.SetCellValue(3, col, "Interval")
+                self.grid.meta[label]['measure'] = "Interval"
+            elif val[0].lower() == 'r':
+                self.SetCellValue(3, col, "Ratio")
+                self.grid.meta[label]['measure'] = "Ratio"
+            elif val[0].lower() == 'u':
+                self.SetCellValue(3, col, "Unset")
+                self.grid.meta[label]['measure'] = "Unset"
+            else:
+                self.SetCellValue(row, col, oldname)
+        elif row == 4: # iv, dv, unset
+            if val[0].lower() == 'i':
+                self.SetCellValue(4, col, "IV")
+                self.grid.meta[label]['ivdv'] = "IV"
+            elif val[0].lower() == 'd':
+                self.SetCellValue(4, col, "DV")
+                self.grid.meta[label]['ivdv'] = "DV"
+            elif val[0].lower() == 'u':
+                self.SetCellValue(4, col, "Unset")
+                self.grid.meta[label]['ivdv'] = "Unset"
             else:
                 self.SetCellValue(row, col, oldname)
         elif row == 5: # decimal places
@@ -153,8 +183,8 @@ class DataGrid(gridlib.Grid):
 		else:
 		    varObj['label'] = colname
 		    varObj['align'] = 'Left'
-		    varObj['measure'] = 'None set'
-		    varObj['ivdv'] = 'None set'
+		    varObj['measure'] = 'Unset'
+		    varObj['ivdv'] = 'Unset'
 		    varObj['decplaces'] = ''
 		    varObj['missingvalues'] = ''
 		self.meta[colname] = varObj
@@ -168,8 +198,8 @@ class DataGrid(gridlib.Grid):
             varObj = {'name': colname}
             varObj['align'] = 'Left'
             varObj['label'] =colname
-            varObj['measure'] = 'None set'
-            varObj['ivdv'] = 'None set'
+            varObj['measure'] = 'Unset'
+            varObj['ivdv'] = 'Unset'
             varObj['decplaces'] = ''
             varObj['missingvalues'] = ''
             self.meta[colname] = varObj
