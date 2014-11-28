@@ -38,7 +38,7 @@ def importfromSQLite(filename, datagrid, output):
         for index, v in enumerate(c.execute("SELECT * FROM data")):
             obj= {'name': v[0], 'align':v[1], 'label':v[2], 'measure':v[3], 'ivdv': v[4],
                     'decplaces':v[5],'missingvalues':v[6]}
-            datagrid.AddNewMeta(v[0],obj)
+            datagrid.AddNewMeta(v[0],obj, pos=index)
             datagrid.SetColLabelValue(index, v[0])
             if len(v[7]) > 0:
                 data = v[7].split(',') # won't work if commas are in the cells
@@ -81,8 +81,7 @@ def exporttoSQLite(filename, datagrid, output=None):
     # needs changing because the order (which is important) isn't saved
     numcols = datagrid.GetNumberCols()
     for item in range(numcols):
-        label = datagrid.GetColLabelValue(item)
-        v = datagrid.meta[label]
+        v = datagrid.meta[item]
         vars = datagrid.GetVariableData(item)
         if type(vars) == list:
             data = ', '.join(vars)
