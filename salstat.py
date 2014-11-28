@@ -2473,7 +2473,10 @@ class DataFrame(wx.Frame):
             self.grid.LoadFile(filename)
 
     def Test(self, event):
-        exportSQLite.importfromSQLite("/Users/alan/Projects/SQLitefile.sqlite",self.grid, output)
+        print len(self.grid.meta)
+        for item in self.grid.meta:
+            print item['name']
+        #exportSQLite.importfromSQLite("/Users/alan/Projects/SQLitefile.sqlite",self.grid, output)
 
     def GoVariables(self, evt):
         # shows Variables grid
@@ -2698,6 +2701,7 @@ class DataFrame(wx.Frame):
             try:
                 for idxCol, colLabel in enumerate(varnames):
                     self.grid.SetColLabelValue(idxCol, colLabel)
+                    self.grid.AddNewMeta(colLabel, pos=idxCol)
             except:
                 pass
             for idxRow, dataRow in enumerate(newdata):
@@ -2705,18 +2709,6 @@ class DataFrame(wx.Frame):
                 for idxCol, colValue in enumerate(dataRow):
                     if colValue.isspace() == False:
                         self.grid.SetCellValue(idxRow, idxCol, colValue)
-            #self.grid.meta = {}
-            if meta:
-                for index, col in enumerate(meta.cols):
-                    obj = {'name': col.name, 'label': col.label[1] }
-                    obj['align'] = "Left"
-                    obj['measure'] = 'Unset'
-                    obj['ivdv'] = 'Unset'
-                    obj['decplaces'] = ''
-                    obj['missingvalues'] = ''
-                    self.grid.AddNewMeta(col.name, obj)
-        else:
-            pass
 
     def ToggleChartWindow(self, event):
         self.chartWindow = ChartWindow.ChartWindow(self)
@@ -2929,30 +2921,27 @@ class DataFrame(wx.Frame):
             data = []
             datar = []
             names = []
-            try:
-                win.stats
-                win.DVs
-                if len(win.GRPs) > 0: # user's selected grouping variables
-                    #groupedVars = [self.grid.GetVariableData(col,'string') for col in win.GRPs]
-                    groupedVars = [self.grid.CleanData(col) for col in win.GRPs]
-                    groups = GetGroups(groupedVars)
-                    DVs = [self.grid.GetVariableData(col,'float') for col in win.DVs]
-                    groupnames = win.varListGRP.GetCheckedStrings()
-                    varnames = win.varListDV.GetCheckedStrings()
+            win.stats
+            win.DVs
+            if len(win.GRPs) > 0: # user's selected grouping variables
+                #groupedVars = [self.grid.GetVariableData(col,'string') for col in win.GRPs]
+                groupedVars = [self.grid.CleanData(col) for col in win.GRPs]
+                groups = GetGroups(groupedVars)
+                DVs = [self.grid.GetVariableData(col,'float') for col in win.DVs]
+                groupnames = win.varListGRP.GetCheckedStrings()
+                varnames = win.varListDV.GetCheckedStrings()
+                alpha = win.alpha
+                GroupedDescriptives(groups, groupedVars, DVs, win.stats, groupnames, varnames,alpha)
+            else:
+                for i in win.DVs:
+                    colnum = win.ColNums[i]
+                    vals = self.grid.GetVariableData(colnum,'float')
+                    data.append(vals)
+                    vals = self.grid.GetVariableData(colnum,'str')
+                    datar.append(vals)
+                    names.append(self.grid.GetColLabelValue(colnum))
                     alpha = win.alpha
-                    GroupedDescriptives(groups, groupedVars, DVs, win.stats, groupnames, varnames,alpha)
-                else:
-                    for i in win.DVs:
-                        colnum = win.ColNums[i]
-                        vals = self.grid.GetVariableData(colnum,'float')
-                        data.append(vals)
-                        vals = self.grid.GetVariableData(colnum,'str')
-                        datar.append(vals)
-                        names.append(self.grid.GetColLabelValue(colnum))
-                        alpha = win.alpha
-                    ManyDescriptives(win.stats, data, datar, names,alpha)
-            except NameError:
-                pass
+                ManyDescriptives(win.stats, data, datar, names,alpha)
         win.Destroy()
 
     def GoTransformData(self, event):
