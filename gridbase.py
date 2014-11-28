@@ -56,9 +56,7 @@ class VariablesGrid(gridlib.Grid):
         if row == 0: # change variable name
             newname = self.GetCellValue(0, col)
             if newname not in self.grid.meta.keys(): # unused name
-                obj = self.grid.meta[oldname]
-                self.grid.AddNewMeta(newname, obj)
-                del self.grid.meta[oldname]
+                self.grid.AddNewMeta(newname, pos=col)
             else:
                 self.SetCellValue(0, col, oldname)
         elif row == 1: # changed column text alignment
@@ -123,8 +121,7 @@ class VariablesGrid(gridlib.Grid):
             #attr = gridlib.GridCellAttr()
             #attr.SetEditor(self.choice_align)
             self.SetColLabelValue(i, str(i + 1))
-            colLabel = self.grid.GetColLabelValue(i)
-            meta = self.grid.meta[colLabel]
+            meta = self.grid.meta[i]
             self.SetCellValue(0, i, meta["name"])
             #self.SetCellEditor(1, i, self.choice_align)
             self.SetCellValue(1, i, meta["align"])
@@ -171,7 +168,7 @@ class DataGrid(gridlib.Grid):
         self.colnames = 21
         self.BeginMeta()
 
-    def AddNewMeta(self, colname, obj=None):
+    def InsertNewMeta(self, colname, obj=None, pos=-1):
 		varObj = {'name': colname}
 		if obj:
 		    varObj['label'] = obj['label']
@@ -187,22 +184,49 @@ class DataGrid(gridlib.Grid):
 		    varObj['ivdv'] = 'Unset'
 		    varObj['decplaces'] = ''
 		    varObj['missingvalues'] = ''
-		self.meta[colname] = varObj
+		self.meta.insert(pos, varObj)
+
+    def AddNewMeta(self, colname, obj=None, pos=-1):
+		varObj = {'name': colname}
+		if obj:
+		    varObj['label'] = obj['label']
+		    varObj['align'] = obj['align']
+		    varObj['measure'] = obj['measure']
+		    varObj['ivdv'] = obj['ivdv']
+		    varObj['decplaces'] = obj['decplaces']
+		    varObj['missingvalues'] = obj['missingvalues']
+		else:
+		    varObj['label'] = colname
+		    varObj['align'] = 'Left'
+		    varObj['measure'] = 'Unset'
+		    varObj['ivdv'] = 'Unset'
+		    varObj['decplaces'] = ''
+		    varObj['missingvalues'] = ''
+		if pos == -1:
+		    self.meta.append(varObj)
+		else:
+		    self.meta[pos] = varObj
 
     def BeginMeta(self):
-        self.meta = {}
+        self.meta = []
         ncols = self.GetNumberCols()
         for colidx in range(ncols):
             labelObj = {}
-            colname = self.GetColLabelValue(colidx)
-            varObj = {'name': colname}
+            label = "Var %03d"%(colidx + 1)
+            self.SetColLabelValue(colidx, label)
+            varObj = {'name': label}
             varObj['align'] = 'Left'
-            varObj['label'] =colname
+            varObj['label'] =label
             varObj['measure'] = 'Unset'
             varObj['ivdv'] = 'Unset'
             varObj['decplaces'] = ''
             varObj['missingvalues'] = ''
-            self.meta[colname] = varObj
+            self.meta.append(varObj)
+
+    def ResetMeta():
+        self.meta = []
+        numcols = self.GetNumberCols()
+        
 
     def RangeSelected(self, event):
         if event.Selecting():
@@ -385,23 +409,21 @@ class DataGrid(gridlib.Grid):
         if len(Cols) > 0:
             Cols.reverse()
             for col in Cols:
-                colname = self.GetColLabelValue(col)
                 self.DeleteCols(col, 1)
-                del self.meta[colname]
+                self.meta.pop(col)
         elif len(TopLt) < 1 and len(BotRt) < 1:
             currentcol = self.GetGridCursorCol()
             colname = self.GetColLabelValue(currentcol)
             self.DeleteCols(currentcol, 1)
-            del self.meta[colname]
+            self.meta.pop(currentcol)
         else:
             tl = TopLt[0][1]
             br = BotRt[0][1] + 1
             #self.DeleteCols(tl, br-tl)
             #del self.meta[col]
             for i in range(br-tl):
-                colname = self.GetColLabelValue(tl)
                 self.DeleteCols(tl, 1)
-                del self.meta[colname]
+                self.meta.pop(tl)
         self.AdjustScrollbars()
         self.Saved = False
 
@@ -434,14 +456,14 @@ class DataGrid(gridlib.Grid):
                 label = "Var %03d"%(self.colnames)
                 self.SetColLabelValue(col, label)
                 self.colnames += 1
-                self.AddNewMeta(label)
+                self.InsertNewMeta(label, pos=col)
         elif len(TopLt) < 1 and len(BotRt) < 1: # single cell selected
             currentcol = self.GetGridCursorCol()
             self.InsertCols(currentcol, 1)
             label = "Var %03d"%(self.colnames)
             self.SetColLabelValue(currentcol, label)
             self.colnames += 1
-            self.AddNewMeta(label)
+            self.InsertNewMeta(label, pos=currentcol)
         else: # block of cells selected
             tl = TopLt[0][1]
             br = BotRt[0][1] + 1
@@ -450,7 +472,7 @@ class DataGrid(gridlib.Grid):
 	            label = "Var %03d"%(self.colnames)
 	            self.SetColLabelValue(tl+i, label)
 	            self.colnames += 1
-	            self.AddNewMeta(label)
+	            self.InsertNewMeta(label, pos=tl+i)
         self.AdjustScrollbars()
         self.Saved = False
 
@@ -727,7 +749,7 @@ class DataGrid(gridlib.Grid):
         It's inefficient and requires 2 passes but it should be reliable.
         """
         maxRow = self.GetNumberRows()
-        meta = self.meta[self.GetColLabelValue(col)]
+        meta = self.meta[col]
         missing = meta["missingvalues"]
         if col > self.GetNumberCols():
             return None
@@ -773,8 +795,7 @@ class DataGrid(gridlib.Grid):
     def GetColumnData(self, col):
         indata = []
         self.missing = 0
-        label = self.GetColLabelValue(col)
-        missingvalues = self.meta[label]['missingvalues']
+        missingvalues = self.meta[col]['missingvalues']
         for i in range(self.GetNumberRows()):
             datapoint = self.GetCellValue(i, col)
             if (datapoint != '') and (datapoint != '.'):
@@ -794,8 +815,7 @@ class DataGrid(gridlib.Grid):
         for i in range(self.GetNumberRows()):
             datapoint = self.GetCellValue(i, col)
             if datapoint != '':
-                label = self.GetColLabelValue(col)
-                if datapoint != self.meta[label]['missingvalues']:
+                if datapoint != self.meta[col]['missingvalues']:
                     if datapoint.isspace() == False:
                         indata.append(datapoint)
                 else:
@@ -805,10 +825,11 @@ class DataGrid(gridlib.Grid):
     def CleanData(self, col):
         indata = []
         self.missing = 0
+        missingvalues = self.meta[col]['missingvalues']
         for i in range(self.GetNumberRows()):
             val = self.GetCellValue(i, col)
             if val != "":
-                if val != missingvalue:
+                if val not in missingvalues:
                     try:
                         indata.append(float(val))
                     except ValueError:
