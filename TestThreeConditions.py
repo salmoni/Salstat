@@ -40,7 +40,7 @@ class TestDialog(wx.Dialog):
         wx.Dialog.__init__(self, None, title="Analyse 2 or more conditions",\
                 size=(700,425))
         self.testFlag = testFlag
-        helpTop = "These tests allow you to compare two or more conditions for significant differences. These tests allow you to compare two or more conditions for significant differences."
+        helpTop = "These tests allow you to compare two or more conditions for significant differences."
         t1 = wx.StaticText(self,-1, label=helpTop, pos=(20,30),size=(-1,660))
         t1.Wrap(660)
         self.decider = wx.Notebook(self, -1, pos=(20,65), size=(660,290))
@@ -89,9 +89,6 @@ class TestDialog(wx.Dialog):
 
     def CancelButton(self, event):
         self.Close()
-        if self.testFlag:
-            print "Test run - exiting now...\n"
-            sys.exit() # remove after testing
         return None
 
 
