@@ -25,7 +25,7 @@ def tableANOVAWithin(results):
     line3 = '<tr><td></td><td>Residual</td><td>%.3f</td><td>%d</td><td>%.3f</td><td></td><td></td></tr>\n'%(l3vars)
     line4 = '<tr><td></td><td>Interaction</td><td>%.3f</td><td></td><td></td><td></td><td></td></tr>\n'%(l4vars)
     line5 = '<tr><td></td><td>Total</td><td>%.3f</td><td>%d</td><td></td><td></td><td></td></tr>\n'%(l5vars)
-    line = ln1+headhtml+line1+line3+line4+line2+line5
+    line = ln1+headhtml+line1+line3+line4+line2+line5+'</table>'
     return line
 
 def tableANOVABetween(results):
@@ -37,7 +37,7 @@ def tableANOVABetween(results):
     line1 = '<tr><td>%s</td><td>Between groups</td><td>%.3f</td><td>%d</td><td>%.3f</td><td>%.3f</td><td>%1.4f</td></tr>\n'%(l1vars)
     line2 = '<tr><td></td><td>Within groups</td><td>%.3f</td><td>%d</td><td>%.3f</td></tr>\n'%(l2vars)
     line3 = '<tr><td></td><td>Total</td><td>%.3f</td><td>%d</td></tr>\n'%(l3vars)
-    line = ln1+headhtml+line1+line2+line3
+    line = ln1+headhtml+line1+line2+line3+'</table>'
     return line
 
 def table(ListofLists):
