@@ -33,7 +33,7 @@ def importfromSQLite(filename, datagrid, output):
             rowlen = len(item[7].split(','))
             if rowlen > numrows:
                 numrows = rowlen
-        datagrid.ResizeGrid(numcols, numrows, spare=10)
+        datagrid.ResizeGrid(numcols, numrows, spare=0)
         # populate the grid with data & meta data
         for index, v in enumerate(c.execute("SELECT * FROM data")):
             obj= {'name': v[0], 'align':v[1], 'label':v[2], 'measure':v[3], 'ivdv': v[4],
