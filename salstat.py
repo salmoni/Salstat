@@ -23,7 +23,7 @@ import salstat_stats, images, tabler, ChartWindow
 import DescriptivesFrame, PrefsFrame
 import MetaGrid, AllRoutines, ImportCSV, ImportSS, ImportHTML, Inferentials
 import sas7bdat as sas
-import TestThreeConditions
+import TestThreeConditions, TestTwoConditions
 import exportSQLite
 import numpy, math
 import numpy.ma as ma
@@ -1267,7 +1267,6 @@ class OutputSheet(wx.Frame):
         fout.close()
         file_loc = FileToURL(basedir+os.sep+'tmp/output.html')
         self.htmlpage.LoadURL(file_loc)
-        #self.htmlpage.SetPage(self.WholeOutString+htmlend,HOME)
 
     def PrintOutput(self, event):
         self.htmlpage.Print()
@@ -2473,9 +2472,16 @@ class DataFrame(wx.Frame):
             self.grid.LoadFile(filename)
 
     def Test(self, event):
+        ColumnList, waste = self.grid.GetUsedCols()
+        dlg = TestTwoConditions.TestDialog(ColumnList)
+        win = dlg.ShowModal()
+        if dlg.results:
+            DoTwoConditionTests(self.grid, dlg.results)
+        """
         print len(self.grid.meta)
         for item in self.grid.meta:
             print item['name']
+        """
         #exportSQLite.importfromSQLite("/Users/alan/Projects/SQLitefile.sqlite",self.grid, output)
 
     def GoVariables(self, evt):
@@ -2961,13 +2967,15 @@ class DataFrame(wx.Frame):
             self.SetStatusText('You need to enter 1 data column for this!')
 
     def GoTwoConditionTest(self,event):
-        # show Two Conditions Test dialog
+        # shows two conditions test dialog
         ColumnList, waste = self.grid.GetUsedCols()
         if (len(ColumnList) > 1):
-            win = TwoConditionTestFrame(frame, -1, ColumnList)
-            win.Show(True)
+            dlg = TestTwoConditions.TestDialog(ColumnList)
+            win = dlg.ShowModal()
+            if dlg.results:
+                DoTwoConditionTests(self.grid, dlg.results)
         else:
-            self.SetStatusText('You need 2 data columns for that!')
+            self.SetStatusText('You need some data for that!')
 
     def GetThreeConditionTest(self, event):
         # shows three conditions or more test dialog
@@ -3111,7 +3119,8 @@ def DoThreeConditionTests(grid, result):
             data.append(vector)
         result = Inferentials.anovaWithin(data)
         quotevars = (result["DFbet"],result["DFres"],result["F"],result["p"])
-        quote = "<b>Quote:</b> <i>F</i>(%d, %d)=%.3f, <i>p</i>=%1.4f<br />"%(quotevars)
+        quote = "Within-subjects ANOVA (Analysis of Variance)<br />"
+        quote += "<b>Quote:</b> <i>F</i>(%d, %d) = %.3f, <i>p</i> = %1.4f<br />"%(quotevars)
         ln = '<br />'+quote+'<br />'+tabler.tableANOVAWithin(result)
         output.Addhtml(ln)
     elif result["testType"] == 'between':
@@ -3129,8 +3138,95 @@ def DoThreeConditionTests(grid, result):
             indices[column] += 1
         result = Inferentials.anovaBetween(data)
         quotevars = (result["DFbet"],result["DFerr"],result["F"],result["p"])
-        quote = "<b>Quote:</b> <i>F</i>(%d, %d)=%.3f, <i>p</i>=%1.4f<br />"%(quotevars)
+        quote = "Between-subjects ANOVA (Analysis of Variance)<br />"
+        quote += "<b>Quote:</b> <i>F</i>(%d, %d) = %.3f, <i>p</i> = %1.4f<br />"%(quotevars)
         ln = '<br />'+quote+'<br />'+tabler.tableANOVABetween(result)
+        output.Addhtml(ln)
+
+def DoTwoConditionTests(grid, result):
+    if result["testType"] == "within":
+        data = []
+        quote = ""
+        col1 = result["DV"][0]
+        col2 = result["DV"][1]
+        name1 = frame.grid.meta[col1]["name"]
+        name2 = frame.grid.meta[col2]["name"]
+        data.append(grid.GetVariableData(int(col1), 'float'))
+        data.append(grid.GetVariableData(int(col2), 'float'))
+        if "ttestpaired" in result["tests"]:
+            quote += "<h3>T-test</h3>(two paired, dependent, within-subjects or related samples)<br />"
+            res = Inferentials.TTestPaired(data[0], data[1])
+            quote += "<b>Quote: </b> <i>t</i> (%d) = %.3f, <i>p</i> = %1.4f<br />"%(res[0],res[1],res[2])
+            variables =[['Variable:', "%s grouped by %s"%(name2, name1)],
+                    ['df', res[0]],
+                    ['t',res[1]],
+                    ['p',res[2]],
+                    ["Cohen's d",res[3]]]
+            quote += '<br />' + tabler.table(variables) + '<br />'
+
+        if "wilcoxon" in result["tests"]:
+            quote += "<h3>Wilcoxon Signed Ranks test</h3>(two unpaired, independent, between-subjects, or unrelated samples)<br /><br />"
+            res = Inferentials.SignedRanks(data[0], data[1])
+            quote += "<b>Quote: </b> <i>T</i> = %.3f, <i>p</i> = %1.4f<br />"%(res[0],res[1])
+            variables =[['Variable:', "%s grouped by %s"%(name2, name1)],
+                    ['T', res[0]],
+                    ['p',res[1]]]
+            quote += '<br />' + tabler.table(variables) + '<br />'
+
+        if "pairedsign" in result["tests"]:
+            quote += "<h3>Paired Sign test</h3>(two unpaired, independent, between-subjects, or unrelated samples)<br /><br />"
+            res = Inferentials.TwoSampleSignTest(data[0], data[1])
+            quote += "<b>Quote: </b> <i>z</i> = %.3f, <i>p</i> = %1.4f<br />"%(res[3],res[4])
+            variables =[['Variable:', "%s grouped by %s"%(name2, name1)],
+                    ['N+', res[0]],
+                    ['N-', res[1]],
+                    ['Total', res[2]],
+                    ['z', res[3]],
+                    ['p',res[4]]]
+            quote += '<br />' + tabler.table(variables) + '<br />'
+
+        ln = "<br />"+quote+"<br />"
+        output.Addhtml(ln)
+    elif result["testType"] == "between":
+        name1 = frame.grid.meta[result["IV"][0]]["name"]
+        name2 = frame.grid.meta[result["DV"][0]]["name"]
+        quote = ""
+        vectorIV = grid.GetVariableData(int(result["IV"][0]), 'str')
+        vectorDV = grid.GetVariableData(int(result["DV"][0]), 'float')
+        data = Inferentials.GroupData2(vectorIV, vectorDV)
+        #print data[1]
+        if "ttestunpaired" in result["tests"]:
+            quote += "<h3>T-test</h3>(two unpaired, independent, between-subjects, or unrelated samples)<br /><br />"
+            res = Inferentials.TTestUnpaired(data[0], data[1])
+            quote += "<b>Quote: </b> <i>t</i> (%d) = %.3f, <i>p</i> = %1.4f<br />"%(res[0],res[1],res[2])
+            variables =[['Variable:', "%s grouped by %s"%(name2, name1)],
+                    ['df', res[0]],
+                    ['t',res[1]],
+                    ['p',res[2]],
+                    ["Cohen's d",res[3]]]
+            quote += '<br />' + tabler.table(variables) + '<br />'
+
+        if "mannwhitneyu" in result["tests"]:
+            quote += "<h3>Mann-Whitney U test</h3>(two unpaired, independent, between-subjects, or unrelated samples)<br /><br />"
+            res = Inferentials.MannWhitneyU(data[0], data[1])
+            quote += "<b>Quote: </b> <i>U</i> = %.3f, <i>p</i> = %1.4f<br />"%(res[0],res[1])
+            variables =[['Variable:', "%s grouped by %s"%(name2, name1)],
+                    ['U', res[0]],
+                    ['p',res[1]]]
+            quote += '<br />' + tabler.table(variables) + '<br />'
+
+        if "kolmogorov" in result["tests"]:
+            quote += "<h3>Kolmogorov-Smirnov</h3>(two unpaired, independent, between-subjects, or unrelated samples)<br /><br />"
+            res = Inferentials.KolmogorovSmirnov(data[0], data[1])
+            quote += "<b>Quote: </b> <i>d</i> = %.3f, <i>p</i> = %1.4f<br />"%(res[0],res[1])
+            variables =[['Variable:', "%s grouped by %s"%(name2, name1)],
+                    ['d', res[0]],
+                    ['p',res[1]]]
+            quote += '<br />' + tabler.table(variables) + '<br />'
+
+        if "ftest" in result["tests"]:
+            pass
+        ln = "<br />"+quote+"<br />"
         output.Addhtml(ln)
 
 #---------------------------------------------------------------------------
