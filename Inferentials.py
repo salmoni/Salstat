@@ -98,8 +98,8 @@ def GroupData2(x, y):
         for idy in zip(x,y):
             if idy[0] == idx[0]:
                 vector.append(idy[1])
-        data.append(vector)
-    print data
+        data.append(ma.array(vector))
+    return data
 
 #########################################################################
 # One sample tests (requires a user-hypthesised mean
@@ -180,12 +180,6 @@ def TTestUnpaired(data1, data2):
     """
     Returns df, t, prob, d
     """
-    # pairwise deletion
-    for i in range(len(data1)):
-        if data1[i] is ma.masked:
-            data2[i] = ma.masked
-        elif data2[i] is ma.masked:
-            data1[i] = ma.masked
     c1 = Count(data1)
     c2 = Count(data2)
     if c1 < 2:
@@ -209,6 +203,13 @@ def TTestUnpaired(data1, data2):
         t = 0.0
         d = 0.0
         prob = 1.0
+    result = {}
+    result["t"] = t
+    result["df"] = df
+    result["prob"] = prob
+    result["d"] = d
+    result["help"] = """T-test (unpaired). Requires 2 variables, the first an independent 
+                        variable to define the groups, and the second the dependent variable"""
     return df, t, prob, d
 
 def TTestPaired(data1, data2):
@@ -247,6 +248,9 @@ def TwoSampleSignTest(data1, data2):
     """
     c1 = Count(data1)
     c2 = Count(data2)
+    nplus  = 0
+    nminus = 0
+    ntotal = 0
     if c1 != c2:
         prob   = -1.0
         z      = 0.0
@@ -254,10 +258,17 @@ def TwoSampleSignTest(data1, data2):
         nminus = 0
         ntotal = 0
     else:
-        data1, data2 = PairwiseDeletion(data1, data2)
-        nplus  = Count(map(higher,data1,data2))
-        nminus = Count(map(lower,data1,data2))
-        ntotal = nplus-nminus
+        #data1, data2 = PairwiseDeletion(data1, data2)
+        #nplus  = Count(map(higher,data1,data2))
+        #nminus = Count(map(lower,data1,data2))
+        for row in data1:
+            ntotal += 1
+            if data1[row] > data2[row]:
+                nplus += 1
+            elif data1[row] < data2[row]:
+                nminus += 1
+                
+        #ntotal = nplus-nminus
         mean   = c1 / 2
         sd     = math.sqrt(mean)
         z      = (nplus-mean)/sd
