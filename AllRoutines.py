@@ -170,7 +170,11 @@ def UniqueVals3(data):
 
 def CalculateRanks(data, start = 1):
     data = numpy.ma.array(data)
-    vals = list(set(data.flatten()))
+    try:
+        vals = data.compressed()
+        vals = numpy.ma.sort(vals)
+    except AttributeError:
+        vals = list(set(data))
     rank = start - 0.5
     ranks = numpy.ma.zeros(numpy.ma.shape(data), 'f')
     for i in vals:
