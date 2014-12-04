@@ -1994,10 +1994,10 @@ class CorrelationTestFrame(wx.Dialog):
         x1 = len(frame.grid.GetVariableData(self.ColBox1.GetSelection(),'float'))
         x2 = len(frame.grid.GetVariableData(self.ColBox2.GetSelection(),'float'))
         if (x1 != x2):
-            print "unequal"
+            pass # "unequal"
             # disable some tests in the listbox
         else:
-            print "equal"
+            pass # "equal"
             # enable all tests in the listbox
 
     def ChangeCol2(self, event):
@@ -2005,9 +2005,9 @@ class CorrelationTestFrame(wx.Dialog):
         x1 = len(frame.grid.GetVariableData(self.ColBox1.GetSelection(),'float'))
         x2 = len(frame.grid.GetVariableData(self.ColBox2.GetSelection(),'float'))
         if (x1 != x2):
-            print "unequal"
+            pass # "unequal"
         else:
-            print "equal"
+            pass # "equal"
 
     def OnOkayButton(self, event):
         x1 = self.ColBox1.GetSelection()
@@ -2586,7 +2586,9 @@ class DataFrame(wx.Frame):
         FileName = GetFilename(frame, startDir)
         if FileName.fileName == None:
             return None
-        extension = os.path.splitext(FileName.fileName)[1].lower()
+        filepath = os.path.splitext(FileName.fileName)
+        extension = filepath[1].lower()
+        inits['opendir'] = os.path.split(FileName.fileName)[0]
         spreads = ['.xls','.xlsx','.ods']
         csvs    = ['.csv','.txt','.prn','.dat']
         htmls   = ['.htm','.html','.xhtml','.dhtml']
@@ -2972,8 +2974,11 @@ class DataFrame(wx.Frame):
         if (len(ColumnList) > 1):
             dlg = TestTwoConditions.TestDialog(ColumnList)
             win = dlg.ShowModal()
-            if dlg.results:
-                DoTwoConditionTests(self.grid, dlg.results)
+            try:
+                if dlg.results:
+                    DoTwoConditionTests(self.grid, dlg.results)
+            except AttributeError:
+                pass
         else:
             self.SetStatusText('You need some data for that!')
 
@@ -3117,16 +3122,25 @@ def DoThreeConditionTests(grid, result):
         for column in result["DV"]:
             vector = grid.GetVariableData(int(column), 'float')
             data.append(vector)
-        result = Inferentials.anovaWithin(data)
-        quotevars = (result["DFbet"],result["DFres"],result["F"],result["p"])
-        quote = "Within-subjects ANOVA (Analysis of Variance)<br />"
-        quote += "<b>Quote:</b> <i>F</i>(%d, %d) = %.3f, <i>p</i> = %1.4f<br />"%(quotevars)
-        ln = '<br />'+quote+'<br />'+tabler.tableANOVAWithin(result)
-        output.Addhtml(ln)
+        if "anovawithin" in result["tests"]:
+            res = Inferentials.anovaWithin(data)
+            quotevars = (res["DFbet"],res["DFres"],res["F"],res["p"])
+            quote = "Within-subjects ANOVA (Analysis of Variance)<br />"
+            quote += "<b>Quote:</b> <i>F</i>(%d, %d) = %.3f, <i>p</i> = %1.4f<br />"%(quotevars)
+            ln = '<br />'+quote+'<br />'+tabler.tableANOVAWithin(res)
+            output.Addhtml(ln)
+        if "friedmans" in result["tests"]:
+            pass
+        if "cochranes" in result["tests"]:
+            pass
     elif result["testType"] == 'between':
         #print "Between subs ",result['tests']
-        vectorIV = grid.GetVariableData(int(result["IV"][0]), 'str')
-        vectorDV = grid.GetVariableData(int(result["DV"][0]), 'float')
+        col1 = int(result["IV"][0])
+        col2 = int(result["DV"][0])
+        name1 = frame.grid.meta[result["IV"][0]]["name"]
+        name2 = frame.grid.meta[result["DV"][0]]["name"]
+        vectorIV = grid.GetVariableData(col1, 'str')
+        vectorDV = grid.GetVariableData(col2, 'float')
         vals, freqs = AllRoutines.UniqueVals(vectorIV)
         data = ma.zeros((len(freqs), max(freqs)))
         data.mask = True
@@ -3136,12 +3150,24 @@ def DoThreeConditionTests(grid, result):
             row = indices[column]
             data[column, row] = vectorDV[idx]
             indices[column] += 1
-        result = Inferentials.anovaBetween(data)
-        quotevars = (result["DFbet"],result["DFerr"],result["F"],result["p"])
-        quote = "Between-subjects ANOVA (Analysis of Variance)<br />"
-        quote += "<b>Quote:</b> <i>F</i>(%d, %d) = %.3f, <i>p</i> = %1.4f<br />"%(quotevars)
-        ln = '<br />'+quote+'<br />'+tabler.tableANOVABetween(result)
-        output.Addhtml(ln)
+        if "anovabetween" in result["tests"]:
+            res = Inferentials.anovaBetween(data)
+            quotevars = (res["DFbet"],res["DFerr"],res["F"],res["p"])
+            quote = "Between-subjects ANOVA (Analysis of Variance)<br />"
+            quote += "<b>Quote:</b> <i>F</i>(%d, %d) = %.3f, <i>p</i> = %1.4f<br />"%(quotevars)
+            ln = '<br />'+quote+'<br />'+tabler.tableANOVABetween(res)
+            output.Addhtml(ln)
+        if "kruskal" in result["tests"]:
+            res = Inferentials.KruskalWallis(data)
+            quotevars = (res['df'],res["h"],res["prob"])
+            quote = "Kruskal-Wallis test<br />"
+            quote += "<b>Quote:</b> <i>H</i> (%d) = %.3f, <i>p</i> = %1.4f<br />"%(quotevars)
+            variables =[['Variable:', "%s grouped by %s"%(name2, name1)],
+                    ['h',res['h']],
+                    ['df',res['df']],
+                    ['p',res['prob']]]
+            ln = '<br />'+quote+'<br />'+tabler.table(variables)
+            output.Addhtml(ln)
 
 def DoTwoConditionTests(grid, result):
     if result["testType"] == "within":
@@ -3156,33 +3182,32 @@ def DoTwoConditionTests(grid, result):
         if "ttestpaired" in result["tests"]:
             quote += "<h3>T-test</h3>(two paired, dependent, within-subjects or related samples)<br />"
             res = Inferentials.TTestPaired(data[0], data[1])
-            quote += "<b>Quote: </b> <i>t</i> (%d) = %.3f, <i>p</i> = %1.4f<br />"%(res[0],res[1],res[2])
-            variables =[['Variable:', "%s grouped by %s"%(name2, name1)],
-                    ['df', res[0]],
-                    ['t',res[1]],
-                    ['p',res[2]],
-                    ["Cohen's d",res[3]]]
+            quote += res['quote']%(res['df'],res['t'],res['prob'],res['d'])
+            variables =[['Variable:', "%s compared against %s"%(name2, name1)],
+                    ['df', res['df']],
+                    ['t',res['t']],
+                    ['p',res['prob']],
+                    ["Cohen's d",res['d']]]
             quote += '<br />' + tabler.table(variables) + '<br />'
 
         if "wilcoxon" in result["tests"]:
             quote += "<h3>Wilcoxon Signed Ranks test</h3>(two unpaired, independent, between-subjects, or unrelated samples)<br /><br />"
             res = Inferentials.SignedRanks(data[0], data[1])
-            quote += "<b>Quote: </b> <i>T</i> = %.3f, <i>p</i> = %1.4f<br />"%(res[0],res[1])
-            variables =[['Variable:', "%s grouped by %s"%(name2, name1)],
-                    ['T', res[0]],
-                    ['p',res[1]]]
+            quote += res['quote']
+            variables =[['Variable:', "%s compared against %s"%(name2, name1)],
+                    ['T', res['t']],
+                    ['p',res['prob']]]
             quote += '<br />' + tabler.table(variables) + '<br />'
 
         if "pairedsign" in result["tests"]:
             quote += "<h3>Paired Sign test</h3>(two unpaired, independent, between-subjects, or unrelated samples)<br /><br />"
             res = Inferentials.TwoSampleSignTest(data[0], data[1])
-            quote += "<b>Quote: </b> <i>z</i> = %.3f, <i>p</i> = %1.4f<br />"%(res[3],res[4])
-            variables =[['Variable:', "%s grouped by %s"%(name2, name1)],
-                    ['N+', res[0]],
-                    ['N-', res[1]],
-                    ['Total', res[2]],
-                    ['z', res[3]],
-                    ['p',res[4]]]
+            quote += res['quote']
+            variables =[['Variable:', "%s compared against %s"%(name2, name1)],
+                    ['Z', res['z']],
+                    ['p',res['prob']],
+                    ['Mean', res['mean']],
+                    ['StdDev', res['sd']]]
             quote += '<br />' + tabler.table(variables) + '<br />'
 
         ln = "<br />"+quote+"<br />"
@@ -3198,30 +3223,30 @@ def DoTwoConditionTests(grid, result):
         if "ttestunpaired" in result["tests"]:
             quote += "<h3>T-test</h3>(two unpaired, independent, between-subjects, or unrelated samples)<br /><br />"
             res = Inferentials.TTestUnpaired(data[0], data[1])
-            quote += "<b>Quote: </b> <i>t</i> (%d) = %.3f, <i>p</i> = %1.4f<br />"%(res[0],res[1],res[2])
+            quote += res["quote"]%(res['t'],res['df'],res['prob'],res['d'])
             variables =[['Variable:', "%s grouped by %s"%(name2, name1)],
-                    ['df', res[0]],
-                    ['t',res[1]],
-                    ['p',res[2]],
-                    ["Cohen's d",res[3]]]
+                    ['df', res['df']],
+                    ['t',res['t']],
+                    ['p',res['prob']],
+                    ["Cohen's d",res['d']]]
             quote += '<br />' + tabler.table(variables) + '<br />'
 
         if "mannwhitneyu" in result["tests"]:
             quote += "<h3>Mann-Whitney U test</h3>(two unpaired, independent, between-subjects, or unrelated samples)<br /><br />"
             res = Inferentials.MannWhitneyU(data[0], data[1])
-            quote += "<b>Quote: </b> <i>U</i> = %.3f, <i>p</i> = %1.4f<br />"%(res[0],res[1])
+            quote += res['quote']
             variables =[['Variable:', "%s grouped by %s"%(name2, name1)],
-                    ['U', res[0]],
-                    ['p',res[1]]]
+                    ['U', res['u']],
+                    ['p',res['prob']]]
             quote += '<br />' + tabler.table(variables) + '<br />'
 
         if "kolmogorov" in result["tests"]:
-            quote += "<h3>Kolmogorov-Smirnov</h3>(two unpaired, independent, between-subjects, or unrelated samples)<br /><br />"
+            quote += "<h3>Kolmogorov-Smirnov test</h3>(two unpaired, independent, between-subjects, or unrelated samples)<br /><br />"
             res = Inferentials.KolmogorovSmirnov(data[0], data[1])
-            quote += "<b>Quote: </b> <i>d</i> = %.3f, <i>p</i> = %1.4f<br />"%(res[0],res[1])
+            quote += res['quote']
             variables =[['Variable:', "%s grouped by %s"%(name2, name1)],
-                    ['d', res[0]],
-                    ['p',res[1]]]
+                    ['d', res['d']],
+                    ['p',res['prob']]]
             quote += '<br />' + tabler.table(variables) + '<br />'
 
         if "ftest" in result["tests"]:
