@@ -26,9 +26,19 @@ def PairwiseDeletion(data1, data2):
             data1[i] = ma.masked
     return data1, data2
 
-def PairwiseDeletion(data):
-    for row in data:
-        pass
+def PairwiseDeletion2(data):
+    """
+    Takes a matrix and turns any row that has a missing value into a row of all missing values
+    """
+    shape = data.shape
+    k = shape[0] # number of conditions / variables
+    n = shape[1] # number of cases per variable
+    for col in range(k):
+        for item in range(n):
+            if data[col][item] is ma.masked:
+                data[:,item] = ma.masked
+                break
+    return data
 
 def higher(a,b):
     if a>b:
@@ -210,7 +220,9 @@ def TTestUnpaired(data1, data2):
     result["d"] = d
     result["help"] = """T-test (unpaired). Requires 2 variables, the first an independent 
                         variable to define the groups, and the second the dependent variable"""
-    return df, t, prob, d
+    result['quote'] = "<b>Quote: </b> <i>t</i> (%d) = %.3f, <i>p</i> = %1.4f, d = %.3f<br />"
+    result['quotetxt'] = "Quote: t (%d) = %.3f, p = %1.4f, d = %.3f\n"
+    return result
 
 def TTestPaired(data1, data2):
     for i in range(len(data1)):
@@ -237,7 +249,14 @@ def TTestPaired(data1, data2):
         except ZeroDivisionError:
             t = 0.0
             prob = 1.0
-    return df, t, prob, d
+    result = {}
+    result['t'] = t
+    result['df'] = df
+    result['prob'] = prob
+    result['d'] = d
+    result['quote'] = "<b>Quote: </b> <i>t</i> (%d) = %.3f, <i>p</i> = %1.4f, d = %.3f<br />"
+    result['quotetxt'] = "Quote: t (%d) = %.3f, p = %1.4f, d = %.3f\n"
+    return result
 
 def TwoSampleSignTest(data1, data2):
     """
@@ -273,7 +292,14 @@ def TwoSampleSignTest(data1, data2):
         sd     = math.sqrt(mean)
         z      = (nplus-mean)/sd
         prob   = erfcc(abs(z)/1.4142136)
-    return nplus, nminus, ntotal, z, prob
+    result = {'z':z, 'prob':prob,'sd':sd,'mean':mean}
+    result['quote'] = "<b>Quote: </b> <i>Z</i> = %.3f, <i>p</i> = %1.4f, \
+            <i>mean</i> = %.3f, <i>standard deviation</i> = %.3f<br />"%\
+            (result['z'],result['prob'], result['mean'], result['sd'])
+    result['quotetxt'] = "Quote: Z = %.3f, p = %1.4f, mean = %.3f, \
+            standard deviation = %.3f"%\
+            (result['z'],result['prob'], result['mean'], result['sd'])
+    return result
 
 def FTest(data1, data2, uservar):
     """
@@ -297,19 +323,34 @@ def FTest(data1, data2, uservar):
 
 def KolmogorovSmirnov(x, y):
     d, prob = stats.ks_twosamp(x, y)
-    return d, prob
+    result = {'d':d, 'prob':prob}
+    result['quote'] = "<b>Quote: </b> <i>d</i> = %.3f, <i>p</i> = %1.4f<br />"%\
+            (result['d'],result['prob'])
+    result['quotetxt'] = "Quote: d = %.3f, p = %1.4f"%\
+            (result['d'],result['prob'])
+    return result
 
 def MannWhitneyU(x, y):
     u, prob = stats.mannwhitneyu(x, y)
-    return u, prob
+    result = {'u':u, 'prob':prob}
+    result['quote'] = "<b>Quote: </b> <i>U</i> = %.3f, <i>p</i> = %1.4f<br />"%\
+            (result['u'],result['prob'])
+    result['quotetxt'] = "Quote: U = %.3f, p = %1.4f"%\
+            (result['u'],result['prob'])
+    return result
 
 def linregress(x,y):
     slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
     return slope, intercept, r_value, p_value, std_err
 
 def SignedRanks(x, y):
-    T, p = scipy.stats.wilcoxon(x, y)
-    return T, p
+    T, prob = scipy.stats.wilcoxon(x, y)
+    result = {'t':T, 'prob':prob}
+    result['quote'] = "<b>Quote: </b> <i>T</i> = %.3f, <i>p</i> = %1.4f<br />"%\
+            (result['t'],result['prob'])
+    result['quotetxt'] = "Quote: T = %.3f, p = %1.4f"%\
+            (result['t'],result['prob'])
+    return result
 
 def RankSums(x, y):
     z, prob = scipy.stats.ranksums(x, y)
@@ -325,90 +366,55 @@ def ChiSquare(x):
     return Count(freqs), chisq, df, prob
 
 def KendallsTau(x, y):
+    x, y = PairwiseDeletion(x,y)
     tau, prob = stats.kendalltau(x,y)
-    adj = PairwiseDeletion(x,y)
-    df = Count(adj[0])-1
+    df = Count(x)-1
+    result = {'tau':tau, 'df':df, 'prob':prob}
     return tau, df, prob
 
 def PearsonR(x, y):
+    x, y = PairwiseDeletion(x,y)
     r, prob = stats.pearsonr(x, y)
-    adj = PairwiseDeletion(x,y)
-    df = Count(adj[0])-1
+    df = Count(x)-1
+    result = {'r':r, 'df':df, 'prob':prob}
     return r, df, prob
 
 def PointBiserial(x, y):
+    x, y = PairwiseDeletion(x,y)
     r, prob = stats.pointbiserialr(x, y)
-    adj = PairwiseDeletion(x,y)
-    df = Count(adj[0])-1
+    df = Count(x)-1
+    result = {'r':r, 'df':df, 'prob':prob}
     return r, df, prob
 
 def SpearmanR(x, y):
+    x, y = PairwiseDeletion(x,y)
     r, prob = stats.spearmanr(x, y)
-    adj = PairwiseDeletion(x,y)
-    df = Count(adj[0])-1
+    df = Count(x)-1
+    result = {'r':r, 'df':df, 'prob':prob}
     return r, df, prob
 
 #########################################################################
 # Three sample tests
 #########################################################################
 
-
-def KruskalWallisH(args):
+def KruskalWallis (data):
     """
-    This method performs a Kruskal Wallis test (like a nonparametric 
-    between subjects anova) on a list of lists.
-    Usage: KruskalWallisH(args).
-    Returns: h, prob.
+    Kruskal-Wallis H test. Taken from Siegel's Nonparametric Statistics
     """
-    args = list(args)
-    n = [0]*len(args)
-    n = map(len,args)
-    ranked = CalculateRanks(args).tolist()
-    #T = tiecorrect(ranked)
-    T = 0
-    for i in range(len(args)):
-        args[i] = ranked[0:n[i]]
-        del ranked[0:n[i]]
-    rsums = []
-    for i in range(len(args)):
-        rsums.append(sum(args[i])**2)
-        rsums[i] = rsums[i] / float(n[i])
-    ssbn = sum(rsums)
-    totaln = sum(n)
-    h = 12.0 / (totaln*(totaln+1)) * ssbn - 3*(totaln+1)
-    df = len(args) - 1
-    if T == 0:
-        h = 0.0
-        prob = 1.0
-    else:
-        h = h / float(T)
-        prob = 0.5 #chisqprob(h,df)
-    return h, prob
-
-def KruskalWallis2 ( data ):
-    """
-    Kruskal-Wallis test for 2+ samples of independent nonparametric data.\n
-    Data are passed as a matrix, first dimension the variables, second the cases
-    """
-    k = len ( data )
-    df = k - 1
-    N = Count ( data )
-    ns = Count ( data[0] )
-    print k, df, N, ns
-    ranks = CalculateRanks ( data )
-    print ranks
-    Rj = sum ( numpy.transpose ( ranks ) )
-    RjM = Mean ( numpy.transpose ( ranks ) )
-    R = ( N + 1 ) / 2.0
-    pre = 12 / float ( N * ( N + 1 ) )
-    print RjM
-    mid = ns * ( RjM ** 2 )
-    post = 3 * ( N + 1 )
-    num = pre * mid - post
-    un, nu = tiecorrect ( data )
-    den = 1 - ( ( sum ( nu ** 2 ) - nu ) ) / float ( ( N ** 3 ) - N )
-    KW = num / float ( den )
-    return KW
+    shape = data.shape
+    k = shape[0] 
+    ranked = CalculateRanks ( data )
+    ns = ranked.count ( 1 )
+    N = Count ( ranked )
+    ranked_sums = ranked.sum ( 1 )
+    p1 = 12 / float( N * ( N + 1 ) )
+    p2 = Sum ( ranked_sums ** 2 / ns )
+    p3 = 3 * ( N + 1 )
+    H = ( p1 * p2 )  - p3
+    df = k - 1 
+    prob = chisqprob( H , df )
+    result = { 'h' : H , 'df' : df , 'prob' : prob }
+    return result
 
 def anovaBetween(data):
     """
@@ -530,6 +536,7 @@ def anovaWithin(data):
     return results
 
 if __name__ == '__main__':
+    """"
     d1 = ma.array([1,2,3,4,3,2], mask=[0,0,1,0,0,0])
     d2 = ma.array([5,4,5,6,7,6])
     d3 = ma.array([1,1,1,1,1,1,1,1,2,2,2,2])
@@ -546,7 +553,19 @@ if __name__ == '__main__':
     a2 = ma.array([1,1,1,1,1,1,2,2,2,2,2,2,3,3,3,3,3,3])
     a3 = ma.array( [[1,2,3,4,3,2],
                     [5,4,5,6,5,6],
-                    [4,3,2,9,3,2]])
+                    [4,3,2,9,3,2]], 
+                   mask=[[0,0,0,1,0,0],
+                    [1,0,0,0,0,0],
+                    [0,0,0,0,0,0]])
+    a4 = ma.array( [[ 96,128, 83, 61,101],
+                    [ 82,124,132,135,109],
+                    [115,149,166,147,1]],
+                    mask=[[0,0,0,0,0],
+                    [0,0,0,0,0],
+                    [0,0,0,0,1]])
+    a5 = ma.array( [[18,21,24,28],[26,32,34,36],[18,21,23,24]] )
+    print KruskalWallis(a5)
+    """
     res = anovaBetween(a2, a1)
     print "SS = ",res.SSbet, res.SSwit, res.SStot
     print "DF = ",res.DFbet, res.DFerr, res.DFtot
