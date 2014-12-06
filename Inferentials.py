@@ -370,28 +370,36 @@ def KendallsTau(x, y):
     tau, prob = stats.kendalltau(x,y)
     df = Count(x)-1
     result = {'tau':tau, 'df':df, 'prob':prob}
-    return tau, df, prob
+    result['quote'] = "<b>Quote: </b> <i>tau</i> (%d) = %.3f, <i>p</i> = %1.4f<br />"
+    result['quotetxt'] = "Quote: tau (%d) = %.3f, p = %1.4f\n"
+    return result
 
 def PearsonR(x, y):
     x, y = PairwiseDeletion(x,y)
     r, prob = stats.pearsonr(x, y)
     df = Count(x)-1
     result = {'r':r, 'df':df, 'prob':prob}
-    return r, df, prob
+    result['quote'] = "<b>Quote: </b> <i>r</i> (%d) = %.3f, <i>p</i> = %1.4f<br />"
+    result['quotetxt'] = "Quote: r (%d) = %.3f, p = %1.4f\n"
+    return result
 
 def PointBiserial(x, y):
     x, y = PairwiseDeletion(x,y)
     r, prob = stats.pointbiserialr(x, y)
     df = Count(x)-1
     result = {'r':r, 'df':df, 'prob':prob}
-    return r, df, prob
+    result['quote'] = "<b>Quote: </b> <i>r</i> (%d) = %.3f, <i>p</i> = %1.4f<br />"
+    result['quotetxt'] = "Quote: r (%d) = %.3f, p = %1.4f\n"
+    return result
 
 def SpearmanR(x, y):
     x, y = PairwiseDeletion(x,y)
     r, prob = stats.spearmanr(x, y)
     df = Count(x)-1
     result = {'r':r, 'df':df, 'prob':prob}
-    return r, df, prob
+    result['quote'] = "<b>Quote: </b> <i>r</i> (%d) = %.3f, <i>p</i> = %1.4f<br />"
+    result['quotetxt'] = "Quote: r (%d) = %.3f, p = %1.4f\n"
+    return result
 
 #########################################################################
 # Three sample tests
@@ -415,6 +423,32 @@ def KruskalWallis (data):
     prob = chisqprob( H , df )
     result = { 'h' : H , 'df' : df , 'prob' : prob }
     return result
+
+def Friedman (data):
+    """
+    Friedman's two-way ANOVA for nonparametric data
+    """
+    data = PairwiseDeletion2 ( data )
+    shape = data.shape
+    k = shape[0]
+    n = shape[1]
+    N = k * n
+    ranked = numpy.zeros([k,n])
+    for idx in range(n):
+        row = data[:, idx]
+        ranked_row = CalculateRanks ( row )
+        ranked[:, idx] = ranked_row
+    #ranked = CalculateRanks ( data )
+    ranked_sums = ranked.sum ( 1 )
+    p1 = 12 / float ( n * k * ( k + 1 ) )
+    p2 = Sum ( ranked_sums ** 2 )
+    p3 = 3 * n * ( k + 1 )
+    chi = ( p1 * p2 ) - p3
+    df = k - 1 
+    prob = chisqprob( chi , df )
+    results = { 'chi' : chi , 'k' : k , 'n' : n , 'df' : df , 'prob' : prob }
+    print results
+    return results
 
 def anovaBetween(data):
     """
@@ -564,7 +598,11 @@ if __name__ == '__main__':
                     [0,0,0,0,0],
                     [0,0,0,0,1]])
     a5 = ma.array( [[18,21,24,28],[26,32,34,36],[18,21,23,24]] )
-    print KruskalWallis(a5)
+    #print KruskalWallis(a5)
+    data = numpy.ma.array([[9,9.5,5,7.5,9.5,7.5,8,7,8.5,6],
+                           [7,6.5,7,7.5,5,8,6,6.5,7,7],
+                           [6,8,4,6,7,6.5,6,4,6.5,3]])
+    print Friedman (data)
     """
     res = anovaBetween(a2, a1)
     print "SS = ",res.SSbet, res.SSwit, res.SStot
