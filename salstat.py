@@ -23,7 +23,7 @@ import salstat_stats, images, tabler, ChartWindow
 import DescriptivesFrame, PrefsFrame
 import MetaGrid, AllRoutines, ImportCSV, ImportSS, ImportHTML, Inferentials
 import sas7bdat as sas
-import TestThreeConditions, TestTwoConditions
+import TestThreeConditions, TestTwoConditions, TestCorrelations
 import exportSQLite
 import numpy, math
 import numpy.ma as ma
@@ -2473,10 +2473,10 @@ class DataFrame(wx.Frame):
 
     def Test(self, event):
         ColumnList, waste = self.grid.GetUsedCols()
-        dlg = TestTwoConditions.TestDialog(ColumnList)
+        dlg = TestCorrelations.TestDialog(ColumnList)
         win = dlg.ShowModal()
         if dlg.results:
-            DoTwoConditionTests(self.grid, dlg.results)
+            DoCorrelations(self.grid, dlg.results)
         """
         print len(self.grid.meta)
         for item in self.grid.meta:
@@ -2986,7 +2986,6 @@ class DataFrame(wx.Frame):
         # shows three conditions or more test dialog
         ColumnList, waste = self.grid.GetUsedCols()
         if (len(ColumnList) > 1):
-            #win = ThreeConditionTestFrame(frame, -1, ColumnList)
             dlg = TestThreeConditions.TestDialog(ColumnList)
             win = dlg.ShowModal()
             if dlg.results:
@@ -2998,10 +2997,15 @@ class DataFrame(wx.Frame):
         # Shows the correlations dialog
         ColumnList, waste = self.grid.GetUsedCols()
         if (len(ColumnList) > 1):
-            win = CorrelationTestFrame(frame, -1, ColumnList)
-            win.Show(True)
+            dlg = TestCorrelations.TestDialog(ColumnList)
+            win = dlg.ShowModal()
+            try:
+                if dlg.results:
+                    DoCorrelations(self.grid, dlg.results)
+            except AttributeError:
+                pass
         else:
-            self.SetStatusText('You need 2 data columns for that!')
+            self.SetStatusText('You need some data for that!')
 
     def GoScriptWindow(self, event):
         # Shows the scripting window
@@ -3122,6 +3126,7 @@ def DoThreeConditionTests(grid, result):
         for column in result["DV"]:
             vector = grid.GetVariableData(int(column), 'float')
             data.append(vector)
+        data = ma.array(data)
         if "anovawithin" in result["tests"]:
             res = Inferentials.anovaWithin(data)
             quotevars = (res["DFbet"],res["DFres"],res["F"],res["p"])
@@ -3130,7 +3135,16 @@ def DoThreeConditionTests(grid, result):
             ln = '<br />'+quote+'<br />'+tabler.tableANOVAWithin(res)
             output.Addhtml(ln)
         if "friedmans" in result["tests"]:
-            pass
+            res = Inferentials.Friedman(data)
+            quotevars = (res["df"],res["chi"],res["prob"])
+            quote = "Friedman's Tests (nonparametric analysis of variance)<br />"
+            quote += "<b>Quote:</b> <i>F</i>(%d) = %.3f, <i>p</i> = %1.4f<br />"%(quotevars)
+            variables =[['Variable:', " grouped by "],
+                    ['chi',res['chi'] ],
+                    ['df',res['df'] ],
+                    ['p',res['prob'] ]]
+            ln = '<br />'+quote+'<br />'+tabler.table(variables)
+            output.Addhtml(ln)
         if "cochranes" in result["tests"]:
             pass
     elif result["testType"] == 'between':
@@ -3253,6 +3267,58 @@ def DoTwoConditionTests(grid, result):
             pass
         ln = "<br />"+quote+"<br />"
         output.Addhtml(ln)
+
+def DoCorrelations(grid, result):
+    data = []
+    quote = ""
+    col1 = result["DV"][0]
+    col2 = result["DV"][1]
+    name1 = frame.grid.meta[col1]["name"]
+    name2 = frame.grid.meta[col2]["name"]
+    data.append(grid.GetVariableData(int(col1), 'float'))
+    data.append(grid.GetVariableData(int(col2), 'float'))
+    if "pearsons" in result["tests"]:
+        quote += "<h3>Pearson's Correlation</h3>(two samples)<br />"
+        res = Inferentials.PearsonR(data[0], data[1])
+        quote += res['quote']%(res['df'],res['r'],res['prob'])
+        variables =[['Variable:', "%s associated with %s"%(name2, name1)],
+                ['df', res['df'] ],
+                ['r',res['r'] ],
+                ['p',res['prob']] ]
+        quote += '<br />' + tabler.table(variables) + '<br />'
+
+    if "spearmans" in result["tests"]:
+        quote += "<h3>Spearman's Correlation</h3>(two samples)<br />"
+        res = Inferentials.SpearmanR(data[0], data[1])
+        quote += res['quote']%(res['df'],res['r'],res['prob'])
+        variables =[['Variable:', "%s associated with %s"%(name2, name1)],
+                ['df', res['df'] ],
+                ['r',res['r'] ],
+                ['p',res['prob']] ]
+        quote += '<br />' + tabler.table(variables) + '<br />'
+
+    if "kendalls" in result["tests"]:
+        quote += "<h3>Kendall's Correlation</h3>(two samples)<br />"
+        res = Inferentials.KendallsTau(data[0], data[1])
+        quote += res['quote']%(res['df'],res['tau'],res['prob'])
+        variables =[['Variable:', "%s associated with %s"%(name2, name1)],
+                ['df', res['df'] ],
+                ['tau',res['tau'] ],
+                ['p',res['prob']] ]
+        quote += '<br />' + tabler.table(variables) + '<br />'
+
+    if "pointbr" in result["tests"]:
+        quote += "<h3>Point biserial r Correlation</h3>(two samples)<br />"
+        res = Inferentials.PointBiserial(data[0], data[1])
+        quote += res['quote']%(res['df'],res['r'],res['prob'])
+        variables =[['Variable:', "%s associated with %s"%(name2, name1)],
+                ['df', res['df'] ],
+                ['r',res['r'] ],
+                ['p',res['prob']] ]
+        quote += '<br />' + tabler.table(variables) + '<br />'
+
+    ln = "<br />"+quote+"<br />"
+    output.Addhtml(ln)
 
 #---------------------------------------------------------------------------
 # Creating HTML document
