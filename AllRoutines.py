@@ -172,9 +172,9 @@ def CalculateRanks(data, start = 1):
     data = numpy.ma.array(data)
     try:
         vals = data.compressed()
-        vals = numpy.ma.sort(vals)
     except AttributeError:
-        vals = list(set(data))
+        pass
+    vals = sorted(list(set(vals)))
     rank = start - 0.5
     ranks = numpy.ma.zeros(numpy.ma.shape(data), 'f')
     for i in vals:
@@ -941,7 +941,11 @@ if __name__ == '__main__':
     data = 3.14
     data = {3: "hi"}
     data = [3,2,5.65464,"hi",2,3,"hi"]
-    vals, freqs = UniqueVals3(data)
-    print vals
-    print freqs
+    data = numpy.ma.array([[9,9.5,5,7.5,9.5,7.5,8,7,8.5,6],
+                           [7,6.5,7,7.5,5,8,6,6.5,7,7],
+                           [6,8,4,6,7,6.5,6,4,6.5,3]])
+    print CalculateRanks(data)
+
+
+
 
