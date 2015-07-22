@@ -1,6 +1,6 @@
 #!/usr/local/bin/python
 
-"""SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed 
+"""SalStat Statistics Package. Copyright 2002 Alan James Salmoni. Licensed
 under the GNU General Public License (GPL). See the file COPYING for full
 details of this license. """
 
@@ -10,7 +10,7 @@ import codecs
 import wx
 from wx.stc import *
 import wx.grid as gridlib
-import gridbase 
+import gridbase
 import wx.html as htmllib
 import wx.html2 as html2lib
 import BeautifulSoup as BS
@@ -145,13 +145,6 @@ if wx.Platform == '__WXMSW__':
     wind = 50
     DOCDIR = 'c:\My Documents'
     INITDIR = os.getcwd()
-    # I got the following lines from the wxPython group but it's a red herring
-    # it was to ensure Javascript files would load properly.
-    # The solution was to use WebView.LoadURL not WebView.SetPage :-)
-    import _winreg as wreg
-    current_file = __file__
-    key = wreg.CreateKey(wreg.HKEY_CURRENT_USER, "Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION")
-    wreg.SetValueEx(key, current_file, 0, wreg.REG_DWORD, 10001)
 else:
     face1 = 'Helvetica'
     face2 = 'Times'
@@ -988,7 +981,7 @@ class ScriptFrame(wx.Frame):
             filename = dlg.GetPath()
             fin = file(filename, "r")
             TextIn = fin.readlines()
-            
+
             self.scripted.SetText(TextIn)
             fin.close()
 
@@ -1090,7 +1083,7 @@ class MyHtmlWindow(htmllib.HtmlWindow):
         self.AppendToPage(htmlline)
         self.WholeOutString = self.WholeOutString+htmlline + '\n'
         r = self.scroll.GetScrollRange(wx.VERTICAL)
-        self.scroll.Scroll(0, r+10) 
+        self.scroll.Scroll(0, r+10)
 
     def write(self, TextIn):
         TextIn = '<br>'+TextIn
@@ -1214,7 +1207,7 @@ class OutputSheet(wx.Frame):
     def OnWebViewNavigating(self, evt):
         """
         Interrupts an event when a user clicks on a hyperlink in the results page.
-        It then uses this link to perform its next action. 
+        It then uses this link to perform its next action.
         This, of course, means I need to create a table of possible actions and
         ensure Salstat does the right thing.
         """
@@ -1247,7 +1240,7 @@ class OutputSheet(wx.Frame):
             self.htmlpage.SetPage(data,HOME)
             self.htmlpage.Reload() # hack to make content appear
             inits.update({'opendir': dlg.GetDirectory()})
-    
+
     def SaveHtmlPage(self):
         dlg = wx.FileDialog(self, "Save Output","","","*.html|*>*", \
                             wx.SAVE)
@@ -1428,7 +1421,7 @@ class OneConditionTestFrame(wx.Dialog):
             output.Addhtml(ln)
 
         self.Close(True)
-            
+
     def OnCloseOneCond(self, event):
         self.Close(True)
 
@@ -1794,7 +1787,7 @@ class ThreeConditionTestFrame(wx.Dialog):
                 tmplist = frame.grid.GetVariableData(self.colnums[i], 'float')
                 biglist.append(tmplist)
                 tmplist = frame.grid.GetVariableData(self.colnums[i], 'string')
-                biglistr.append(tmplist)                
+                biglistr.append(tmplist)
                 names.append(frame.grid.GetColLabelValue(i))
         k = len(biglist)
         self.stats = self.DescChoice.GetCheckedStrings()
@@ -2024,7 +2017,7 @@ class CorrelationTestFrame(wx.Dialog):
         #TBase = salstat_stats.TwoSampleTests(x, y, name1, name2,xmiss,ymiss)
         self.stats = self.DescChoice.GetCheckedStrings()
         ManyDescriptives(self.stats, [x,y], [xr, yr], [name1,name2], None)
-        
+
         # Kendalls tau correlation
         if self.paratests.IsChecked(0):
             output.Addhtml('<h3>Kendalls Tau correlation</h3>')
@@ -2129,7 +2122,7 @@ class MFanovaFrame(wx.Dialog):
         self.hypchoice.SetSelection(1)
         #self.DescChoice = DescChoiceBox(self, 215)
         # I might leave the descriptives out and implement a feedback box
-        # that tells the user about the analysis (eg, how many factors, # 
+        # that tells the user about the analysis (eg, how many factors, #
         # levels per factor, # interactions etc which might be useful. It
         # would be updated whenever the user changes a selection.
         okaybutton = wx.Button(self,216,"Okay",wx.Point(10,winheight-35), \
@@ -2244,7 +2237,7 @@ class TransformFrame(wx.Dialog):
     def OnOkayButton(self, event):
         pass # start transforming!
         # process: collect each selected column, then pass the contents through the self.transform function
-        # then put the resulting column into a new column, and retitle it with the original variable 
+        # then put the resulting column into a new column, and retitle it with the original variable
         # name plus the function.
         self.transform = self.transformEdit.GetValue()
         cols = range(self.cols)
@@ -2493,7 +2486,7 @@ class DataFrame(wx.Frame):
         	self.choice.SetSelection(0) # ditto
 
     def ChangedTab(self, event):
-    	# This is called when the tabs change. 
+    	# This is called when the tabs change.
     	# From data -> variable, repopulate variable with data
     	# From variable -> data, save changes
     	page = self.choice.GetSelection()
@@ -3328,7 +3321,7 @@ def CreateHTMLDoc():
         page = fin.read()
         fin.close()
     except IOError:
-        page = """<!DOCTYPE html>\n<html>\n\t<head>\n\t<script src="jquery/1.8.2/jquery.min.js"></script>\n\t<script src="highcharts/3.0.7/highcharts.js"></script>\n\t<script src="html/highcharts/3.0.7/highcharts-more.js"></script\n\t<script src="highcharts/3.0.7/exporting.js"></script>\n\t<script src="/js/themes/gray.js"></script>\n\t<style>\n\t\tbody { font-family: helvectica, arial, \'lucida sans\'; }\n\t</style>\n</head>\n<body>\n\t<a href="http://www.salstat.com" alt="Go to the Salstat home page"><img src="http://bit.ly/1fqFdQm" alt="Salstat Statistics" style="float: right;"></a>\n\t<h2>Salstat Statistics</h2>\n\n\n"""   
+        page = """<!DOCTYPE html>\n<html>\n\t<head>\n\t<meta http-equiv="X-UA-Compatible" content="IE=edge"/>\n\t<script src="jquery/1.8.2/jquery.min.js"></script>\n\t<script src="highcharts/3.0.7/highcharts.js"></script>\n\t<script src="html/highcharts/3.0.7/highcharts-more.js"></script\n\t<script src="highcharts/3.0.7/exporting.js"></script>\n\t<script src="/js/themes/gray.js"></script>\n\t<style>\n\t\tbody { font-family: helvectica, arial, \'lucida sans\'; }\n\t</style>\n</head>\n<body>\n\t<a href="http://www.salstat.com" alt="Go to the Salstat home page"><img src="http://bit.ly/1fqFdQm" alt="Salstat Statistics" style="float: right;"></a>\n\t<h2>Salstat Statistics</h2>\n\n\n"""
     return page
 
 #---------------------------------------------------------------------------
@@ -3351,4 +3344,3 @@ if __name__ == '__main__':
     output.Show(True)
     frame.Show(True)
     app.MainLoop()
-
