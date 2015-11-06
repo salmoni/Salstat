@@ -7,6 +7,8 @@ details of this license. """
 # import wx stuff
 from __future__ import unicode_literals
 import codecs
+import numpy, math
+import numpy.ma as ma
 import wx
 from wx.stc import *
 import wx.grid as gridlib
@@ -25,8 +27,6 @@ import MetaGrid, AllRoutines, ImportCSV, ImportSS, ImportHTML, Inferentials
 import sas7bdat as sas
 import TestThreeConditions, TestTwoConditions, TestCorrelations
 import exportSQLite
-import numpy, math
-import numpy.ma as ma
 
 from xml.dom import minidom
 
