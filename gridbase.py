@@ -1,8 +1,8 @@
+import numpy
+import numpy.ma as ma
 import wx
 from wx.stc import *
 import wx.grid as gridlib
-import numpy
-import numpy.ma as ma
 import string, os
 
 #---------------------------------------------------------------------------
