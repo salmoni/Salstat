@@ -7,6 +7,7 @@ tmp/html2text.py
 ImportExcel.py
 
 tmp/output.html
+
 .salstatrc
 
 tmp/chartput.html
@@ -23,3 +24,4 @@ tmp/Salstat – overall shot.png
 
 tmp/*
 
+.vscode
