@@ -76,7 +76,7 @@ class ChartWindow(wx.Frame):
         toolBar.SetToolBitmapSize((24,24))
         toolBar.Realize()
         self.SetToolBar(toolBar)
-        self.charthtml = """<!DOCTYPE html>\n<html>\n<head>\n<script src="html/jquery/1.8.2/jquery.min.js"></script>\n\t\t<script src="html/highcharts/3.0.7/highcharts.js"></script>\n\t\t<script src="html/bootstrap/2.3.1/bootstrap.min.js"></script>\n\t\t<link href="html/bootstrap/2.3.1/bootstrap-combined.min.css" rel="stylesheet" media="screen">\n\t\t<script src="html/highcharts/3.0.7/exporting.js"></script>\n\t\t<script src="html/js/themes/gray.js"></script></script>\n\t<style>\n\t\tbody { font-family: helvectica, arial, \'lucida sans\'; }\n\t</style>\n</head>\n<body>\n"""
+        self.charthtml = """<!DOCTYPE html>\n<html>\n<head>\n<meta http-equiv="X-UA-Compatible" content="IE=edge"/>\n<script src="html/jquery/1.8.2/jquery.min.js"></script>\n\t\t<script src="html/highcharts/3.0.7/highcharts.js"></script>\n\t\t<script src="html/bootstrap/2.3.1/bootstrap.min.js"></script>\n\t\t<link href="html/bootstrap/2.3.1/bootstrap-combined.min.css" rel="stylesheet" media="screen">\n\t\t<script src="html/highcharts/3.0.7/exporting.js"></script>\n\t\t<script src="html/js/themes/gray.js"></script></script>\n\t<style>\n\t\tbody { font-family: helvectica, arial, \'lucida sans\'; }\n\t</style>\n</head>\n<body>\n"""
         self.webview = html2lib.WebView
         self.preview = self.webview.New(self) #, size=(100,100))
         self.preview.SetSize
@@ -378,7 +378,7 @@ class DataObject(object):
 
 class ChartObject(object):
     def __init__(self):
-        self.charthtml = """<!DOCTYPE html>\n<html>\n<head>\n<script src="html/jquery/1.8.2/jquery.min.js"></script>\n\t\t<script src="html/highcharts/3.0.7/highcharts.js"></script>\n\t\t<script src="html/highcharts/3.0.7/highcharts-more.js"></script>\n\t\t<script src="html/bootstrap/2.3.1/bootstrap.min.js"></script>\n\t\t<link href="html/bootstrap/2.3.1/bootstrap-combined.min.css" rel="stylesheet" media="screen">\n\t\t<script src="html/highcharts/3.0.7/exporting.js"></script>\n\t\t<script src="html/js/themes/gray.js"></script></script>\n\t<style>\n\t\tbody { font-family: helvectica, arial, \'lucida sans\'; }\n\t</style>\n</head>\n<body>\n"""
+        self.charthtml = """<!DOCTYPE html>\n<html>\n<head>\n<meta http-equiv="X-UA-Compatible" content="IE=edge"/>\n<script src="html/jquery/1.8.2/jquery.min.js"></script>\n\t\t<script src="html/highcharts/3.0.7/highcharts.js"></script>\n\t\t<script src="html/highcharts/3.0.7/highcharts-more.js"></script>\n\t\t<script src="html/bootstrap/2.3.1/bootstrap.min.js"></script>\n\t\t<link href="html/bootstrap/2.3.1/bootstrap-combined.min.css" rel="stylesheet" media="screen">\n\t\t<script src="html/highcharts/3.0.7/exporting.js"></script>\n\t\t<script src="html/js/themes/gray.js"></script></script>\n\t<style>\n\t\tbody { font-family: helvectica, arial, \'lucida sans\'; }\n\t</style>\n</head>\n<body>\n"""
 
         self.title_text = " "
         #self.chart_anim = { animation: false }
