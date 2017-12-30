@@ -127,7 +127,7 @@ def OneSampleTTest(data, usermean):
     if Count(data) < 2:
         df = 0
         t = 1.0
-        prob = 1.0
+        prob = -1.0
         d = 0.0
     else:
         df = Count(data) - 1
@@ -136,7 +136,16 @@ def OneSampleTTest(data, usermean):
         t = t_diff / math.sqrt(svar*(1.0/Count(data)))
         d = t_diff / float(SampStdDev(data))
         prob = betai(0.5*df, 0.5, float(df)/(df+(t*t)))
-    return df, t, prob, d
+    result = {}
+    result['df'] = df
+    result['t'] = t
+    result['prob'] = prob
+    result['d'] = d
+    result["help"] = """T-test (one sample). Requires 1 variable, an independent
+                        variable of observations, and also a user hypothesised mean to be compared against"""
+    result['quote'] = "<b>Quote: </b> <i>t</i> (%d) = %.3f, <i>p</i> = %1.4f, d = %.3f<br />"%(df, t, prob, d)
+    result['quotetxt'] = "Quote: t (%d) = %.3f, p = %1.4f, d = %.3f\n"%(df, t, prob, d)
+    return result
 
 def OneSampleSignTest(data, usermean):
     """
@@ -164,7 +173,17 @@ def OneSampleSignTest(data, usermean):
         prob=1.0
     else:
         prob=erfcc(abs(z) / 1.4142136)
-    return nplus, nminus, nequal, z, prob
+    result = {}
+    result['nplus'] = nplus
+    result['nminus'] = nminus
+    result['nequal'] = nequal
+    result['z'] = z
+    result['probability'] = prob
+    result["help"] = """One sample sign test. This requires 1 variable (an independent
+                        variable of observations) and a user hypothesised mean to be compared against"""
+    result['quote'] = "<b>Quote: </b> <i>z</i> = %.3f, <i>p</i> = %1.4f<br />"%(z, prob)
+    result['quotetxt'] = "Quote: z = %.3f, p = %1.4f\n"%(z, prob)
+    return result
 
 def ChiSquareVariance(data, usermean):
     """
@@ -178,7 +197,15 @@ def ChiSquareVariance(data, usermean):
     except ZeroDivisionError:
         chisquare = 0.0
         prob = 1.0
-    return df, chisquare, prob
+    result = {}
+    result['df'] = df
+    result['chisquare'] = chisquare
+    result['probability'] = prob
+    result["help"] = """T-test (one sample). Requires 1 variable, an independent
+                        variable of observations, and also a user hypothesised mean to be compared against"""
+    result['quote'] = "<b>Quote: </b> <i>Chi</i> (%d) = %.3f, <i>p</i> = %1.4f<br />"%(chisquare, df, prob)
+    result['quotetxt'] = "Quote: Chi (%d) = %.3f, p = %1.4f\n"%(chisquare, df, prob)
+    return result
 
 
 #########################################################################

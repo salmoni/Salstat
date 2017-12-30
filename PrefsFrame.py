@@ -76,10 +76,10 @@ class PFrame(wx.Dialog):
         if initdir == None:
             initdir = os.getcwd()
         self.directory.SetValue(initdir)
-        wx.EVT_BUTTON(self, 2296, self.Cancel)
-        wx.EVT_BUTTON(self, 2297, self.Okay)
-        wx.EVT_BUTTON(self, 2298, self.GetDirectory)
-        wx.EVT_BUTTON(self, 2299, self.GetFont)
+        self.Bind(wx.EVT_BUTTON, self.Cancel, id=2296)
+        self.Bind(wx.EVT_BUTTON, self.Okay, id=2297)
+        self.Bind(wx.EVT_BUTTON, self.GetDirectory, id=2298)
+        self.Bind(wx.EVT_BUTTON, self.GetFont, id=2299)
 
     def GetFont(self, event):
         print ("here?")

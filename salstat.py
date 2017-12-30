@@ -26,7 +26,7 @@ import salstat_stats, images, tabler, ChartWindow
 import DescriptivesFrame, PrefsFrame
 import MetaGrid, AllRoutines, ImportCSV, ImportSS, ImportHTML, Inferentials
 import sas7bdat as sas
-import TestThreeConditions, TestTwoConditions, TestCorrelations
+import TestThreeConditions, TestTwoConditions, TestCorrelations, TestOneCondition
 import exportSQLite
 
 from xml.dom import minidom
@@ -192,9 +192,9 @@ class SaveDialog(wx.Dialog):
 		self.SetIcon(ico)
 		saveButton.SetDefault()
 		self.Layout()
-		wx.EVT_BUTTON(self, 331, self.SaveData)
-		wx.EVT_BUTTON(self, 332, self.DiscardData)
-		wx.EVT_BUTTON(self, 333, self.CancelDialog)
+		self.Bind(wx.EVT_BUTTON, self.SaveData, id=331)
+		self.Bind(wx.EVT_BUTTON, self.DiscardData, id=332)
+		self.Bind(wx.EVT_BUTTON, self.CancelDialog, id=333)
 
 	def SaveData(self, event):
 		self.EndModal(2)
@@ -896,8 +896,8 @@ class EditGridFrame(wx.Dialog):
 									wx.Size(BWidth, BHeight))
 		cancelbutton = wx.Button(self, 422, "Cancel", wx.Point(110,90), \
 									wx.Size(BWidth, BHeight))
-		wx.EVT_BUTTON(self, 421, self.OkayButtonPressed)
-		wx.EVT_BUTTON(self, 422, self.CancelButtonPressed)
+		self.Bind(wx.EVT_BUTTON, self.OkayButtonPressed, id=421)
+		self.Bind(wx.EVT_BUTTON, self.CancelButtonPressed, id=422)
 
 	def OkayButtonPressed(self, event):
 		colswanted = self.numnewcols.GetValue()
@@ -958,13 +958,13 @@ class ScriptFrame(wx.Frame):
 		"""
 		toolBar.SetToolBitmapSize((24,24))
 		toolBar.Realize()
-		wx.EVT_TOOL(self, 710, self.ExecuteScript)
-		wx.EVT_TOOL(self, 711, self.OpenScript)
-		wx.EVT_TOOL(self, 713, self.SaveScriptAs)
-		wx.EVT_TOOL(self,715, self.CutSelection)
-		wx.EVT_TOOL(self, 716, self.CopySelection)
-		wx.EVT_TOOL(self, 717, self.PasteSelection)
-		wx.EVT_TOOL(self, 718, self.ShowHelp)
+		self.Bind(wx.EVT_TOOL, self.ExecuteScript, id=710)
+		self.Bind(wx.EVT_TOOL, self.OpenScript, id=711)
+		self.Bind(wx.EVT_TOOL, self.SaveScriptAs, id=713)
+		self.Bind(wx.EVT_TOOL, self.CutSelection, id=715)
+		self.Bind(wx.EVT_TOOL, self.CopySelection, id=716)
+		self.Bind(wx.EVT_TOOL, self.PasteSelection, id=717)
+		self.Bind(wx.EVT_TOOL, self.ShowHelp, id=718)
 
 	def ExecuteScript(self, event):
 		mainscript = self.scripted.GetText()
@@ -1277,153 +1277,9 @@ class OutputSheet(wx.Frame):
 		self.htmlpage.SetPage(self.WholeOutString+htmlend,HOME)
 
 #---------------------------------------------------------------------------
-# Same as DescriptivesContinuousFrame, but for nominal descriptives
-class OneConditionTestFrame(wx.Dialog):
-	def __init__(self, parent, id, ColumnList):
-		wx.Dialog.__init__(self, parent, id, "One Condition Tests", \
-						  size=(500,400+wind))
-		x = self.GetClientSize()
-		winheight = x[1]
-		self.SetIcon(ico)
-		ColumnList, self.colnums = frame.grid.GetUsedCols()
-		self.ColBox = wx.Choice(self, 101,(10,30), (110,20), choices = ColumnList)
-		self.ColBox.SetSelection(0)
-		cID = wx.NewId()
-		l0 = wx.StaticText(self,-1,"Select Column to Analyse",pos=(10,10))
-		l1 = wx.StaticText(self,-1,"Choose Test(s):", pos=(10,60))
-		if wx.Platform == '__WXMSW__':
-			l3a = wx.StaticText(self,-1,'User Hypothesised', pos=(10,335))
-			l3b = wx.StaticText(self,-1,'Mean:',pos=(10,352))
-			self.UserMean = wx.TextCtrl(self,219,pos=(140,345),size=(70,20))
-			allbutton = wx.Button(self, 105, "Select All", wx.Point(250,winheight-70),\
-									wx.Size(BWidth, BHeight))
-			nonebutton = wx.Button(self, 106, "Select None", wx.Point(360,winheight-70),\
-									wx.Size(BWidth, BHeight))
-		else:
-			l3a = wx.StaticText(self,-1,'User Hypothesised', pos=(10,325))
-			l3b = wx.StaticText(self,-1,'Mean:',pos=(10,342))
-			self.UserMean = wx.TextCtrl(self,219,pos=(140,335),size=(70,20))
-			allbutton = wx.Button(self, 105, "Select All", wx.Point(250,winheight-50),\
-									wx.Size(BWidth, BHeight))
-			nonebutton = wx.Button(self, 106, "Select None", wx.Point(360,winheight-50),\
-									wx.Size(BWidth, BHeight))
-		l4 = wx.StaticText(self,-1,"Select Descriptive Statistics",pos=(250,10))
-		Tests = ['t-test','Sign test','Chi square test for variance']
-		self.TestChoice = wx.CheckListBox(self,213,wx.Point(10,80),\
-									wx.Size(230,180),Tests)
-		self.hypchoice=wx.RadioBox(self, 205,"Select Hypothesis",\
-									wx.Point(10,270),wx.DefaultSize,HypList)
-		self.hypchoice.SetSelection(1)
-		self.okaybutton = wx.Button(self,103,"Okay",wx.Point(10,winheight-35),\
-									wx.Size(BWidth, BHeight))
-		self.okaybutton.SetDefault()
-		cancelbutton = wx.Button(self,104,"Cancel",wx.Point(100,winheight-35),\
-									wx.Size(BWidth, BHeight))
-		self.DescChoice = DescChoiceBox(self, 104)
-		self.stats = []
-		self.Bind(wx.EVT_BUTTON, self.OnOkayButton, id=103)
-		self.Bind(wx.EVT_BUTTON, self.OnCloseOneCond, id=104)
-		self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectAllDescriptives, id=105)
-		self.Bind(wx.EVT_BUTTON, self.DescChoice.SelectNoDescriptives, id=106)
-		# enable the okay button if something is entered as a hyp mean.
-		# Can the wx.TextCtrl allow only numbers to be entered?
-		#wx.EVT_TEXT(self.UserMean, 107, self.EnteredText) # doesn't work on Windows!
-
-	def OnOkayButton(self, event):
-		colNum = self.ColBox.GetSelection()
-		name = frame.grid.GetColLabelValue(colNum)
-		if (colNum < 0): # add top limits of grid to this
-			self.Close(True)
-			return
-		try:
-			umean = float(self.UserMean.GetValue())
-		except:
-			output.Addhtml('<p class="text-warning">Cannot do test - no user \
-									hypothesised mean specified')
-			self.Close(True)
-			return
-		#x = frame.grid.GetVariableData(x1,'float')
-		data = frame.grid.GetVariableData(colNum,'float')
-		raw_data = frame.grid.GetVariableData(colNum,'string')
-		self.stats = self.DescChoice.GetCheckedStrings()
-		ManyDescriptives(self.stats, [data], [raw_data], [name], None)
-		# One sample t-test
-		if self.TestChoice.IsChecked(0):
-			output.Addhtml('<h3>One sample t-test</h3>')
-			df, t, prob, d = Inferentials.OneSampleTTest(data, umean)
-			if (prob == -1.0):
-				output.Addhtml('<p class="text-warning">All elements are the same, \
-									test not possible</p>')
-			else:
-				if (self.hypchoice.GetSelection() == 0):
-					prob = prob / 2
-				variables = [['Variable', name],
-						['Hypothetic mean', umean],
-						['df', df],
-						['t',t],
-						['p',prob],
-						["Cohen's d",d]]
-				quote = "<b>Quote:</b> <i>t</i>(%d)=%2.3f, <i>p</i>=%1.3f, <i>d</i>=%1.3f<br />"%\
-						(df, t, prob, d)
-				ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
-				output.Addhtml(ln)
-				#now draw up the xml history stuff
-				xmlevt = '<analyse test="one sample t-test" column = "'+str(colNum)
-				xmlevt = xmlevt+' hyp_value = "'+str(umean)+'" tail="'
-				if (self.hypchoice.GetSelection() == 0):
-					xmlevt = xmlevt+'1">'
-				else:
-					xmlevt = xmlevt+'2">'
-				xmlevt = xmlevt+'t ('+str(df)+') = '+str(t)+', p = '+str(prob)
-				xmlevt = xmlevt+'</analyse>'
-				hist.AppendEvent(xmlevt)
-		# One sample sign test
-		if self.TestChoice.IsChecked(1):
-			output.Addhtml('<H3>One sample sign test</H3>')
-			nplus, nminus, nequal, z, prob = Inferentials.OneSampleSignTest(data, umean)
-			if (prob == -1.0):
-				output.Addhtml('<p class="text-warning">All data are the same - no \
-									analysis is possible</p>')
-			else:
-				if (self.hypchoice.GetSelection() == 0):
-					prob = prob / 2
-				variables = [['Variable', name],
-						['Hypothetic mean', umean],
-						['Positive',nplus],
-						['Negative',nminus],
-						['Equal',nequal],
-						['Total N', nplus+nminus+nequal],
-						['Z',z],
-						['p',prob]]
-				quote = "<i>Z</i>=%1.3f, <i>p</i>=%1.3f<br />"%(z, prob)
-				ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
-				output.Addhtml(ln)
-		# chi square test for variance
-		if self.TestChoice.IsChecked(2):
-			output.Addhtml('<H3>One sample chi square</H3>')
-			df, chisquare, prob = Inferentials.ChiSquareVariance(data, umean)
-			if (self.hypchoice.GetSelection() == 0):
-				prob = prob / 2
-			if (prob == None):
-				prob = 1.0
-				df = 0
-				chisquare = 0.0
-			variables = [['Variable', name],
-					['Hypothetic mean', umean],
-					['df', df],
-					['Chi',chisquare],
-					['p',prob]]
-			ln = tabler.table(variables)
-			output.Addhtml(ln)
-
-		self.Close(True)
-
-	def OnCloseOneCond(self, event):
-		self.Close(True)
-
-#---------------------------------------------------------------------------
 #dialog for 2 sample tests
 class TwoConditionTestFrame(wx.Dialog):
+	# This can be removed?
 	def __init__(self, parent, id, ColumnList):
 		wx.Dialog.__init__(self, parent, id, "Two Condition Tests", \
 									size=(500,400+wind))
@@ -2951,8 +2807,16 @@ class DataFrame(wx.Frame):
 		# shows One Condition Test dialog
 		ColumnList, waste = self.grid.GetUsedCols()
 		if (len(ColumnList) > 0):
-			win = OneConditionTestFrame(frame, -1, ColumnList)
-			win.Show(True)
+			dlg = TestOneCondition.TestDialog(ColumnList) 
+			win = dlg.ShowModal()
+			try:
+				if dlg.results:
+					print(dlg.results)
+					DoOneConditionTests(self.grid, dlg.results)
+			except AttributeError:
+				pass
+			#win = OneConditionTestFrame(frame, -1, ColumnList)
+			#win.Show(True)
 		else:
 			self.SetStatusText('You need to enter 1 data column for this!')
 
@@ -3259,6 +3123,68 @@ def DoTwoConditionTests(grid, result):
 		if "ftest" in result["tests"]:
 			pass
 		ln = "<br />"+quote+"<br />"
+		output.Addhtml(ln)
+
+def DoOneConditionTests(grid, result):
+	#name = frame.grid.meta[result["IV"]]["tests"]
+	quote = ""
+	name1 = frame.grid.meta[result["IV"]]["name"]
+	data = grid.GetVariableData(int(result["IV"]), 'float')
+	try:
+		umean = float(result["umean"])
+	except ValueError:
+		output.Addhtml('<p class="text-warning">Cannot do test - no user hypothesised mean specified')
+		return
+	# ['ttestone','signtest','chivariance']
+	# One sample t-test
+	if 'ttestone' in result['tests']:
+		output.Addhtml('<h3>One sample t-test</h3>')
+		#df, t, prob, d = Inferentials.OneSampleTTest(data, umean)
+		res = Inferentials.OneSampleTTest(data, umean)
+		if (res['prob'] == -1.0):
+			output.Addhtml('<p class="text-warning">All elements are the same, \
+								test not possible</p>')
+		else:
+			variables = [['Variable', name1],
+					['Hypothetic mean', umean],
+					['df', res['df']],
+					['t',res['t']],
+					['p',res['prob']]]
+			#quote += '<br />' + tabler.table(variables) + '<br />'
+			quote = res['quote']
+			ln = '<br />' + tabler.table(variables) + quote + '<p /><br />'
+			output.Addhtml(ln)
+	# One sample sign test
+	if 'signtest' in result['tests']:
+		output.Addhtml('<H3>One sample sign test</H3>')
+		res = Inferentials.OneSampleSignTest(data, umean)
+		if (res['probability'] == -1.0):
+			output.Addhtml('<p class="text-warning">All data are the same - no \
+								analysis is possible</p>')
+		else:
+			variables = [['Variable', name1],
+					['Hypothetic mean', umean],
+					['Positive',res['nplus']],
+					['Negative',res['nminus']],
+					['Equal',res['nequal']],
+					['Z',res['z']],
+					['p',res['probability']]]
+			ln = '<br />' + tabler.table(variables) + res['quote'] + '<p /><br />'
+			output.Addhtml(ln)
+	# chi square test for variance
+	if 'chivariance' in result['tests']:
+		print('One sample chi square')
+		output.Addhtml('<H3>One sample chi square</H3>')
+		res = Inferentials.ChiSquareVariance(data, umean)
+		if (res['probability'] == -1.0):
+			output.Addhtml('<p class="text-warning">All elements are the same, test not possible</p>')
+		else:
+			variables = [['Variable', name1],
+					['Hypothetic mean', umean],
+					['df', res['df']],
+					['Chi',res['chisquare']],
+					['p',res['probability']]]
+			ln = '<br />' + tabler.table(variables) + res['quote'] + '<p /><br />'
 		output.Addhtml(ln)
 
 def DoCorrelations(grid, result):

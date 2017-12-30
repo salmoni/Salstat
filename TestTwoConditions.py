@@ -88,7 +88,7 @@ class TestDialog(wx.Dialog):
             if self.withinSubs.test3.IsChecked():
                 tests.append('pairedsign')
             self.results["IV"] = []
-            self.results["DV"] = self.withinSubs.DVBox.GetChecked()
+            self.results["DV"] = self.withinSubs.DVBox.GetCheckedItems()
             self.results["tests"] = tests
         else:
             self.results = None

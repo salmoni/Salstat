@@ -173,13 +173,13 @@ class ImportDialog(wx.Dialog):
                 choices = lineEndChoices)
         self.AttemptPreview()
         # It seems odd but it seems better for all events to be routed to the same method
-        wx.EVT_CHECKBOX(self, 760, self.AttemptPreview)
-        wx.EVT_TEXT(self, 761, self.AttemptPreview)
-        wx.EVT_TEXT(self, 762, self.AttemptPreview)
-        wx.EVT_BUTTON(self, 764, self.CancelButton)
-        wx.EVT_BUTTON(self, 763, self.ImportButton)
-        wx.EVT_CHOICE(self, 765, self.AttemptPreview)
-        wx.EVT_SPINCTRL(self, 766, self.AttemptPreview)
+        self.Bind(wx.EVT_CHECKBOX, self.AttemptPreview, id=760)
+        self.Bind(wx.EVT_TEXT, self.AttemptPreview, id=761)
+        self.Bind(wx.EVT_TEXT, self.AttemptPreview, id=762)
+        self.Bind(wx.EVT_BUTTON, self.CancelButton, id=764)
+        self.Bind(wx.EVT_BUTTON, self.ImportButton, id=763)
+        self.Bind(wx.EVT_CHOICE, self.AttemptPreview, id=765)
+        self.Bind(wx.EVT_SPINCTRL, self.AttemptPreview, id=766)
 
     def AttemptPreview(self, event=None):
         # check we have filename first

@@ -225,10 +225,10 @@ class ImportDialog(wx.Dialog):
                         val = unicode(sheet[idx_row, idx_col].value)
                     self.grids[idx].SetCellValue(idx_row, idx_col, val)
         # It seems odd but it seems better for all events to be routed to the same method
-        wx.EVT_CHECKBOX(self, 760, self.AdjustGrid)
-        wx.EVT_SPINCTRL(self, 766, self.AdjustGrid)
-        wx.EVT_BUTTON(self, 764, self.CancelButton)
-        wx.EVT_BUTTON(self, 763, self.ImportButton)
+        self.Bind(wx.EVT_CHECKBOX, self.AdjustGrid, id=760)
+        self.Bind(wx.EVT_SPINCTRL, self.AdjustGrid, id=766)
+        self.Bind(wx.EVT_BUTTON, self.CancelButton, id=764)
+        self.Bind(wx.EVT_BUTTON, self.ImportButton, id=763)
 
     def AttemptPreview(self, event=None):
         beginRow = self.dataRow.GetValue()
