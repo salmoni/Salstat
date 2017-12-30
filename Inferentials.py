@@ -474,7 +474,6 @@ def Friedman (data):
     df = k - 1
     prob = chisqprob( chi , df )
     results = { 'chi' : chi , 'k' : k , 'n' : n , 'df' : df , 'prob' : prob }
-    print (results)
     return results
 
 def anovaBetween(data):

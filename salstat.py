@@ -2987,14 +2987,14 @@ def DoThreeConditionTests(grid, result):
 		if "anovawithin" in result["tests"]:
 			res = Inferentials.anovaWithin(data)
 			quotevars = (res["DFbet"],res["DFres"],res["F"],res["p"])
-			quote = "Within-subjects ANOVA (Analysis of Variance)<br />"
+			quote = "<h3>Within-subjects ANOVA</h3>(analysis of variance)<br />"
 			quote += "<b>Quote:</b> <i>F</i>(%d, %d) = %.3f, <i>p</i> = %1.4f<br />"%(quotevars)
 			ln = '<br />'+quote+'<br />'+tabler.tableANOVAWithin(res)
 			output.Addhtml(ln)
 		if "friedmans" in result["tests"]:
 			res = Inferentials.Friedman(data)
 			quotevars = (res["df"],res["chi"],res["prob"])
-			quote = "Friedman's Tests (nonparametric analysis of variance)<br />"
+			quote = "<h3>Friedman's Tests</h3>(nonparametric analysis of variance)<br />"
 			quote += "<b>Quote:</b> <i>F</i>(%d) = %.3f, <i>p</i> = %1.4f<br />"%(quotevars)
 			variables =[['Variable:', " grouped by "],
 					['chi',res['chi'] ],
@@ -3024,14 +3024,14 @@ def DoThreeConditionTests(grid, result):
 		if "anovabetween" in result["tests"]:
 			res = Inferentials.anovaBetween(data)
 			quotevars = (res["DFbet"],res["DFerr"],res["F"],res["p"])
-			quote = "Between-subjects ANOVA (Analysis of Variance)<br />"
+			quote = "<h3>Between-subjects ANOVA</h3>(analysis of variance)<br />"
 			quote += "<b>Quote:</b> <i>F</i>(%d, %d) = %.3f, <i>p</i> = %1.4f<br />"%(quotevars)
 			ln = '<br />'+quote+'<br />'+tabler.tableANOVABetween(res)
 			output.Addhtml(ln)
 		if "kruskal" in result["tests"]:
 			res = Inferentials.KruskalWallis(data)
 			quotevars = (res['df'],res["h"],res["prob"])
-			quote = "Kruskal-Wallis test<br />"
+			quote = "<h3>Kruskal-Wallis test</h3>(nonparametric analysis of variance)<br />"
 			quote += "<b>Quote:</b> <i>H</i> (%d) = %.3f, <i>p</i> = %1.4f<br />"%(quotevars)
 			variables =[['Variable:', "%s grouped by %s"%(name2, name1)],
 					['h',res['h']],
@@ -3173,7 +3173,6 @@ def DoOneConditionTests(grid, result):
 			output.Addhtml(ln)
 	# chi square test for variance
 	if 'chivariance' in result['tests']:
-		print('One sample chi square')
 		output.Addhtml('<H3>One sample chi square</H3>')
 		res = Inferentials.ChiSquareVariance(data, umean)
 		if (res['probability'] == -1.0):
