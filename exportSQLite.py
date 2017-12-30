@@ -13,7 +13,7 @@ auditable.
 import sqlite3, os.path
 
 def exporttoSQLiteTEST(datagrid, output):
-    print output.WholeOutString
+    print(output.WholeOutString)
     filename = "/Users/alan/Projects/SQLitefile.sqlite"
     exporttoSQLite(filename, datagrid, output)
 
@@ -61,7 +61,7 @@ def exporttoSQLite(filename, datagrid, output=None):
         conn = sqlite3.connect(filename)
         c = conn.cursor()
     except:
-        print "Could not open database"
+        print("Could not open database")
         return
     # then save data and meta-data to a table
     # First drop the original table
@@ -73,7 +73,7 @@ def exporttoSQLite(filename, datagrid, output=None):
     # write variables table
     try:
         c.execute('''CREATE TABLE data
-                    (name text, align text, label text, measure text, ivdv text, 
+                    (name text, align text, label text, measure text, ivdv text,
                     decplaces text, missingvalues text, data text)''')
     except sqlite3.OperationalError:
        pass
@@ -106,7 +106,3 @@ def exporttoSQLite(filename, datagrid, output=None):
         conn.commit()
     # wrap up
     conn.close()
-
-
-
-

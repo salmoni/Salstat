@@ -14,66 +14,66 @@ def chisqprob(chisq,df):
     """
     Returns the (1-tailed) probability value associated with the provided
     chi-square value and df.  Adapted from chisq.c in Gary Perlman's |Stat.
-    
+
     Usage:   chisqprob(chisq,df)
     """
     BIG = 20.0
     def ex(x):
-	BIG = 20.0
-	if x < -BIG:
-	    return 0.0
-	else:
-	    return math.exp(x)
+    	BIG = 20.0
+    	if x < -BIG:
+    	    return 0.0
+    	else:
+    	    return math.exp(x)
 
     if chisq <=0 or df < 1:
-	return 1.0
+	       return 1.0
     a = 0.5 * chisq
     if df%2 == 0:
-	even = 1
+	       even = 1
     else:
-	even = 0
+	       even = 0
     if df > 1:
-	y = ex(-a)
+	       y = ex(-a)
     if even:
-	s = y
+	       s = y
     else:
-	s = 2.0 * zprob(-math.sqrt(chisq))
+	       s = 2.0 * zprob(-math.sqrt(chisq))
     if (df > 2):
-	chisq = 0.5 * (df - 1.0)
-	if even:
-	    z = 1.0
-	else:
-	    z = 0.5
-	if a > BIG:
-	    if even:
-		e = 0.0
-	    else:
-		e = math.log(math.sqrt(math.pi))
-	    c = math.log(a)
-	    while (z <= chisq):
-		e = math.log(z) + e
-		s = s + ex(c*z-a-e)
-		z = z + 1.0
-	    return s
-	else:
-	    if even:
-		e = 1.0
-	    else:
-		e = 1.0 / math.sqrt(math.pi) / math.sqrt(a)
-		c = 0.0
-		while (z <= chisq):
-		    e = e * (a/float(z))
-		    c = c + e
-		    z = z + 1.0
-		return (c*y+s)
+    	chisq = 0.5 * (df - 1.0)
+    	if even:
+    	    z = 1.0
+    	else:
+    	    z = 0.5
+    	if a > BIG:
+    	    if even:
+    		          e = 0.0
+    	    else:
+    		          e = math.log(math.sqrt(math.pi))
+    	    c = math.log(a)
+    	    while (z <= chisq):
+        		e = math.log(z) + e
+        		s = s + ex(c*z-a-e)
+        		z = z + 1.0
+    	    return s
+    	else:
+    	    if even:
+    		          e = 1.0
+    	    else:
+        		e = 1.0 / math.sqrt(math.pi) / math.sqrt(a)
+        		c = 0.0
+        		while (z <= chisq):
+        		    e = e * (a/float(z))
+        		    c = c + e
+        		    z = z + 1.0
+        		return (c*y+s)
     else:
-	return s
+        return s
 
 def inversechi(prob, df):
     """This function calculates the inverse of the chi square function. Given
-    a p-value and a df, it should approximate the critical value needed to 
+    a p-value and a df, it should approximate the critical value needed to
     achieve these functions. Adapted from Gary Perlmans critchi function in
-    C. Apologies if this breaks copyright, but no copyright notice was 
+    C. Apologies if this breaks copyright, but no copyright notice was
     attached to the relevant file."""
     minchisq = 0.0
     maxchisq = 99999.0
@@ -95,7 +95,7 @@ def erfcc(x):
     """
     Returns the complementary error function erfc(x) with fractional
     error everywhere less than 1.2e-7.  Adapted from Numerical Recipies.
-    
+
     Usage:   erfcc(x)
     """
     z = abs(x)
@@ -113,42 +113,42 @@ def erfcc(x):
 def zprob(z):
     """
     Returns the area under the normal curve 'to the left of' the given z value.
-    Thus, 
+    Thus,
     for z<0, zprob(z) = 1-tail probability
     for z>0, 1.0-zprob(z) = 1-tail probability
     for any z, 2.0*(1.0-zprob(abs(z))) = 2-tail probability
     Adapted from z.c in Gary Perlman's |Stat.
-    
+
     Usage:   zprob(z)
     """
     Z_MAX = 6.0    # maximum meaningful z-value
     if z == 0.0:
-	x = 0.0
+	       x = 0.0
     else:
-	y = 0.5 * math.fabs(z)
-	if y >= (Z_MAX*0.5):
-	    x = 1.0
-	elif (y < 1.0):
-	    w = y*y
-	    x = ((((((((0.000124818987 * w
-			-0.001075204047) * w +0.005198775019) * w
-		      -0.019198292004) * w +0.059054035642) * w
-		    -0.151968751364) * w +0.319152932694) * w
-		  -0.531923007300) * w +0.797884560593) * y * 2.0
-	else:
-	    y = y - 2.0
-	    x = (((((((((((((-0.000045255659 * y
-			     +0.000152529290) * y -0.000019538132) * y
-			   -0.000676904986) * y +0.001390604284) * y
-			 -0.000794620820) * y -0.002034254874) * y
-		       +0.006549791214) * y -0.010557625006) * y
-		     +0.011630447319) * y -0.009279453341) * y
-		   +0.005353579108) * y -0.002141268741) * y
-		 +0.000535310849) * y +0.999936657524
+    	y = 0.5 * math.fabs(z)
+    	if y >= (Z_MAX*0.5):
+    	    x = 1.0
+    	elif (y < 1.0):
+    	    w = y*y
+    	    x = ((((((((0.000124818987 * w
+    			-0.001075204047) * w +0.005198775019) * w
+    		      -0.019198292004) * w +0.059054035642) * w
+    		    -0.151968751364) * w +0.319152932694) * w
+    		  -0.531923007300) * w +0.797884560593) * y * 2.0
+    	else:
+    	    y = y - 2.0
+    	    x = (((((((((((((-0.000045255659 * y
+    			     +0.000152529290) * y -0.000019538132) * y
+    			   -0.000676904986) * y +0.001390604284) * y
+    			 -0.000794620820) * y -0.002034254874) * y
+    		       +0.006549791214) * y -0.010557625006) * y
+    		     +0.011630447319) * y -0.009279453341) * y
+    		   +0.005353579108) * y -0.002141268741) * y
+    		 +0.000535310849) * y +0.999936657524
     if z > 0.0:
-	prob = ((x+1.0)*0.5)
+	       prob = ((x+1.0)*0.5)
     else:
-	prob = ((1.0-x)*0.5)
+	       prob = ((1.0-x)*0.5)
     return prob
 
 
@@ -164,12 +164,12 @@ def ksprob(alam):
     termbf = 0.0
     a2 = -2.0*alam*alam
     for j in range(1,201):
-	term = fac*math.exp(a2*j*j)
-	sum = sum + term
-	if math.fabs(term)<=(0.001*termbf) or math.fabs(term)<(1.0e-8*sum):
-	    return sum
-	fac = -fac
-	termbf = math.fabs(term)
+    	term = fac*math.exp(a2*j*j)
+    	sum = sum + term
+    	if math.fabs(term)<=(0.001*termbf) or math.fabs(term)<(1.0e-8*sum):
+    	    return sum
+    	fac = -fac
+    	termbf = math.fabs(term)
     return 1.0             # Get here only if fails to converge; was 0.0!!
 
 
@@ -178,7 +178,7 @@ def fprob (dfnum, dfden, F):
     Returns the (1-tailed) significance level (p-value) of an F
     statistic given the degrees of freedom for the numerator (dfR-dfF) and
     the degrees of freedom for the denominator (dfF).
-    
+
     Usage:   fprob(dfnum, dfden, F)   where usually dfnum=dfbn, dfden=dfwn
     """
     p = betai(0.5*dfden, 0.5*dfnum, dfden/float(dfden+dfnum*F))
@@ -190,7 +190,7 @@ def tprob(df, t):
 def inversef(prob, df1, df2):
     """This function returns the f value for a given probability and 2 given
     degrees of freedom. It is an approximation using the fprob function.
-    Adapted from Gary Perlmans critf function - apologies if copyright is 
+    Adapted from Gary Perlmans critf function - apologies if copyright is
     broken, but no copyright notice was attached """
     f_epsilon = 0.000001
     maxf = 9999.0
@@ -217,7 +217,7 @@ def betacf(a,b,x):
     """
     This function evaluates the continued fraction form of the incomplete
     Beta function, betai.  (Adapted from: Numerical Recipies in C.)
-    
+
     Usage:   betacf(a,b,x)
     """
     ITMAX = 200
@@ -281,7 +281,7 @@ def betai(a,b,x):
     Usage:   betai(a,b,x)
     """
     if (x<0.0 or x>1.0):
-        raise ValueError, 'Bad x in lbetai'
+        raise ValueError
     if (x==0.0 or x==1.0):
         bt = 0.0
     else:
@@ -291,7 +291,3 @@ def betai(a,b,x):
         return bt*betacf(a,b,x)/float(a)
     else:
         return 1.0-bt*betacf(b,a,1.0-x)/float(b)
-
-
-
-

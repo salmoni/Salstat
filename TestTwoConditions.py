@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import time, os, os.path
-import urlparse, urllib, codecs
+import urllib, codecs
+import urllib.parse as urlparse
 import wx
 import images
 import sys, numpy
@@ -54,8 +55,8 @@ class TestDialog(wx.Dialog):
         okayButton = wx.Button(self,211,"Analyse",pos=(540,360),size=(125,-1))
         cancelButton = wx.Button(self,212,"Cancel",pos=(390,360),size=(125,-1))
         okayButton.SetDefault()
-        wx.EVT_BUTTON(self, 211, self.AnalyseButton)
-        wx.EVT_BUTTON(self, 212, self.CancelButton)
+        self.Bind(wx.EVT_BUTTON, self.AnalyseButton, id=211)
+        self.Bind(wx.EVT_BUTTON, self.CancelButton, id=212)
 
     def AnalyseButton(self, event):
         page = self.decider.GetSelection()
@@ -108,5 +109,3 @@ if __name__ == '__main__':
     frame = TestDialog(cList, testFlag=True)
     frame.Show(True)
     app.MainLoop()
-
-    

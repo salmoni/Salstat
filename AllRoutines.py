@@ -18,34 +18,34 @@ sum - returns the sum of non-missing data
 minimum - returns the minimum of non-missing data
 maximum - returns the maximum of non-missing data
 Range - maximum minus the minimum
-proportions - 
-relfreqmode - 
-cumsum - 
-cumproduct - 
-cumpercent - 
-frequencies - 
-trimmeddata - 
-trimmedmean - 
-bitrimmedmean - 
-mean - 
-median - 
-mode - 
-moment - 
+proportions -
+relfreqmode -
+cumsum -
+cumproduct -
+cumpercent -
+frequencies -
+trimmeddata -
+trimmedmean -
+bitrimmedmean -
+mean -
+median -
+mode -
+moment -
 TukeyQuartiles - returns Tukey's hinges
 MooreQuartiles - returns Moore & McCabe's hinges
 SPQuantile - quantile used by S-Plus
 TradQuantile - quantile used by SPSS
 MidstepQuantile - mid-step qua
-Q1 - Q1 quantile from Hyndnumpy.man & Fan
-Q2 - Q2 quantile from Hyndnumpy.man & Fan
-Q3 - Q3 quantile from Hyndnumpy.man & Fan
-Q4 - Q4 quantile from Hyndnumpy.man & Fan
-Q5 - Q5 quantile from Hyndnumpy.man & Fan
-Q6 - Q6 quantile from Hyndnumpy.man & Fan
-Q7 - Q7 quantile from Hyndnumpy.man & Fan
-Q8 - Q8 quantile from Hyndnumpy.man & Fan
-Q9 - Q9 quantile from Hyndnumpy.man & Fan 
-InterquartileRange - 
+Q1 - Q1 quantile from Hyndman & Fan
+Q2 - Q2 quantile from Hyndman & Fan
+Q3 - Q3 quantile from Hyndman & Fan
+Q4 - Q4 quantile from Hyndman & Fan
+Q5 - Q5 quantile from Hyndman & Fan
+Q6 - Q6 quantile from Hyndman & Fan
+Q7 - Q7 quantile from Hyndman & Fan
+Q8 - Q8 quantile from Hyndman & Fan
+Q9 - Q9 quantile from Hyndman & Fan
+InterquartileRange -
 SS - sum of squares
 SSDevs - sum of squared deviations from the mean
 SampVar - sample variance
@@ -55,7 +55,7 @@ PopStdDev - population standard deviation
 StdErr - standard error
 CoeffVar - coefficient of variation
 ConfidenceIntervals - returns the confidence intervals
-numpy.maD - Median absolute deviation
+MAD - Median absolute deviation
 GeometricMean - the geometric mean
 HarmonicMean - the harmonic mean
 MSSD - mean square of successive differences
@@ -69,7 +69,7 @@ OutliersSQR - returns two arrays, one of outliers defined by 1.5 * IQR, and the 
 
 """
 import math
-import numpy 
+import numpy
 import numpy.ma
 
 
@@ -200,7 +200,7 @@ def GetVariances(data):
 
 def GetStdDevs(data):
     return numpy.ma.sqrt(GetVariances(data))
-    
+
 def GetCorrelationnMatrix(data):
     VCV = GetVarsCovars_M(data)
     return VCV / numpy.ma.sqrt(numpy.ma.diagonal(VCV))
@@ -227,7 +227,7 @@ def Sum(data):
         return int(numpy.ma.sum(data))
     elif 'float' in t:
         return float(numpy.ma.sum(data))
-    else: 
+    else:
         return None
 
 def Minimum(data):
@@ -241,7 +241,7 @@ def Minimum(data):
         return int(numpy.ma.minimum(data))
     elif 'float' in t:
         return float(numpy.ma.minimum(data))
-    else: 
+    else:
         return None
 
 def Maximum(data):
@@ -255,7 +255,7 @@ def Maximum(data):
         return int(numpy.ma.maximum(data))
     elif 'float' in t:
         return float(numpy.ma.maximum(data))
-    else: 
+    else:
         return None
 
 def Range(data):
@@ -299,7 +299,7 @@ def RelFreqMode(data):
     total = numpy.ma.sum(nums)
     modes = numpy.ma.equal(data, m)
     return modes, (m / float(total)) * 100.0
-    
+
 def sum(data):
     """
     Sum
@@ -317,7 +317,7 @@ def CumSum(data):
         return int(cumsum(data)[-1])
     elif 'float' in t:
         return float(CumSum(data)[-1])
-    else: 
+    else:
         return None
 
 def CumProduct(data):
@@ -331,7 +331,7 @@ def CumProduct(data):
         return int(numpy.ma.cumprod(data)[-1])
     elif 'float' in t:
         return float(numpy.ma.cumprod(data)[-1])
-    else: 
+    else:
         return None
 
 def CumPercent(data):
@@ -409,7 +409,7 @@ def WinsorisedMean(Data, trim):
                 idx_upper = numpy.ma.greater(Data, UB)
                 val_min = Data[-idx_lower][0]
                 val_max = Data[-idx_upper][-1]
-                Data[idx_lower] = LB 
+                Data[idx_lower] = LB
                 Data[idx_upper] = UB
                 return Mean(Data)
         except:
@@ -442,7 +442,7 @@ def Median(data):
             return (data[l/2], data[(l/2)+1])
     if 'float' in t or 'int' in t:
         return float(numpy.ma.median(data))
-    else: 
+    else:
         return None
 
 def Mode(data):
@@ -461,11 +461,11 @@ def Moment(data, m):
     """
     t = str(data.dtype.type)
     if 'string' in t:
-        return 
+        return
     elif 'float' in t or 'int' in t:
         return (Sum((data - numpy.ma.average(data)) ** m) / Count(data))
     else:
-        return 
+        return
 
 def TukeyQuartiles(data):
     """
@@ -795,7 +795,7 @@ def GeometricMean(data):
     """
     t = str(data.dtype.type)
     if 'int' in t or 'float' in t:
-        return math.exp(Mean(numpy.ma.log(data))) 
+        return math.exp(Mean(numpy.ma.log(data)))
     else:
         return
 
@@ -809,7 +809,7 @@ def HarmonicMean(data):
             div1 = numpy.ma.divide(1.0, data)
             m1 = Mean(div1)
             hm = numpy.ma.divide(1.0, m1)
-            return hm 
+            return hm
         except ZeroDivisionError:
             return None
     else:
@@ -828,7 +828,7 @@ def MSSD(data):
             return None
     else:
         return
-    
+
 def Skewness(data):
     """
     Skewness
@@ -944,8 +944,4 @@ if __name__ == '__main__':
     data = numpy.ma.array([[9,9.5,5,7.5,9.5,7.5,8,7,8.5,6],
                            [7,6.5,7,7.5,5,8,6,6.5,7,7],
                            [6,8,4,6,7,6.5,6,4,6.5,3]])
-    print CalculateRanks(data)
-
-
-
-
+    print (CalculateRanks(data))

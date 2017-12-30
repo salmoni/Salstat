@@ -5,12 +5,13 @@ A Python module to read Excel files into Salstat. Does not include xlsx format
 """
 
 from __future__ import unicode_literals
-import os, os.path 
-import HTMLParser
+import os, os.path
+#import HTMLParser
+import html.parser as HTMLParser
 import wx, wx.aui, xlrd
 import wx.grid as gridlib
 import requests
-import BeautifulSoup as BS
+import bs4 as BS
 
 
 ################################################
@@ -226,7 +227,7 @@ def ImportHTML(frame, URL):
     """
     Controls all the module.
     Parameters: startDir: where to start the file dialog
-    Returns: 
+    Returns:
     filename: Path + File name selected by user
     headers: Variable name (None if none selected)
     data: data as a list of lists
@@ -254,16 +255,13 @@ if __name__ == '__main__':
     startDir = os.path.expanduser("~")
     app = wx.App(False)
     x = ImportCSV(startDir)
-    print x[0]
+    print (x[0])
     try:
-        print x[1],len(x[1])
+        print (x[1],len(x[1]))
     except TypeError:
-        print "No headers"
-    print x[2],len(x[2])
+        print ("No headers")
+    print (x[2],len(x[2]))
     #x.Close()
     #frame = ImportDialog(startDir)
     #frame.Show()
-    app.MainLoop()  
-
-
-
+    app.MainLoop()

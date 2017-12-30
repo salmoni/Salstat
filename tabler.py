@@ -54,7 +54,7 @@ def table(ListofLists):
                 foothtml = '<td>n/a</td>'
         elif type(val) is int:
             foothtml = '<td>%d</td>'%val
-        elif (type(val) is str) or (type(val) is unicode):
+        elif (type(val) is str):
             foothtml = '<td>%s</td>'%val
         #elif type(val) is float:
         else:
@@ -81,12 +81,12 @@ def vtable(List):
                 linehtml = '<td>n/a</td>'
         elif type(val) is int:
             linehtml = linehtml + '<td>%d</td>'%val
-        elif (type(val) is str) or (type(val) is unicode):
+        elif (type(val) is str):
             linehtml = linehtml + '<td>%s</td>'%val
         elif type(val) is float:
             linehtml = linehtml + '<td>%s</td>'%str(val)
         elif type(val) is tuple:
-            print "TUPLE!", val
+            print ("TUPLE!", val)
         else:
             try:
                 linehtml = linehtml + '<td>%s</td>'%str(val)
@@ -157,7 +157,7 @@ def tableFrequencies(List):
             table += '\t<tr><td>%s</td><td>%s</td></tr>\n'%(str(row),str(freqs[idx]))
         table += '</table>\n'
     return table
-        
+
 def tableProportions(List):
     """
     Passes two arrays in a list:
@@ -202,6 +202,4 @@ if __name__ == '__main__':
     a4 = ['t',30.0001]
     a5 = ['p',0.003]
     a = [a1,a2,a3,a4,a5]
-    print table(a)
-
-
+    print (table(a))

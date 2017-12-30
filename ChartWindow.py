@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import time, os, os.path
-import urlparse, urllib, codecs
+import urllib, codecs
+import urllib.parse as urlparse
 import wx
 import wx.html2 as html2lib
 #import wx.propgrid as wxpg
@@ -35,7 +36,7 @@ def ExtractGroupsData(group, groupingvars, variable):
     return data
 
 def FileToURL(path):
-    return urlparse.urljoin('file:', urllib.pathname2url(path))
+    return urlparse.urljoin('file:', urllib.request.pathname2url(path))
 
 base_file_name = os.path.abspath(__file__)
 basedir, script_name = os.path.split(base_file_name)
@@ -61,11 +62,11 @@ class ChartWindow(wx.Frame):
                                     wx.TB_3DBUTTONS | wx.TB_TEXT)
         #ToolNew = wx.ToolBarToolBase(toolBar)
         #toolBar.AddTool(10, NewIcon,"New")
-        toolBar.AddLabelTool(10, "New", wx.Bitmap("icons/IconNew.png"), shortHelp="Create a new chart")
-        toolBar.AddLabelTool(20, "Open", wx.Bitmap("icons/IconOpen.png"), shortHelp="Open a data file")
-        toolBar.AddLabelTool(30, "Save", wx.Bitmap("icons/IconSave.png"), shortHelp="Save these data to file")
-        toolBar.AddLabelTool(50, "Print", wx.Bitmap("icons/IconPrint.png"), shortHelp="Print this sheet")
-        toolBar.AddLabelTool(70, "Embed", wx.Bitmap("icons/IconEmbed.png"), shortHelp="Embed this chart with the rest of your results")
+        toolBar.AddTool(10, "New", wx.Bitmap("icons/IconNew.png"), shortHelp="Create a new chart")
+        toolBar.AddTool(20, "Open", wx.Bitmap("icons/IconOpen.png"), shortHelp="Open a data file")
+        toolBar.AddTool(30, "Save", wx.Bitmap("icons/IconSave.png"), shortHelp="Save these data to file")
+        toolBar.AddTool(50, "Print", wx.Bitmap("icons/IconPrint.png"), shortHelp="Print this sheet")
+        toolBar.AddTool(70, "Embed", wx.Bitmap("icons/IconEmbed.png"), shortHelp="Embed this chart with the rest of your results")
         """
         toolBar.AddSimpleTool(10, NewIcon,"New")
         toolBar.AddSimpleTool(20, OpenIcon,"Open")
@@ -94,7 +95,7 @@ class ChartWindow(wx.Frame):
         self.SetAutoLayout(True)
         self.SetSizer(self.box)
         self.Layout()
-        wx.EVT_TOOL(self, 70, self.EmbedChart)
+        self.Bind(wx.EVT_TOOL, self.EmbedChart, id=70)
 
     def EmbedChart(self, event):
         #self.embed = True
@@ -140,7 +141,7 @@ class ControlPanel(wx.Panel):
         self.XLabels.SetSelection(0)
 
         changebutton = wx.Button(self, 710, "Change settings", pos=(15,330))
-        wx.EVT_BUTTON(changebutton, 710, self.ChangeSettings)
+        self.Bind(wx.EVT_BUTTON, self.ChangeSettings, id=710)
 
     def ChangeSettings(self, event):
         type_idx = self.ctrl_type.GetSelection()
@@ -164,7 +165,7 @@ class ControlPanel(wx.Panel):
         if idx_align == 0:
             self.chartObject.legend_align = "do not show"
             self.chartObject.legend_verticalAlign = None
-            
+
         labelIdx = self.XLabels.GetSelection()
         if labelIdx > 0:
             labelVals = self.grid.GetVariableData(labelIdx - 1)
@@ -208,7 +209,7 @@ class VarPanel(wx.Panel):
         acceptbutton = wx.Button(self, 711, "Draw this chart", pos=(15,330))
         self.SetAutoLayout(True)
         self.Layout()
-        wx.EVT_BUTTON(acceptbutton, 711, self.ChangeVars)
+        self.Bind(wx.EVT_BUTTON, self.ChangeVars, id=711)
         self.ChangeVars(None)
 
     def GetSetDV(self, col_DV, col_IV):
@@ -219,7 +220,7 @@ class VarPanel(wx.Panel):
             name_DV = self.DV.GetCheckedStrings()
             self.chartObject.yAxis_title = name_DV
             test = self.stat.GetStringSelection()
-            allVals = [] 
+            allVals = []
             allFreqs = []
             series = []
             chartType = self.parent.GetChartType()
@@ -344,7 +345,7 @@ class VarPanel(wx.Panel):
         col_IV = self.IV.GetSelection()
         self.GetSetIV(col_IV)
         #print dir(self.DV)
-        col_DV = self.DV.GetChecked()
+        col_DV = self.DV.GetCheckedItems()
         self.GetSetDV(col_DV, col_IV)
         if self.valid_content:
             self.chartObject.ToString()
@@ -537,7 +538,7 @@ class ChartObject(object):
     def FinalToString(self):
         # converts all attributes to a HighCharts string ready for the output screen
         # uses timestamp as DIV id
-        t = str(time.time()).translate(None, '.')
+        t = str(time.time()).translate('.')
         self.chartLine = """\t$(function () {\n\t$("#Chart_%s").highcharts({\n"""%t + \
                 self.chart() + self.title() + self.subtitle() + \
                 self.xAxis() + self.yAxis() + self.legend() + \
@@ -561,4 +562,3 @@ if __name__ == '__main__':
     #print frame.chartObject.page
     #frame.preview.SetPage(frame.chartObject.chartLine,"")
     app.MainLoop()
-

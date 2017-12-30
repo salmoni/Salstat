@@ -5,7 +5,7 @@ A Python module to read Excel files into Salstat. Does not include xlsx format
 """
 
 from __future__ import unicode_literals
-import os, os.path 
+import os, os.path
 import wx, wx.aui, xlrd
 import wx.grid as gridlib
 from xlrd import open_workbook
@@ -44,7 +44,7 @@ def SaveToExcel(filename, grid):
         metasheet.write(4, idxx + 1, meta['ivdv'])
         metasheet.write(5, idxx + 1, meta['decplaces'])
         metasheet.write(6, idxx + 1, meta['missingvalues'])
-    book.save(filename)    
+    book.save(filename)
 
 ################################################
 # Save in xlsx format
@@ -79,7 +79,7 @@ def SaveToLibre(filename, grid):
         metasheet[(5, idxx + 1)].set_value(meta[str('decplaces')])
         metasheet[(6, idxx + 1)].set_value(meta['missingvalues'])
     book.save()
-    
+
 
 ################################################
 # Custom grid class for previewing data
@@ -327,7 +327,7 @@ def ImportSS(frame, startDir):
     """
     Controls all the module.
     Parameters: startDir: where to start the file dialog
-    Returns: 
+    Returns:
     filename: Path + File name selected by user
     headers: Variable name (None if none selected)
     data: data as a list of lists
@@ -358,15 +358,13 @@ if __name__ == '__main__':
     startDir = os.path.expanduser("~")
     app = wx.App(False)
     x = ImportCSV(startDir)
-    print x[0]
+    print (x[0])
     try:
-        print x[1],len(x[1])
+        print (x[1],len(x[1]))
     except TypeError:
-        print "No headers"
-    print x[2],len(x[2])
+        print ("No headers")
+    print (x[2],len(x[2]))
     #x.Close()
     #frame = ImportDialog(startDir)
     #frame.Show()
-    app.MainLoop()  
-
-
+    app.MainLoop()

@@ -82,7 +82,7 @@ class PFrame(wx.Dialog):
         wx.EVT_BUTTON(self, 2299, self.GetFont)
 
     def GetFont(self, event):
-        print "here?"
+        print ("here?")
         dlg = wx.FontDialog(self, self.fontObj)
         if dlg.ShowModal() == wx.ID_OK:
             font = dlg.GetFontData()
@@ -123,4 +123,3 @@ if __name__ == '__main__':
     frame = PFrame(None, -1, None)
     PWin = frame.Show()
     app.MainLoop()
-

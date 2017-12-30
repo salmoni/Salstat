@@ -71,14 +71,14 @@ class DFrame(wx.Dialog):
         sizerH01.Add(sizerL, 1, wx.EXPAND|wx.ALL, border=bord)
         sizerH01.AddSpacer(0)
         sizerH01.Add(sizerR, 1, wx.EXPAND|wx.ALL, border=bord)
-        
+
         self.SetAutoLayout(True)
         self.SetSizer(sizerH01)
         self.Layout()
-        wx.EVT_BUTTON(self, 1341, self.CancelButton)
-        wx.EVT_BUTTON(self, 1342, self.OkayButton)
-        wx.EVT_CHECKLISTBOX(self, 1343, self.CheckChecked)
-        wx.EVT_CHECKLISTBOX(self, 1344, self.CheckChecked)
+        self.Bind(wx.EVT_BUTTON, self.CancelButton, id=1341)
+        self.Bind(wx.EVT_BUTTON, self.OkayButton, id=1342)
+        self.Bind(wx.EVT_CHECKLISTBOX, self.CheckChecked, id=1343)
+        self.Bind(wx.EVT_CHECKLISTBOX, self.CheckChecked, id=1344)
 
     def CheckChecked(self, event):
         page = self.tests.GetSelection()
@@ -154,6 +154,5 @@ if __name__ == '__main__':
     app = wx.App()
     frame = DFrame(None, -1, None)
     frame.ShowModal()
-    print frame.alpha
+    print (frame.alpha)
     app.MainLoop()
-

@@ -1,7 +1,7 @@
 """
 ImportCSV.py
 
-A Python module to import all manner of CSV files. Produces a dialog 
+A Python module to import all manner of CSV files. Produces a dialog
 in wxPython for users to specify things like delimiters and so on.
 
 Usage:
@@ -12,7 +12,7 @@ import ImportCSV
 def GetData(frame, base_directory):
     result = ImportCSV.ImportCSV(base_directory)
     if result == None:
-        # User did not select file 
+        # User did not select file
     else:
         file_name = result[0]       # string
         variable_names = result[1]  # list
@@ -186,7 +186,7 @@ class ImportDialog(wx.Dialog):
         if self.FileName.fileName == None:
             return
         else:
-            # retrieve data 
+            # retrieve data
             data = []
             fin = codecs.open(self.FileName.fileName, encoding='utf-8')
             #fin = open(self.FileName.fileName,'r')
@@ -264,7 +264,7 @@ class ImportDialog(wx.Dialog):
 
     def ParseLine(self, line, delims, quotes):
         """
-        Parses a line of CSV text into components. This attempts to 
+        Parses a line of CSV text into components. This attempts to
         be a proper parser that can cope with multiple delimiters.
         """
         inQuote = False # flag for being 'within' quotes
@@ -278,7 +278,7 @@ class ImportDialog(wx.Dialog):
                     token = '' # and begin new token
                     inQuote = False # flag that we're not in a quote any more
                 else: # But if char is a non-matching quote...
-                    token += char # ...just add to token 
+                    token += char # ...just add to token
             elif char in delims: # or if char is a delimiter...
                 if len(token) > 0: # ...and token is worth recording...
                     tokens.append(token) # add token to list
@@ -367,26 +367,26 @@ class ImportDialog(wx.Dialog):
 
 class CSVObject(object):
     """
-    This class instantiates a file object as an interable. It means that 
-    CSV files can be read more efficiently than reading the entire data 
-    into memory. 
+    This class instantiates a file object as an interable. It means that
+    CSV files can be read more efficiently than reading the entire data
+    into memory.
     """
     def __init__(self, fileName, delims, quotes):
         self.fileName = fileName
         self.delims = delims
         self.quotes = quotes
         self.fin = open(fileName, 'r')
-        
+
     def __iter__(self):
         return self
-        
+
     def next(self):
         line = self.fin.next()
         return self.ParseLine(line)
 
     def ParseLine(self, line):
         """
-        Parses a line of CSV text into components. This attempts to 
+        Parses a line of CSV text into components. This attempts to
         be a proper parser that can cope with multiple delimiters.
         """
         inQuote = False # flag for being 'within' quotes
@@ -399,7 +399,7 @@ class CSVObject(object):
                     token = '' # and begin new token
                     inQuote = False # flag that we're not in a quote any more
                 else: # But if char is a non-matching quote...
-                    token += char # ...just add to token 
+                    token += char # ...just add to token
             elif char in self.delims: # or if char is a delimiter...
                 if len(token) > 0: # ...and token is worth recording...
                     tokens.append(token) # add token to list
@@ -423,7 +423,7 @@ def ImportCSV(frame=None, startDir=None):
     """
     Controls all the module.
     Parameters: startDir: where to start the file dialog
-    Returns: 
+    Returns:
     filename: Path + File name selected by user
     headers: Variable name (None if none selected)
     data: data as a list of lists
@@ -462,5 +462,4 @@ if __name__ == '__main__':
     quotes = '"'
     obj = CSVObject(fname, delims, quotes)
     for ln in obj:
-        print ln
-
+        print (ln)

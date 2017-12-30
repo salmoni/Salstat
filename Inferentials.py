@@ -63,13 +63,13 @@ def tiecorrect(rankvals):
     Corrects for ties in Mann Whitney U and Kruskal Wallis H tests.  See
     Siegel, S. (1956) Nonparametric Statistics for the Behavioral Sciences.
     New York: McGraw-Hill.  Code adapted from |Stat rankind.c code.
-    
+
     Usage:   tiecorrect(rankvals)
     Returns: T correction factor for U or H
     """
     sorted = rankvals.sort()
-    print "rankvals = ",rankvals
-    print "sorted   = ",sorted
+    print ("rankvals = ",rankvals)
+    print ("sorted   = ",sorted)
     n = len(sorted)
     T = 0.0
     i = 0
@@ -86,7 +86,7 @@ def tiecorrect(rankvals):
 
 def GroupData(x, y):
     """
-    This function takes 2 variables, x (a grouping / dummy variable), and 
+    This function takes 2 variables, x (a grouping / dummy variable), and
     y (the actual data). Returned are a list of vectors for each condition.
     """
     uniques, freqs = UniqueVals(x)
@@ -98,7 +98,7 @@ def GroupData(x, y):
 
 def GroupData2(x, y):
     """
-    This function takes 2 variables, x (a grouping / dummy variable), and 
+    This function takes 2 variables, x (a grouping / dummy variable), and
     y (the actual data). Returned are a list of vectors for each condition.
     """
     uniques, freqs = UniqueVals(x)
@@ -218,7 +218,7 @@ def TTestUnpaired(data1, data2):
     result["df"] = df
     result["prob"] = prob
     result["d"] = d
-    result["help"] = """T-test (unpaired). Requires 2 variables, the first an independent 
+    result["help"] = """T-test (unpaired). Requires 2 variables, the first an independent
                         variable to define the groups, and the second the dependent variable"""
     result['quote'] = "<b>Quote: </b> <i>t</i> (%d) = %.3f, <i>p</i> = %1.4f, d = %.3f<br />"
     result['quotetxt'] = "Quote: t (%d) = %.3f, p = %1.4f, d = %.3f\n"
@@ -260,7 +260,7 @@ def TTestPaired(data1, data2):
 
 def TwoSampleSignTest(data1, data2):
     """
-    This method performs a 2 sample sign test for matched samples on 2 
+    This method performs a 2 sample sign test for matched samples on 2
     supplied data vectors.
     Usage: TwoSampleSignTest(data1, data2)
     Returns: nplus, nminus, ntotal, z, prob
@@ -286,7 +286,7 @@ def TwoSampleSignTest(data1, data2):
                 nplus += 1
             elif data1[row] < data2[row]:
                 nminus += 1
-                
+
         #ntotal = nplus-nminus
         mean   = c1 / 2
         sd     = math.sqrt(mean)
@@ -303,7 +303,7 @@ def TwoSampleSignTest(data1, data2):
 
 def FTest(data1, data2, uservar):
     """
-    This method performs a F test for variance and needs a user 
+    This method performs a F test for variance and needs a user
     hypothesised variance to be supplied.
     Usage: FTest(uservar)
     Returns: f, df1, df2, prob
@@ -410,7 +410,7 @@ def KruskalWallis (data):
     Kruskal-Wallis H test. Taken from Siegel's Nonparametric Statistics
     """
     shape = data.shape
-    k = shape[0] 
+    k = shape[0]
     ranked = CalculateRanks ( data )
     ns = ranked.count ( 1 )
     N = Count ( ranked )
@@ -419,7 +419,7 @@ def KruskalWallis (data):
     p2 = Sum ( ranked_sums ** 2 / ns )
     p3 = 3 * ( N + 1 )
     H = ( p1 * p2 )  - p3
-    df = k - 1 
+    df = k - 1
     prob = chisqprob( H , df )
     result = { 'h' : H , 'df' : df , 'prob' : prob }
     return result
@@ -444,10 +444,10 @@ def Friedman (data):
     p2 = Sum ( ranked_sums ** 2 )
     p3 = 3 * n * ( k + 1 )
     chi = ( p1 * p2 ) - p3
-    df = k - 1 
+    df = k - 1
     prob = chisqprob( chi , df )
     results = { 'chi' : chi , 'k' : k , 'n' : n , 'df' : df , 'prob' : prob }
-    print results
+    print (results)
     return results
 
 def anovaBetween(data):
@@ -505,8 +505,8 @@ def anovaWithin(data):
     """
     Produces a within-subjects ANOVA
     For the brave:
-    Usage: anovaWithin(inlist, ns, sums, means). ns is a list of the N's, 
-    sums is a list of the sums of each condition, and the same for means 
+    Usage: anovaWithin(inlist, ns, sums, means). ns is a list of the N's,
+    sums is a list of the sums of each condition, and the same for means
     being a list of means
     Returns: SSint, SSres, SSbet, SStot, dfbet, dfwit, dfres, dftot, MSbet,
     MSwit, MSres, F, prob.
@@ -587,7 +587,7 @@ if __name__ == '__main__':
     a2 = ma.array([1,1,1,1,1,1,2,2,2,2,2,2,3,3,3,3,3,3])
     a3 = ma.array( [[1,2,3,4,3,2],
                     [5,4,5,6,5,6],
-                    [4,3,2,9,3,2]], 
+                    [4,3,2,9,3,2]],
                    mask=[[0,0,0,1,0,0],
                     [1,0,0,0,0,0],
                     [0,0,0,0,0,0]])
@@ -602,7 +602,7 @@ if __name__ == '__main__':
     data = numpy.ma.array([[9,9.5,5,7.5,9.5,7.5,8,7,8.5,6],
                            [7,6.5,7,7.5,5,8,6,6.5,7,7],
                            [6,8,4,6,7,6.5,6,4,6.5,3]])
-    print Friedman (data)
+    print (Friedman (data))
     """
     res = anovaBetween(a2, a1)
     print "SS = ",res.SSbet, res.SSwit, res.SStot
