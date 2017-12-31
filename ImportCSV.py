@@ -219,13 +219,13 @@ class ImportDialog(wx.Dialog):
         # get delimiters
         delims = ''
         if self.p1.del_01.IsChecked():
-            delims += b'\t'
+            delims += '\t'
         if self.p1.del_02.IsChecked():
-            delims += b','
+            delims += ','
         if self.p1.del_03.IsChecked():
-            delims += b' '
+            delims += ' '
         if self.p1.del_04.IsChecked():
-            delims += b';'
+            delims += ';'
         val = self.p1.edit_01.GetValue()
         if val != "":
             delims += val
@@ -327,13 +327,13 @@ class ImportDialog(wx.Dialog):
         # get delimiters
         delims = ''
         if self.p1.del_01.IsChecked():
-            delims += b'\t'
+            delims += '\t'
         if self.p1.del_02.IsChecked():
-            delims += b','
+            delims += ','
         if self.p1.del_03.IsChecked():
-            delims += b' '
+            delims += ' '
         if self.p1.del_04.IsChecked():
-            delims += b';'
+            delims += ';'
         val = self.p1.edit_01.GetValue()
         if val != "":
             delims += val

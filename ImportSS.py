@@ -220,10 +220,10 @@ class ImportDialog(wx.Dialog):
             for idx_row in range(nrows):
                 for idx_col in range(ncols):
                     if self.ftype == 'excel':
-                        val = unicode(sheet.cell(idx_row, idx_col).value)
+                        val = sheet.cell(idx_row, idx_col).value
                     elif self.ftype == 'libre':
-                        val = unicode(sheet[idx_row, idx_col].value)
-                    self.grids[idx].SetCellValue(idx_row, idx_col, val)
+                        val = sheet[idx_row, idx_col].value
+                    self.grids[idx].SetCellValue(idx_row, idx_col, str(val))
         # It seems odd but it seems better for all events to be routed to the same method
         self.Bind(wx.EVT_CHECKBOX, self.AdjustGrid, id=760)
         self.Bind(wx.EVT_SPINCTRL, self.AdjustGrid, id=766)
@@ -261,11 +261,10 @@ class ImportDialog(wx.Dialog):
         if self.headerRow.IsChecked():
             for idxCol in range(ncols):
                 if self.ftype == 'excel':
-                    val = unicode(sheet.cell(beginRow, idxCol).value)
+                    val = sheet.cell(beginRow, idxCol).value
                 elif self.ftype == 'libre':
-                    val = unicode(sheet[beginRow, idxCol].value)
-                #print idxCol, val
-                self.grids[sheetIdx].SetColLabelValue(idxCol, val)
+                    val = sheet[beginRow, idxCol].value
+                self.grids[sheetIdx].SetColLabelValue(idxCol, str(val))
             bonus = 1
         else:
             self.headers = []
@@ -273,10 +272,10 @@ class ImportDialog(wx.Dialog):
         for idx_row in range(beginRow+bonus,nrows):
             for idx_col in range(ncols):
                 if self.ftype == 'excel':
-                    val = unicode(sheet.cell(idx_row, idx_col).value)
+                    val = sheet.cell(idx_row, idx_col).value
                 elif self.ftype == 'libre':
-                    val = unicode(sheet[idx_row, idx_col].value)
-                self.grids[sheetIdx].SetCellValue(idx_row-beginRow-bonus, idx_col, val)
+                    val = sheet[idx_row, idx_col].value
+                self.grids[sheetIdx].SetCellValue(idx_row-beginRow-bonus, idx_col, str(val))
 
     def ImportButton(self, event):
         if self.ftype == "excel":
@@ -300,9 +299,9 @@ class ImportDialog(wx.Dialog):
             self.headers = []
             for idxCol in range(ncols):
                 if self.ftype == 'excel':
-                    val = unicode(sheet.cell(beginRow, idxCol).value)
+                    val = sheet.cell(beginRow, idxCol).value
                 elif self.ftype == 'libre':
-                    val = unicode(sheet[beginRow, idxCol].value)
+                    val = sheet[beginRow, idxCol].value
                 self.headers.append(val)
             bonus = 1
         else:
@@ -312,9 +311,9 @@ class ImportDialog(wx.Dialog):
             line = []
             for idx_col in range(ncols):
                 if self.ftype == 'excel':
-                    val = unicode(sheet.cell(idx_row, idx_col).value)
+                    val = sheet.cell(idx_row, idx_col).value
                 elif self.ftype == 'libre':
-                    val = unicode(sheet[idx_row, idx_col].value)
+                    val = sheet[idx_row, idx_col].value
                 line.append(val)
             self.gridData.append(line)
         self.Close()
@@ -358,12 +357,6 @@ if __name__ == '__main__':
     startDir = os.path.expanduser("~")
     app = wx.App(False)
     x = ImportCSV(startDir)
-    print (x[0])
-    try:
-        print (x[1],len(x[1]))
-    except TypeError:
-        print ("No headers")
-    print (x[2],len(x[2]))
     #x.Close()
     #frame = ImportDialog(startDir)
     #frame.Show()

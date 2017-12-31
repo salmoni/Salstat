@@ -1885,8 +1885,8 @@ class DataFrame(wx.Frame):
 			for idxRow, dataRow in enumerate(newdata):
 				n = len(dataRow)
 				for idxCol, colValue in enumerate(dataRow):
-					if colValue.isspace() == False:
-						self.grid.SetCellValue(idxRow, idxCol, colValue)
+					if str(colValue).isspace() == False:
+						self.grid.SetCellValue(idxRow, idxCol, str(colValue))
 
 	def ToggleChartWindow(self, event):
 		self.chartWindow = ChartWindow.ChartWindow(self)
