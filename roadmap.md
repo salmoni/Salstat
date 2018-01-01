@@ -13,3 +13,4 @@ This document describes and the things that it doesn't have but needs and the th
 * Read and write SPSS format files (very tricky but possible)
 * Undo feature for the output and data and variable grids
 * Give each variable (column) a unique index for referencing across the program
+* Mac OSX: Config should be in ~/Library/Application Support/Salstat
