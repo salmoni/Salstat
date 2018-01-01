@@ -571,10 +571,13 @@ class DataGrid(gridlib.Grid):
 		RowsUsed = []
 		for i in range(self.GetNumberCols()):
 			if (self.GetCellValue(0, i) != ''):
+				print(self.GetCellValue(0, i))
 				for j in range(self.GetNumberRows()):
 					if (self.GetCellValue(j,i) == ''):
 						RowsUsed.append(j)
 						break
+				if j == self.GetNumberRows() - 1:
+					RowsUsed.append(j)
 		return RowsUsed
 
 	def SaveAsDataASCII(self, filename):

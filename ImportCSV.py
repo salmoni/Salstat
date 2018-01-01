@@ -53,8 +53,8 @@ def SaveCSV(filename, grid):
             try:
                 datapoint.append(grid.GetCellValue(i, j))
             except:
-                datapoint.append("0")
-        line = string.join(datapoint)
+                datapoint.append("")
+        #line = string.join(datapoint.join(',')
         line = ",".join(datapoint)
         fout.write(line)
         fout.write('\n')

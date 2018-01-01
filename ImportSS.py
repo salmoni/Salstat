@@ -35,7 +35,7 @@ def SaveToExcel(filename, grid):
             val = grid.GetCellValue(idxy, idxx)
             datasheet.write(idxy + 1, idxx, val)
         label = grid.GetColLabelValue(idxx)
-        meta = grid.meta[label]
+        meta = grid.meta[idxx] # was [label]
         datasheet.write(0, idxx, meta['name'])
         metasheet.write(0, idxx + 1, meta['name'])
         metasheet.write(1, idxx + 1, meta['align'])
@@ -69,7 +69,7 @@ def SaveToLibre(filename, grid):
             val = grid.GetCellValue(idxy, idxx)
             datasheet[(idxy + 1, idxx)].set_value(val)
         label = grid.GetColLabelValue(idxx)
-        meta = grid.meta[label]
+        meta = grid.meta[idxx] # was [label]
         datasheet[(0, idxx)].set_value(meta['name'])
         metasheet[(0, idxx + 1)].set_value(meta['name'])
         metasheet[(1, idxx + 1)].set_value(meta['align'])
