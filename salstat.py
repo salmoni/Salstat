@@ -38,6 +38,7 @@ ID_FILE_NEWOUTPUT = wx.NewId()
 ID_FILE_OPEN = wx.NewId()
 ID_FILE_URL = wx.NewId()
 ID_FILE_DB = wx.NewId()
+ID_FILE_APPEND = wx.NewId()
 ID_FILE_SAVE = wx.NewId()
 ID_FILE_SAVEAS = wx.NewId()
 ID_FILE_EXPORT = wx.NewId()
@@ -1482,6 +1483,9 @@ class DataFrame(wx.Frame):
 		self.menuScrape = file_menu.Append(ID_FILE_URL, "Scrape URL...\tCTRL+U")
 		self.menuOpenDB = file_menu.Append(ID_FILE_DB, "Open database...")
 		file_menu.AppendSeparator()
+		# ID_FILE_APPEND
+		self.menuAppendData = file_menu.Append(ID_FILE_APPEND, "Append data...")
+		file_menu.AppendSeparator()
 		self.menuSave = file_menu.Append(ID_FILE_SAVE, '&Save\tCTRL+S')
 		self.menuSaveAs = file_menu.Append(ID_FILE_SAVEAS, 'Save &As...\tSHIFT+CTRL+S')
 		file_menu.AppendSeparator()
@@ -1602,6 +1606,7 @@ class DataFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.SaveData, id=ID_FILE_SAVE)
 		self.Bind(wx.EVT_MENU, self.SaveAsData, id=ID_FILE_SAVEAS)
 		self.Bind(wx.EVT_MENU, self.OpenFile, id=ID_FILE_OPEN)
+		self.Bind(wx.EVT_MENU, self.AppendData, id=ID_FILE_APPEND)
 		self.Bind(wx.EVT_MENU, self.EndApplication, self.menuExit)
 		self.Bind(wx.EVT_MENU, self.grid.CutData, id=ID_EDIT_CUT)
 		self.Bind(wx.EVT_MENU, self.grid.CopyData, id=ID_EDIT_COPY)
@@ -1749,6 +1754,9 @@ class DataFrame(wx.Frame):
 				ImportSS.SaveToLibre(filename, self.grid)
 			elif fileType == 4: # Save as HTML table (.html)
 				ImportHTML.ExportHTML(filename, self.grid)
+
+	def AppendData(self, event):
+		pass
 
 	def OpenFile(self, event):
 		startDir = inits.get('opendir')
