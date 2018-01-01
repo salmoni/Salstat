@@ -401,6 +401,37 @@ class DataGrid(gridlib.Grid):
 						self.SetCellValue(currentrow+row, currentcol+col, val)
 			self.Saved = False
 
+	def ClearCells(self, event):
+		Cells = self.GetSelectedCells()
+		Cols  = self.GetSelectedCols()
+		Rows  = self.GetSelectedRows()
+		TopLt = self.GetSelectionBlockTopLeft()
+		BotRt = self.GetSelectionBlockBottomRight()
+		if len(TopLt) > 0:
+			top = TopLt[0][0]
+			left = TopLt[0][1]
+			bot = BotRt[0][0] + 1
+			right = BotRt[0][1] + 1
+			for row in range(top, bot):
+				for col in range(left, right):
+					self.SetCellValue(row, col, '')
+		elif len(Cols) > 0:
+			for row in range(0, self.GetNumberRows()):
+				for col in Cols:
+					self.SetCellValue(row, col, '')
+		elif len(Rows) > 0:
+			for row in Rows:
+				for col in range(0, self.GetNumberCols()):
+					self.SetCellValue(row, col, '')
+		elif len(Cells) > 0:
+			for cell in Cells:
+				self.SetCellValue(cell[0], cell[1], '')
+		else:
+			col = self.GetGridCursorCol()
+			row = self.GetGridCursorRow()
+			self.SetCellValue(row, col, '')
+		self.Saved = False
+
 	def EditGrid(self, event, numrows):
 		insert = self.AppendRows(numrows)
 
