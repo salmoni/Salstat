@@ -116,14 +116,14 @@ ID_TITLE_GRID = wx.NewId()
 ID_FIND_STRING = wx.NewId()
 
 DescList=['N','Sum','Mean','Variance','Standard Deviation','Standard Error',\
-									'Sum of Squares','Sum of Squared Devs', \
-									'Coefficient of Variation','Minimum',   \
-									'Maximum','Range','Number Missing',     \
-									'Geometric Mean','Harmonic Mean',       \
-									'Skewness','Kurtosis', 'Median',        \
-									'Median Absolute Deviation','Mode',     \
-									'Interquartile Range',                  \
-									'Number of Unique Levels']
+			'Sum of Squares','Sum of Squared Devs', \
+			'Coefficient of Variation','Minimum',   \
+			'Maximum','Range','Number Missing',     \
+			'Geometric Mean','Harmonic Mean',       \
+			'Skewness','Kurtosis', 'Median',        \
+			'Median Absolute Deviation','Mode',     \
+			'Interquartile Range',                  \
+			'Number of Unique Levels']
 
 HypList = ['One tailed','Two tailed']
 inits={}    # dictionary to hold the config values
@@ -148,6 +148,7 @@ if wx.Platform == '__WXMSW__':
 	wind = 50
 	DOCDIR = 'c:\My Documents'
 	INITDIR = os.getcwd()
+	CONFIGFILE = "salstatrc"
 	# I got the following lines from the wxPython group but it's a red herring
 	# it was to ensure Javascript files would load properly.
 	# The solution was to use WebView.LoadURL not WebView.SetPage :-)
@@ -155,6 +156,16 @@ if wx.Platform == '__WXMSW__':
 	current_file = __file__
 	key = wreg.CreateKey(wreg.HKEY_CURRENT_USER, "Software\\Microsoft\\Internet Explorer\\Main\\FeatureControl\\FEATURE_BROWSER_EMULATION")
 	wreg.SetValueEx(key, current_file, 0, wreg.REG_DWORD, 10001)
+elif wx.Platform == '__WXMAC__':
+	face1 = 'Helvetica'
+	face2 = 'Times'
+	face3 = 'Courier'
+	fontsizes = [10,12,14,16,19,24,32]
+	pb = 12
+	wind = 50
+	DOCDIR = os.path.expanduser('~') + '/Library/Application Support/Salstat/'
+	CONFIGFILE = "salstatrc"
+	INITDIR = DOCDIR
 else:
 	face1 = 'Helvetica'
 	face2 = 'Times'
@@ -163,6 +174,7 @@ else:
 	pb = 12
 	wind = 50
 	DOCDIR = os.environ['HOME']
+	CONFIGFILE = ".salstatrc"
 	INITDIR = DOCDIR
 
 def FileToURL(path):
@@ -244,7 +256,7 @@ class GetInits:
 	read into the dictionary in a slightly roundabout way! I am sure that
 	there is a more "Python" way of doing this, but this way works for now"""
 	def __init__(self):
-		self.initfile = os.path.join(INITDIR, '.salstatrc')
+		self.initfile = os.path.join(INITDIR, CONFIGFILE)
 		if os.path.isfile(self.initfile):
 			self.ReadInitFile(self.initfile)
 		else:
