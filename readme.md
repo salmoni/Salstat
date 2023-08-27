@@ -63,7 +63,6 @@ If you find a bug or problem with Salstat, you can let us know by going to this 
 
 This is a different program written by someone else. Feel free to try it out and see if it suits you better: https://code.google.com/p/salstat-statistics-package-2/
 
-Alan James Salmoni
-alan@salstat.com
+James Salmoni
 
 
